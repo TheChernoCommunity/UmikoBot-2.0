@@ -4,6 +4,8 @@
 #include <Discord/Objects/Guild.h>
 #include <Discord/Objects/GuildMember.h>
 
+#include "core/Module.h"
+
 class UmikoBot : public Discord::Client
 {
 public:
@@ -37,4 +39,6 @@ private slots:
 	
 private:
 	QTimer saveTimer;
+
+	QList<Module*> modules;
 };

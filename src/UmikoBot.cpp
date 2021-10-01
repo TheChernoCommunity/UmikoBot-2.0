@@ -59,19 +59,17 @@ void UmikoBot::umikoOnReady()
 
 void UmikoBot::umikoOnDisconnect()
 {
-	printf("Disconnected, reconnecting...\n");
-	getGatewaySocket().reconnectToGateway();
 }
 
-void UmikoBot::umikoOnGuildCreate(const Discord::Guild& guild)
+void UmikoBot::umikoOnGuildCreate(const Guild& guild)
 {
 }
 
-void UmikoBot::umikoOnGuildUpdate(const Discord::Guild& guild)
+void UmikoBot::umikoOnGuildUpdate(const Guild& guild)
 {
 }
 
-void UmikoBot::umikoOnGuildRoleUpdate(snowflake_t guildId, const Discord::Role& role)
+void UmikoBot::umikoOnGuildRoleUpdate(snowflake_t guildId, const Role& role)
 {
 }
 
@@ -79,18 +77,48 @@ void UmikoBot::umikoOnGuildRoleDelete(snowflake_t guildId, snowflake_t roleId)
 {
 }
 
-void UmikoBot::umikoOnGuildMemberAdd(const Discord::GuildMember& member, snowflake_t guildId)
+void UmikoBot::umikoOnGuildMemberAdd(const GuildMember& member, snowflake_t guildId)
 {
 }
 
-void UmikoBot::umikoOnGuildMemberUpdate(snowflake_t guildId, const QList<snowflake_t>& roles, const Discord::User& user, const QString& nickname)
+void UmikoBot::umikoOnGuildMemberUpdate(snowflake_t guildId, const QList<snowflake_t>& roles, const User& user, const QString& nickname)
 {
 }
 
-void UmikoBot::umikoOnGuildMemberRemove(snowflake_t guildId, const Discord::User& user)
+void UmikoBot::umikoOnGuildMemberRemove(snowflake_t guildId, const User& user)
 {
 }
 
-void UmikoBot::umikoOnMessageCreate(const Discord::Message& message)
+void UmikoBot::umikoOnMessageCreate(const Message& message)
 {
+	QString messageString = message.content();
+	bool isCommand = false;
+	
+	for (Module* module : modules)
+	{
+		for (Command& command : module->getCommands())
+		{
+			if (!command.enabled)
+			{
+				continue;
+			}
+			
+			if (command.regex.match(messageString).hasMatch())
+			{
+				isCommand = true;
+				UmikoBot::get().getChannel(message.channelId()).then([this, message, command](const Channel& channel)
+				{
+					command.callback(message, channel);
+				});
+			}
+		}
+	}
+
+	if (!isCommand)
+	{
+		for (Module* module : modules)
+		{
+			module->onMessage(message);
+		}
+	}
 }
