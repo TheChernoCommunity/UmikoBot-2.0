@@ -1,11 +1,12 @@
-#include <stdio.h>
-
+#include "core/InterruptHandler.h"
 #include <QtWidgets/QApplication>
 
 int main(int argc, char* argv[])
 {
-	printf("UmikoBot 2.0\n");
+	InterruptHandler::init();
+	
+	qputenv("QT_QPA_PLATFORM_PLUGIN_PATH", ".");
 	QApplication app { argc, argv };
 	
-	return 0;
+	return app.exec();
 }
