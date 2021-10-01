@@ -41,7 +41,7 @@ UmikoBot::UmikoBot(QObject* parent)
 UmikoBot::~UmikoBot()
 {
 	save();
-	printf("Stopping bot...\n")
+	printf("Stopping bot...\n");
 }
 
 void UmikoBot::save()
@@ -54,10 +54,13 @@ void UmikoBot::load()
 
 void UmikoBot::umikoOnReady()
 {
+	printf("Ready!\n");
 }
 
 void UmikoBot::umikoOnDisconnect()
 {
+	printf("Disconnected, reconnecting...\n");
+	getGatewaySocket().reconnectToGateway();
 }
 
 void UmikoBot::umikoOnGuildCreate(const Discord::Guild& guild)
