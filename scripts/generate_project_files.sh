@@ -6,12 +6,12 @@ projectRoot=$scriptDir/..
 
 # Locates premake
 if ! command -v premake5 &> /dev/null; then
-	if [ ! -f "pmk/premake5" ]; then
+	if [ ! -f "$projectRoot/pmk/premake5" ]; then
 		echo "Premake executable not found, run init.sh to get one."
 		read -p "Press enter to continue..."
 		exit
 	else
-		premakeCommand="pmk/premake5"
+		premakeCommand="$projectRoot/pmk/premake5"
 	fi
 else
 	premakeCommand="premake5"

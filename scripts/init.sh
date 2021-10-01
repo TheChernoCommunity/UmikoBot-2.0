@@ -20,10 +20,10 @@ elif [ "$os" == "linux" ]; then
 	# Tries to locate premake, otherwise downloads it
 	if ! command -v premake5 &> /dev/null; then
 		if [ ! -f "$projectRoot/pmk/premake5" ]; then
-			mkdir $projectRoot/tmp
+			mkdir "$projectRoot/tmp"
 			$(curl -L -o "$projectRoot/tmp/premake5.tar.gz" "https://github.com/premake/premake-core/releases/download/v$PREMAKE_VERSION/premake-5.0.0-alpha12-linux.tar.gz")
 			$(tar -xvzf "$projectRoot/tmp/premake5.tar.gz" -C "$projectRoot/pmk")
-			rm -r $projectRoot/tmp/
+			rm -r "$projectRoot/tmp/"
 		else
 			echo "Found pmk/premake5..."
 		fi
