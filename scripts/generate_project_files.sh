@@ -24,7 +24,7 @@ else
 	# Determine default action from system
 	os=$(uname -s)
 	if [ "$os" == "Linux" ]; then
-		args="gmake"
+		args="qmake"
 	elif [ "$os" == "Darwin" ]; then
 		args="xcode4"
 	else
