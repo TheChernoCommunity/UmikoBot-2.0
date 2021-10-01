@@ -56,6 +56,16 @@ void UmikoBot::load()
 {
 }
 
+bool UmikoBot::isOwner(snowflake_t guildId, snowflake_t userId)
+{
+	return false; // TODO(fkp): Implement	
+}
+
+const QList<Discord::Role>& UmikoBot::getRoles(snowflake_t guildId)
+{
+	return {}; // TODO(fkp): Implement
+}
+
 void UmikoBot::umikoOnReady()
 {
 	printf("Ready!\n");

@@ -15,6 +15,9 @@ public:
 	void operator=(const UmikoBot&) = delete;
 	~UmikoBot();
 
+	bool isOwner(snowflake_t guildId, snowflake_t userId);
+	const QList<Discord::Role>& getRoles(snowflake_t guildId);
+
 private:
 	UmikoBot(QObject* parent = nullptr);
 
