@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "UmikoBot.h"
+#include "modules/GlobalModule.h"
 
 using namespace Discord;
 
@@ -36,6 +37,9 @@ UmikoBot::UmikoBot(QObject* parent)
 	connect(this, &Client::onGuildMemberUpdate, this, &UmikoBot::umikoOnGuildMemberUpdate);
 	connect(this, &Client::onGuildMemberRemove, this, &UmikoBot::umikoOnGuildMemberRemove);
 	connect(this, &Client::onMessageCreate, this, &UmikoBot::umikoOnMessageCreate);
+
+	// Modules
+	modules.push_back(new GlobalModule());
 }
 
 UmikoBot::~UmikoBot()
@@ -91,8 +95,9 @@ void UmikoBot::umikoOnGuildMemberRemove(snowflake_t guildId, const User& user)
 
 void UmikoBot::umikoOnMessageCreate(const Message& message)
 {
-	QString messageString = message.content();
 	bool isCommand = false;
+	QString messageString = message.content();
+	QString commandName = messageString.mid(1, messageString.indexOf(' ') - 1); // TODO(fkp): Variable prefix length
 	
 	for (Module* module : modules)
 	{
@@ -103,13 +108,22 @@ void UmikoBot::umikoOnMessageCreate(const Message& message)
 				continue;
 			}
 			
-			if (command.regex.match(messageString).hasMatch())
+			if (command.name == commandName)
 			{
 				isCommand = true;
-				UmikoBot::get().getChannel(message.channelId()).then([this, message, command](const Channel& channel)
+				UmikoBot::get().getChannel(message.channelId()).then([this, message, command, messageString](const Channel& channel)
 				{
-					command.callback(message, channel);
+					if (command.regex.match(messageString).hasMatch())
+					{
+						command.callback(message, channel);
+					}
+					else
+					{
+						createMessage(message.channelId(), "Wrong usage of command!");
+					}
 				});
+
+				break;
 			}
 		}
 	}

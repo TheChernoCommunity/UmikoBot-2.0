@@ -4,11 +4,17 @@
 #include <QRegularExpression>
 #include <Discord/Client.h>
 
+enum class Commands
+{
+	// Global Module
+	Help,
+};
+
 struct Command
 {
 	using Callback = std::function<void(const Discord::Message&, const Discord::Channel&)>;
 
-	unsigned int id;
+	Commands id;
 	bool enabled;
 	// TODO(fkp): Permission
 
@@ -28,7 +34,7 @@ public:
 protected:
 	Module(const QString& name);
 
-	void registerCommand(unsigned int id, const QString& signature, Command::Callback callback);
+	void registerCommand(Commands id, const QString& signature, Command::Callback callback);
 
 private:
 	QString name;
