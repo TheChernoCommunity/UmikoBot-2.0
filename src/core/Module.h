@@ -30,6 +30,7 @@ public:
 
 	void onMessage(const Discord::Message& message);
 	QList<Command>& getCommands() { return commands; }
+	const QString& getName() const { return name; }
 
 protected:
 	Module(const QString& name);
