@@ -5,6 +5,7 @@
 #include <Discord/Objects/GuildMember.h>
 
 #include "core/Module.h"
+#include "core/Data.h"
 
 class UmikoBot : public Discord::Client
 {
@@ -22,7 +23,9 @@ private:
 	UmikoBot(QObject* parent = nullptr);
 
 	void save();
+	void saveGuildData();
 	void load();
+	void loadGuildData();
 
 private slots:
 	void umikoOnReady();
@@ -44,4 +47,7 @@ private:
 	QTimer saveTimer;
 
 	QList<Module*> modules;
+	QMap<snowflake_t /* guildId */, GuildData> guildData;
+
+	constexpr inline static const char* SETTINGS_LOCATION = "configs/settings.json";
 };

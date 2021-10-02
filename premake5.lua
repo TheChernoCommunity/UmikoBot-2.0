@@ -20,7 +20,7 @@ project "UmikoBot"
 	location "sln/prj/"
 	
 	kind "ConsoleApp"
-	cppdialect "C++11"
+	cppdialect "C++17"
 	flags {
 		"MultiProcessorCompile",
 	}
@@ -77,7 +77,7 @@ group "QDiscord"
 project "QDiscordCore"
 	location "sln/prj/"
 	kind "StaticLib"
-	cppdialect "C++11"
+	cppdialect "C++17"
 	flags {
 		"MultiProcessorCompile",
 	}

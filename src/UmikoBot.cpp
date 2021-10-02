@@ -1,5 +1,10 @@
 #include <stdio.h>
 
+#include <QJsonDocument>
+#include <QJsonValue>
+#include <QFile>
+#include <QDir>
+
 #include "UmikoBot.h"
 #include "modules/GlobalModule.h"
 
@@ -16,6 +21,7 @@ UmikoBot::UmikoBot(QObject* parent)
 {
 	printf("Starting bot...\n");
 
+	QDir().mkdir("configs");
 	load();
 	saveTimer.setInterval(60 * 1000);
 	QObject::connect(&saveTimer, &QTimer::timeout, [this]()
@@ -50,15 +56,72 @@ UmikoBot::~UmikoBot()
 
 void UmikoBot::save()
 {
+	saveGuildData();
+}
+
+void UmikoBot::saveGuildData()
+{
+	QJsonObject json;
+
+	for (const GuildData& data : guildData.values())
+	{
+		json[QString::number(data.guildId)] = data.writeToObject();
+	}
+
+	QJsonDocument doc { json };
+	QString result = doc.toJson(QJsonDocument::Indented);
+
+	// Writes the JSON out to file
+	QFile file { SETTINGS_LOCATION };
+	if (!file.open(QIODevice::WriteOnly))
+	{
+		printf("Unable to open file for saving: \"%s\"\n", SETTINGS_LOCATION);
+		return;
+	}
+	
+	file.write(qPrintable(result));
+	file.close();
 }
 
 void UmikoBot::load()
 {
+	loadGuildData();
+}
+
+void UmikoBot::loadGuildData()
+{
+	QFile file { SETTINGS_LOCATION };
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		printf("Unable to open file for loading: \"%s\"\n", SETTINGS_LOCATION);
+		return;
+	}
+
+	QByteArray fileData = file.readAll();
+	QJsonDocument doc = QJsonDocument::fromJson(fileData);
+	QJsonObject json = doc.object();
+	QStringList guildIds = json.keys();
+
+	for (const QString& guildId : guildIds)
+	{
+		QJsonObject current = json.value(guildId).toObject();
+		guildData[guildId.toULongLong()] = GuildData::createFromObject(guildId.toULongLong(), current);
+	}
+
+	file.close();
 }
 
 bool UmikoBot::isOwner(snowflake_t guildId, snowflake_t userId)
 {
-	return false; // TODO(fkp): Implement	
+	for (const GuildData& data : guildData)
+	{
+		if (data.guildId == guildId && data.ownerId == userId)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 const QList<Discord::Role>& UmikoBot::getRoles(snowflake_t guildId)
