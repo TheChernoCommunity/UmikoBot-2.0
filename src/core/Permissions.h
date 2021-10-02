@@ -9,6 +9,7 @@ namespace CommandPermission
 	{
 		Admin = Discord::Permissions::ADMINISTRATOR | Discord::Permissions::MANAGE_GUILD,
 		Moderator = Admin | Discord::Permissions::MANAGE_MESSAGES | Discord::Permissions::KICK_MEMBERS | Discord::Permissions::BAN_MEMBERS,
+		User = 0xffffffff,
 	};
 };
 

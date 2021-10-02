@@ -6,6 +6,7 @@
 #include <QDir>
 
 #include "UmikoBot.h"
+#include "core/Permissions.h"
 #include "modules/GlobalModule.h"
 
 using namespace Discord;
@@ -119,7 +120,10 @@ void UmikoBot::initialiseGuilds(snowflake_t afterId)
 	{
 		for (const Guild& guild : guilds)
 		{
-			guildData[guild.id()].ownerId = guild.ownerId();
+			getGuild(guild.id()).then([this](const Guild& guild)
+			{
+				guildData[guild.id()].ownerId = guild.ownerId();
+			});
 
 			getGuildRoles(guild.id()).then([this, guild](const QList<Role>& roles)
 			{
@@ -261,16 +265,27 @@ void UmikoBot::umikoOnMessageCreate(const Message& message)
 			if (command.name == commandName)
 			{
 				isCommand = true;
+
 				UmikoBot::get().getChannel(message.channelId()).then([this, message, command, messageString](const Channel& channel)
 				{
-					if (command.regex.match(messageString).hasMatch())
+					::Permissions::contains(channel.guildId(), message.author().id(), command.requiredPermissions,
+											[this, message, channel, messageString, command](bool result)
 					{
-						command.callback(message, channel);
-					}
-					else
-					{
-						createMessage(message.channelId(), "Wrong usage of command!");
-					}
+						if (!result)
+						{
+							SEND_MESSAGE("You do not have permission to use this command!");
+							return;
+						}
+					
+						if (command.regex.match(messageString).hasMatch())
+						{
+							command.callback(message, channel);
+						}
+						else
+						{
+							SEND_MESSAGE("Wrong usage of command!");
+						}
+					});
 				});
 
 				break;

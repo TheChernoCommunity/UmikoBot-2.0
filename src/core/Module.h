@@ -20,7 +20,7 @@ struct Command
 
 	Commands id;
 	bool enabled;
-	// TODO(fkp): Permission
+	unsigned int requiredPermissions;
 
 	QString name;
 	QRegularExpression regex;
@@ -39,7 +39,7 @@ public:
 protected:
 	Module(const QString& name);
 
-	void registerCommand(Commands id, const QString& signature, Command::Callback callback);
+	void registerCommand(Commands id, const QString& signature, unsigned int requiredPermissions, Command::Callback callback);
 
 private:
 	QString name;

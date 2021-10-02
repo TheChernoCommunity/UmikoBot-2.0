@@ -1,5 +1,6 @@
 #include "GlobalModule.h"
 #include "UmikoBot.h"
+#include "core/Permissions.h"
 
 #include <Discord/Objects/Embed.h>
 
@@ -8,8 +9,8 @@ using namespace Discord;
 GlobalModule::GlobalModule()
 	: Module("Global")
 {
-	registerCommand(Commands::Help, "help", help);
-	registerCommand(Commands::Help, "echo .+", echo);
+	registerCommand(Commands::Help, "help", CommandPermission::User, help);
+	registerCommand(Commands::Help, "echo .+", CommandPermission::User, echo);
 }
 
 GlobalModule::~GlobalModule()
