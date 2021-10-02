@@ -10,7 +10,8 @@ GlobalModule::GlobalModule()
 	: Module("Global")
 {
 	registerCommand(Commands::Help, "help", CommandPermission::User, help);
-	registerCommand(Commands::Help, "echo .+", CommandPermission::User, echo);
+	registerCommand(Commands::Echo, "echo\\s.+", CommandPermission::User, echo);
+	registerCommand(Commands::SetPrefix, "set-prefix\\s\\w+", CommandPermission::Moderator, setPrefix);
 }
 
 GlobalModule::~GlobalModule()
@@ -51,3 +52,18 @@ void GlobalModule::echo(const Discord::Message& message, const Discord::Channel&
 	SEND_MESSAGE(restOfMessage);
 }
 
+void GlobalModule::setPrefix(const Discord::Message& message, const Discord::Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression("\\s"));
+	QString& prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
+
+	if (prefix == args[1])
+	{
+		SEND_MESSAGE("That is already the prefix!");
+	}
+	else
+	{
+		prefix = args[1];
+		SEND_MESSAGE(QString("Changed prefix to '%1'").arg(prefix));
+	}
+}

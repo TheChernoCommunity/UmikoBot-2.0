@@ -12,6 +12,7 @@ enum class Commands
 	// Global Module
 	Help,
 	Echo,
+	SetPrefix,
 };
 
 struct Command

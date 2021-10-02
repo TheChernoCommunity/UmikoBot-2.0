@@ -19,7 +19,7 @@ public:
 	bool isOwner(snowflake_t guildId, snowflake_t userId);
 	const QList<Discord::Role>& getRoles(snowflake_t guildId);
 	const QList<Module*>& getModules() const { return modules; }
-	const QMap<snowflake_t, GuildData> getGuildData() const { return guildData; }
+	QMap<snowflake_t, GuildData>& getGuildData() { return guildData; }
 
 private:
 	UmikoBot(QObject* parent = nullptr);
