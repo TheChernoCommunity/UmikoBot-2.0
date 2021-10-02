@@ -9,6 +9,7 @@ GlobalModule::GlobalModule()
 	: Module("Global")
 {
 	registerCommand(Commands::Help, "help", help);
+	registerCommand(Commands::Help, "echo .+", echo);
 }
 
 GlobalModule::~GlobalModule()
@@ -40,5 +41,12 @@ void GlobalModule::help(const Discord::Message& message, const Discord::Channel&
 	embed.setColor(qrand() % 0xffffff);
 	embed.setTitle("Help");
 	embed.setDescription(output);
-	UmikoBot::get().createMessage(message.channelId(), embed);
+	SEND_MESSAGE(embed);
 }
+
+void GlobalModule::echo(const Discord::Message& message, const Discord::Channel& channel)
+{
+	QString restOfMessage = message.content().mid(message.content().indexOf(QRegularExpression("\\s")));
+	SEND_MESSAGE(restOfMessage);
+}
+

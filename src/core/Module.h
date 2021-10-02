@@ -4,10 +4,14 @@
 #include <QRegularExpression>
 #include <Discord/Client.h>
 
+// Intended to be used by modules
+#define SEND_MESSAGE(msg) UmikoBot::get().createMessage(message.channelId(), msg);
+
 enum class Commands
 {
 	// Global Module
 	Help,
+	Echo,
 };
 
 struct Command
