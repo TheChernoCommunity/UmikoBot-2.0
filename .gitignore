@@ -2,4 +2,7 @@ bin/
 obj/
 sln/
 
+res/
+!res/commands.json
+
 scripts/run.sh

@@ -111,6 +111,63 @@ void UmikoBot::loadGuildData()
 	file.close();
 }
 
+void UmikoBot::initialiseGuilds(snowflake_t afterId)
+{
+	constexpr snowflake_t LIMIT = 100;
+	
+	getCurrentUserGuilds(0, afterId, LIMIT).then([this](const QList<Guild>& guilds)
+	{
+		for (const Guild& guild : guilds)
+		{
+			// guildData[guild.id()].ownerId = guild.ownerId();
+			getGuild(guild.id()).then([this](const Guild& guild)
+									  {
+										  guildData[guild.id()].ownerId = guild.ownerId();
+									  });
+			
+
+			getGuildRoles(guild.id()).then([this, guild](const QList<Role>& roles)
+			{
+				guildData[guild.id()].roles = roles;
+			});
+
+			initialiseGuildMembers(guild.id());
+		}
+
+		if (guilds.size() == LIMIT)
+		{
+			// More to come
+			initialiseGuilds(guilds.back().id());
+		}
+		else
+		{
+			printf("Guild count: %d\n", guilds.size());
+		}
+	});
+}
+
+void UmikoBot::initialiseGuildMembers(snowflake_t guildId, snowflake_t afterId)
+{
+	constexpr snowflake_t LIMIT = 1000;
+	
+	listGuildMembers(guildId, LIMIT, afterId).then([this, guildId](const QList<GuildMember>& members)
+	{
+		for (const GuildMember& member : members)
+		{
+			guildData[guildId].userData[member.user().id()].username = member.user().username();
+			guildData[guildId].userData[member.user().id()].nickname = member.nick();
+		}
+
+		if (members.size() == LIMIT)
+		{
+			// More to come
+			initialiseGuildMembers(guildId, members.back().user().id());
+		}
+		
+		printf("Guild %llu: %d members\n", guildId, members.size());
+	});
+}
+
 bool UmikoBot::isOwner(snowflake_t guildId, snowflake_t userId)
 {
 	for (const GuildData& data : guildData)
@@ -132,6 +189,7 @@ const QList<Discord::Role>& UmikoBot::getRoles(snowflake_t guildId)
 void UmikoBot::umikoOnReady()
 {
 	printf("Ready!\n");
+	initialiseGuilds();
 }
 
 void UmikoBot::umikoOnDisconnect()

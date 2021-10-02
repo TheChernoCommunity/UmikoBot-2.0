@@ -26,6 +26,9 @@ private:
 	void saveGuildData();
 	void load();
 	void loadGuildData();
+	
+	void initialiseGuilds(snowflake_t afterId = 0);
+	void initialiseGuildMembers(snowflake_t guildId, snowflake_t afterId = 0);
 
 private slots:
 	void umikoOnReady();
