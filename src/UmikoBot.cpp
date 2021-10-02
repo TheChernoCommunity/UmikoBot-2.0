@@ -119,12 +119,7 @@ void UmikoBot::initialiseGuilds(snowflake_t afterId)
 	{
 		for (const Guild& guild : guilds)
 		{
-			// guildData[guild.id()].ownerId = guild.ownerId();
-			getGuild(guild.id()).then([this](const Guild& guild)
-									  {
-										  guildData[guild.id()].ownerId = guild.ownerId();
-									  });
-			
+			guildData[guild.id()].ownerId = guild.ownerId();
 
 			getGuildRoles(guild.id()).then([this, guild](const QList<Role>& roles)
 			{
@@ -170,20 +165,12 @@ void UmikoBot::initialiseGuildMembers(snowflake_t guildId, snowflake_t afterId)
 
 bool UmikoBot::isOwner(snowflake_t guildId, snowflake_t userId)
 {
-	for (const GuildData& data : guildData)
-	{
-		if (data.guildId == guildId && data.ownerId == userId)
-		{
-			return true;
-		}
-	}
-
-	return false;
+	return guildData[guildId].ownerId == userId;
 }
 
 const QList<Discord::Role>& UmikoBot::getRoles(snowflake_t guildId)
 {
-	return {}; // TODO(fkp): Implement
+	return guildData[guildId].roles;
 }
 
 void UmikoBot::umikoOnReady()
@@ -198,30 +185,62 @@ void UmikoBot::umikoOnDisconnect()
 
 void UmikoBot::umikoOnGuildCreate(const Guild& guild)
 {
+	guildData[guild.id()] = GuildData { guild.id() };
+	initialiseGuilds(); // TODO(fkp): Only initialise a single guild?
 }
 
 void UmikoBot::umikoOnGuildUpdate(const Guild& guild)
 {
+	guildData[guild.id()].ownerId = guild.ownerId();
 }
 
-void UmikoBot::umikoOnGuildRoleUpdate(snowflake_t guildId, const Role& role)
+void UmikoBot::umikoOnGuildRoleUpdate(snowflake_t guildId, const Role& newRole)
 {
+	for (Role& role : guildData[guildId].roles)
+	{
+		if (role.id() == newRole.id())
+		{
+			role = newRole;
+			return;
+		}
+	}
+
+	guildData[guildId].roles.push_back(newRole);
 }
 
 void UmikoBot::umikoOnGuildRoleDelete(snowflake_t guildId, snowflake_t roleId)
 {
+	for (int i = 0; i < guildData[guildId].roles.size(); i++)
+	{
+		if (guildData[guildId].roles[i].id() == roleId)
+		{
+			guildData[guildId].roles.erase(guildData[guildId].roles.begin() + i);
+			return;
+		}
+	}
 }
 
 void UmikoBot::umikoOnGuildMemberAdd(const GuildMember& member, snowflake_t guildId)
 {
+	guildData[guildId].userData[member.user().id()].username = member.user().username();
 }
 
 void UmikoBot::umikoOnGuildMemberUpdate(snowflake_t guildId, const QList<snowflake_t>& roles, const User& user, const QString& nickname)
 {
+	guildData[guildId].userData[user.id()].username = user.username();
+	guildData[guildId].userData[user.id()].nickname = nickname;
 }
 
 void UmikoBot::umikoOnGuildMemberRemove(snowflake_t guildId, const User& user)
 {
+	for (auto it = guildData[guildId].userData.begin(); it != guildData[guildId].userData.end(); it++)
+	{
+		if (it.key() == user.id())
+		{
+			guildData[guildId].userData.erase(it);
+			return;
+		}
+	}
 }
 
 void UmikoBot::umikoOnMessageCreate(const Message& message)

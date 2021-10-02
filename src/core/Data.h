@@ -20,7 +20,7 @@ public:
 	snowflake_t ownerId;
 	QList<Discord::Role> roles;
 	
-	QString prefix;
+	QString prefix = "!";
 	
 	QMap<snowflake_t /* userId */, UserData> userData;
 };
