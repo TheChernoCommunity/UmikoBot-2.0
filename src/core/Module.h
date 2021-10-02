@@ -3,10 +3,37 @@
 #include <functional>
 #include <QRegularExpression>
 #include <Discord/Client.h>
+#include <QString>
 
 // Intended to be used by modules
 #define SEND_MESSAGE(msg) UmikoBot::get().createMessage(message.channelId(), msg);
 
+#define CREATE_COMMANDS(...)											\
+	enum class Commands													\
+	{																	\
+		__VA_ARGS__														\
+	};																	\
+																		\
+	struct CommandInfo													\
+	{																	\
+		inline static QString commandStrings[] = { #__VA_ARGS__ };		\
+																		\
+		/* These rely on the count enum value at the end */				\
+		inline static QString briefDescription[(unsigned int) Commands::Count];	\
+		inline static QString usage[(unsigned int) Commands::Count];	\
+		inline static QString additionalInfo[(unsigned int) Commands::Count]; \
+		inline static QString adminRequired[(unsigned int) Commands::Count]; \
+	};
+
+CREATE_COMMANDS(
+	Help,
+	Echo,
+	SetPrefix,
+
+	Count // Keep at the end
+)
+
+/*
 enum class Commands
 {
 	// Global Module
@@ -14,6 +41,7 @@ enum class Commands
 	Echo,
 	SetPrefix,
 };
+*/
 
 struct Command
 {
