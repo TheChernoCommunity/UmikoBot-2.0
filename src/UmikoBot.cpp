@@ -249,55 +249,69 @@ void UmikoBot::umikoOnGuildMemberRemove(snowflake_t guildId, const User& user)
 
 void UmikoBot::umikoOnMessageCreate(const Message& message)
 {
-	bool isCommand = false;
-	QString messageString = message.content();
-	QString commandName = messageString.mid(1, messageString.indexOf(' ') - 1); // TODO(fkp): Variable prefix length
-	
-	for (Module* module : modules)
+	getChannel(message.channelId()).then([this, message](const Channel& channel)
 	{
-		for (Command& command : module->getCommands())
-		{
-			if (!command.enabled)
-			{
-				continue;
-			}
-			
-			if (command.name == commandName)
-			{
-				isCommand = true;
+		// messageString -> !status Name
+		// prefix        -> !
+		// fullCommand   ->  status Name
+		// commandName   ->  status
+		QString messageString = message.content();
+		const QString& prefix = getGuildData()[channel.guildId()].prefix;
+		QString fullCommand = messageString.mid(prefix.length());
+		QString commandName = messageString.mid(prefix.length(), messageString.indexOf(QRegularExpression("\\s")) - prefix.length());
 
-				UmikoBot::get().getChannel(message.channelId()).then([this, message, command, messageString](const Channel& channel)
+		bool isCommand = false;
+
+		if (messageString.startsWith(prefix))
+		{
+			for (Module* module : modules)
+			{
+				for (const Command& command : module->getCommands())
 				{
-					::Permissions::contains(channel.guildId(), message.author().id(), command.requiredPermissions,
-											[this, message, channel, messageString, command](bool result)
+					if (command.name == commandName)
 					{
-						if (!result)
+						isCommand = true;
+						
+						::Permissions::contains(channel.guildId(), message.author().id(), command.requiredPermissions,
+												[this, message, channel, command, fullCommand](bool result)
 						{
-							SEND_MESSAGE("You do not have permission to use this command!");
-							return;
-						}
-					
-						if (command.regex.match(messageString).hasMatch())
-						{
-							command.callback(message, channel);
-						}
-						else
-						{
-							SEND_MESSAGE("Wrong usage of command!");
-						}
-					});
-				});
+							if (!result)
+							{
+								SEND_MESSAGE("You do not have permission to use this command!");
+								return;
+							}
 
-				break;
+							if (command.regex.match(fullCommand).hasMatch())
+							{
+								if (command.enabled)
+								{
+
+									command.callback(message, channel);
+
+								}
+								else
+								{
+									SEND_MESSAGE("This command has been disabled!");
+								}
+							}
+							else
+							{
+								SEND_MESSAGE("Wrong usage of command!");
+							}
+						});
+
+						break;
+					}
+				}
 			}
 		}
-	}
 
-	if (!isCommand)
-	{
-		for (Module* module : modules)
+		if (!isCommand)
 		{
-			module->onMessage(message);
+			for (Module* module : modules)
+			{
+				module->onMessage(message);
+			}
 		}
-	}
+	});
 }

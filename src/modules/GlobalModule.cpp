@@ -11,7 +11,7 @@ GlobalModule::GlobalModule()
 {
 	registerCommand(Commands::Help, "help", CommandPermission::User, help);
 	registerCommand(Commands::Echo, "echo\\s.+", CommandPermission::User, echo);
-	registerCommand(Commands::SetPrefix, "set-prefix\\s\\w+", CommandPermission::Moderator, setPrefix);
+	registerCommand(Commands::SetPrefix, "set-prefix\\s\\S+", CommandPermission::Moderator, setPrefix);
 }
 
 GlobalModule::~GlobalModule()
