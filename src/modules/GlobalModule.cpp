@@ -6,12 +6,17 @@
 
 using namespace Discord;
 
+// TODO(fkp): Move these later
+#define OPTIONAL(x) "(" x ")?"
+#define IDENTIFIER "\\s\\S+"
+#define TEXT "\\s.+"
+
 GlobalModule::GlobalModule()
 	: Module("Global")
 {
-	registerCommand(Commands::Help, "help", CommandPermission::User, help);
-	registerCommand(Commands::Echo, "echo\\s.+", CommandPermission::User, echo);
-	registerCommand(Commands::SetPrefix, "set-prefix\\s\\S+", CommandPermission::Moderator, setPrefix);
+	registerCommand(Commands::Help, "help" OPTIONAL(IDENTIFIER), CommandPermission::User, help);
+	registerCommand(Commands::Echo, "echo" TEXT, CommandPermission::User, echo);
+	registerCommand(Commands::SetPrefix, "set-prefix" IDENTIFIER, CommandPermission::Moderator, setPrefix);
 }
 
 GlobalModule::~GlobalModule()
@@ -24,6 +29,7 @@ void GlobalModule::help(const Discord::Message& message, const Discord::Channel&
 	QString prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
 	QString output = "";
 	
+	// TODO(fkp): Separate admin commands
 	if (args.size() == 1)
 	{
 		for (Module* module : UmikoBot::get().getModules())
@@ -37,6 +43,37 @@ void GlobalModule::help(const Discord::Message& message, const Discord::Channel&
 			}
 
 			output += "\n";
+		}
+	}
+	else
+	{
+		const QString& request = args[1];
+		for (Module* module : UmikoBot::get().getModules())
+		{
+			for (const Command& command : module->getCommands())
+			{
+				if (command.name == request)
+				{
+					const QString& description = CommandInfo::briefDescription[(unsigned int) command.id];
+					const QString& usage = CommandInfo::usage[(unsigned int) command.id];
+					const QString& additionalInfo = CommandInfo::additionalInfo[(unsigned int) command.id];
+					bool adminRequired = CommandInfo::adminRequired[(unsigned int) command.id];
+
+					output += "**Command name:** `" + command.name + "`\n\n";
+					output += description + "\n" + additionalInfo + "\n";
+					if (additionalInfo != "")
+					{
+						output += "\n";
+					}
+					output += "**Usage:**`" + prefix + usage + "`";
+				}
+			}
+		}
+
+		if (output == "")
+		{
+			SEND_MESSAGE("I could not find that command!");
+			return;
 		}
 	}
 

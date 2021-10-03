@@ -24,7 +24,7 @@
 		inline static QString briefDescription[(unsigned int) Commands::Count] = {}; \
 		inline static QString usage[(unsigned int) Commands::Count] = {}; \
 		inline static QString additionalInfo[(unsigned int) Commands::Count] = {}; \
-		inline static QString adminRequired[(unsigned int) Commands::Count] = {}; \
+		inline static bool adminRequired[(unsigned int) Commands::Count] = {}; \
 	};
 
 CREATE_COMMANDS(
