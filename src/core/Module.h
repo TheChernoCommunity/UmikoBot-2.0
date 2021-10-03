@@ -34,6 +34,9 @@ CREATE_COMMANDS(
 	SetPrefix,
 	Enable,
 	Disable,
+
+	// Currency Module
+	Daily,
 );
 
 class Module;
