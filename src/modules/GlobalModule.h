@@ -2,6 +2,11 @@
 
 #include "core/Module.h"
 
+// For use when registering commands
+#define OPTIONAL(x) "(" x ")?"
+#define IDENTIFIER "\\s\\S+"
+#define TEXT "\\s.+"
+
 class GlobalModule : public Module
 {
 public:

@@ -6,11 +6,6 @@
 
 using namespace Discord;
 
-// TODO(fkp): Move these later
-#define OPTIONAL(x) "(" x ")?"
-#define IDENTIFIER "\\s\\S+"
-#define TEXT "\\s.+"
-
 GlobalModule::GlobalModule()
 	: Module("Global")
 {
