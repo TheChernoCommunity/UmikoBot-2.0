@@ -123,32 +123,44 @@ void GlobalModule::disable(Module* module, const Discord::Message& message, cons
 	enableDisableImpl(module, message, channel, false);
 }
 
+bool canBeDisabled(const Command& command)
+{
+	return command.name != "help" && command.name != "enable" && command.name != "disable";
+}
+
 void GlobalModule::enableDisableImpl(Module* module, const Discord::Message& message, const Discord::Channel& channel, bool enable)
 {
 	QStringList args = message.content().split(QRegularExpression("\\s"));
 	QString output = "";
 
-	if (args[1] == "module")
+	for (Module* module : UmikoBot::get().getModules())
 	{
-		for (Module* module : UmikoBot::get().getModules())
+		if (args[1] == "module" && module->getName() != args[2])
 		{
-			if (module->getName() != args[2])
+			continue;
+		}
+
+		for (Command& command : module->getCommands())
+		{
+			if (args[1] == "command" && command.name != args[2])
 			{
 				continue;
 			}
-			
-			for (Command& command : module->getCommands())
+
+			if (!enable && !canBeDisabled(command))
 			{
-				if (!enable && (command.name == "enable" || command.name == "disable" || command.name == "help"))
-				{
-					output += "You can't disable command `" + command.name + "`!\n";
-					continue;
-				}
-		
-				command.enabled = enable;
-				output += QString("%1 command `%2`!\n").arg(enable ? "Enabled" : "Disabled", command.name);
+				output += "You can't disable command `" + command.name + "`\n";
+				continue;
 			}
+		
+			command.enabled = enable;
+			output += QString("%1 command `%2`\n").arg(enable ? "Enabled" : "Disabled", command.name);		
 		}
+	}
+
+	if (output == "")
+	{
+		output = "Could not find that " + args[1] + "!";
 	}
 
 	SEND_MESSAGE(output);
