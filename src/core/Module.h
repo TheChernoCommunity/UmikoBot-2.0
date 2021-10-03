@@ -28,9 +28,12 @@
 	};
 
 CREATE_COMMANDS(
+	// Global Module
 	Help,
 	Echo,
 	SetPrefix,
+	Enable,
+	Disable,
 );
 
 class Module;

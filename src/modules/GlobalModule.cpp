@@ -17,6 +17,8 @@ GlobalModule::GlobalModule()
 	registerCommand(Commands::Help, "help" OPTIONAL(IDENTIFIER), CommandPermission::User, help);
 	registerCommand(Commands::Echo, "echo" TEXT, CommandPermission::User, echo);
 	registerCommand(Commands::SetPrefix, "set-prefix" IDENTIFIER, CommandPermission::Moderator, setPrefix);
+	registerCommand(Commands::Enable, "enable" "\\s(module|command)" IDENTIFIER, CommandPermission::Moderator, enable);
+	registerCommand(Commands::Disable, "disable" "\\s(module|command)" IDENTIFIER, CommandPermission::Moderator, disable);
 }
 
 GlobalModule::~GlobalModule()
@@ -104,4 +106,45 @@ void GlobalModule::setPrefix(Module* module, const Discord::Message& message, co
 		prefix = args[1];
 		SEND_MESSAGE(QString("Changed prefix to '%1'").arg(prefix));
 	}
+}
+
+void GlobalModule::enable(Module* module, const Discord::Message& message, const Discord::Channel& channel)
+{
+	enableDisableImpl(module, message, channel, true);
+}
+
+void GlobalModule::disable(Module* module, const Discord::Message& message, const Discord::Channel& channel)
+{
+	enableDisableImpl(module, message, channel, false);
+}
+
+void GlobalModule::enableDisableImpl(Module* module, const Discord::Message& message, const Discord::Channel& channel, bool enable)
+{
+	QStringList args = message.content().split(QRegularExpression("\\s"));
+	QString output = "";
+
+	if (args[1] == "module")
+	{
+		for (Module* module : UmikoBot::get().getModules())
+		{
+			if (module->getName() != args[2])
+			{
+				continue;
+			}
+			
+			for (Command& command : module->getCommands())
+			{
+				if (!enable && (command.name == "enable" || command.name == "disable" || command.name == "help"))
+				{
+					output += "You can't disable command `" + command.name + "`!\n";
+					continue;
+				}
+		
+				command.enabled = enable;
+				output += QString("%1 command `%2`!\n").arg(enable ? "Enabled" : "Disabled", command.name);
+			}
+		}
+	}
+
+	SEND_MESSAGE(output);
 }
