@@ -40,7 +40,12 @@ void GlobalModule::help(Module* module, const Discord::Message& message, const D
 			
 			for (const Command& command : module->getCommands())
 			{
-				const QString& description = CommandInfo::briefDescription[(unsigned int) command.id];
+				QString description = CommandInfo::briefDescription[(unsigned int) command.id];
+				if (description == "")
+				{
+					description = "*No description found*";
+				}
+				
 				output += QString("`%1%2` - %3\n").arg(prefix, command.name, description);
 			}
 
