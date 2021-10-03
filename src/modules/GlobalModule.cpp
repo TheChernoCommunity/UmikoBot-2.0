@@ -32,7 +32,8 @@ void GlobalModule::help(const Discord::Message& message, const Discord::Channel&
 			
 			for (const Command& command : module->getCommands())
 			{
-				output += QString("`%1%2` - %3\n").arg(prefix, command.name, "TODO: description");
+				const QString& description = CommandInfo::briefDescription[(unsigned int) command.id];
+				output += QString("`%1%2` - %3\n").arg(prefix, command.name, description);
 			}
 
 			output += "\n";

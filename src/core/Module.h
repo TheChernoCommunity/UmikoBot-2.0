@@ -12,11 +12,12 @@
 	enum class Commands													\
 	{																	\
 		__VA_ARGS__														\
+		Count															\
 	};																	\
 																		\
 	struct CommandInfo													\
 	{																	\
-		inline static QString enumFullString = #__VA_ARGS__;		\
+		inline static QString enumFullString = #__VA_ARGS__;			\
 																		\
 		/* These rely on the count enum value at the end */				\
 		inline static QString commandStrings[(unsigned int) Commands::Count] = {}; \
@@ -30,9 +31,7 @@ CREATE_COMMANDS(
 	Help,
 	Echo,
 	SetPrefix,
-
-	Count // Keep at the end // TODO(fkp): Move away
-)
+);
 
 struct Command
 {
