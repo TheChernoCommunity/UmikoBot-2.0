@@ -87,6 +87,43 @@ void UmikoBot::saveGuildData()
 void UmikoBot::load()
 {
 	loadGuildData();
+
+	// Parses the full enum string into separate commands
+	QStringList individialCommands = CommandInfo::enumFullString.split(",");
+	for (unsigned int i = 0; i < (unsigned int) Commands::Count; i++)
+	{
+		CommandInfo::commandStrings[i] = individialCommands[i].trimmed();
+	}
+
+	// Loads the commands
+	QFile file { "commands.json" };
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		printf("Failed to open commands.json for reading...\n");
+		return;
+	}
+
+	QByteArray data = file.readAll();
+	QJsonDocument doc = QJsonDocument::fromJson(data);
+	QJsonObject json = doc.object();
+
+	for (unsigned int i = 0; i < (unsigned int) Commands::Count; i++)
+	{
+		QJsonValue commandJson = json[CommandInfo::commandStrings[i]];
+
+		// Would be undefined if the command has no description
+		if (commandJson != QJsonValue::Undefined)
+		{
+			QJsonObject current = commandJson.toObject();
+			
+			CommandInfo::briefDescription[i] = current["brief"].toString();
+			CommandInfo::usage[i] = current["usage"].toString();
+			CommandInfo::additionalInfo[i] = current["additional"].toString();
+			CommandInfo::adminRequired[i] = current["admin"].toBool();
+		}
+	}
+
+	file.close();
 }
 
 void UmikoBot::loadGuildData()
