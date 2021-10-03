@@ -33,9 +33,11 @@ CREATE_COMMANDS(
 	SetPrefix,
 );
 
+class Module;
+
 struct Command
 {
-	using Callback = std::function<void(const Discord::Message&, const Discord::Channel&)>;
+	using Callback = std::function<void(Module*, const Discord::Message&, const Discord::Channel&)>;
 
 	Commands id;
 	bool enabled;

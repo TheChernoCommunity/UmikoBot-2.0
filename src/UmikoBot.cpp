@@ -310,7 +310,7 @@ void UmikoBot::umikoOnMessageCreate(const Message& message)
 						isCommand = true;
 						
 						::Permissions::contains(channel.guildId(), message.author().id(), command.requiredPermissions,
-												[this, message, channel, command, fullCommand](bool result)
+												[this, message, channel, command, fullCommand, module](bool result)
 						{
 							if (!result)
 							{
@@ -323,7 +323,7 @@ void UmikoBot::umikoOnMessageCreate(const Message& message)
 								if (command.enabled)
 								{
 
-									command.callback(message, channel);
+									command.callback(module, message, channel);
 
 								}
 								else

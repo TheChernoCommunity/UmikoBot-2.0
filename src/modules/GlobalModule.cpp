@@ -23,7 +23,7 @@ GlobalModule::~GlobalModule()
 {
 }
 
-void GlobalModule::help(const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::help(Module* module, const Discord::Message& message, const Discord::Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression("\\s"));
 	QString prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
@@ -84,13 +84,13 @@ void GlobalModule::help(const Discord::Message& message, const Discord::Channel&
 	SEND_MESSAGE(embed);
 }
 
-void GlobalModule::echo(const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::echo(Module* module, const Discord::Message& message, const Discord::Channel& channel)
 {
 	QString restOfMessage = message.content().mid(message.content().indexOf(QRegularExpression("\\s")));
 	SEND_MESSAGE(restOfMessage);
 }
 
-void GlobalModule::setPrefix(const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::setPrefix(Module* module, const Discord::Message& message, const Discord::Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression("\\s"));
 	QString& prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;

@@ -8,7 +8,7 @@ public:
 	GlobalModule();
 	~GlobalModule();
 
-	static void help(const Discord::Message&, const Discord::Channel&);
-	static void echo(const Discord::Message&, const Discord::Channel&);
-	static void setPrefix(const Discord::Message&, const Discord::Channel&);
+	static void help(Module*, const Discord::Message&, const Discord::Channel&);
+	static void echo(Module*, const Discord::Message&, const Discord::Channel&);
+	static void setPrefix(Module*, const Discord::Message&, const Discord::Channel&);
 };
