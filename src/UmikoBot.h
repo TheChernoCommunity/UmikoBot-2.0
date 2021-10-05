@@ -4,8 +4,8 @@
 #include <Discord/Objects/Guild.h>
 #include <Discord/Objects/GuildMember.h>
 
-#include "core/Module.h"
 #include "core/Data.h"
+#include "modules/Module.h"
 
 class UmikoBot : public Discord::Client
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/Module.h"
+#include "modules/Module.h"
 
 // For use when registering commands
 #define OPTIONAL(x) "(" x ")?"

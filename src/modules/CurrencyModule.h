@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/Module.h"
+#include "modules/Module.h"
 
 struct UserCurrencyData
 {
