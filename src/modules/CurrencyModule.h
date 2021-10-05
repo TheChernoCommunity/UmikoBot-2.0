@@ -24,6 +24,7 @@ public:
 	CurrencyModule();
 	~CurrencyModule();
 
+	static void wallet(Module*, const Discord::Message&, const Discord::Channel&);
 	static void daily(Module*, const Discord::Message&, const Discord::Channel&);
 
 private:
@@ -32,4 +33,6 @@ private:
 private:
 	QMap<snowflake_t /* guildId */, GuildCurrencyConfig> currencyConfigs;
 	QMap<snowflake_t /* guildId */, QList<UserCurrencyData>> currencyData;
+
+	QTimer dayTimer;
 };

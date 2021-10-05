@@ -216,6 +216,48 @@ const QList<Discord::Role>& UmikoBot::getRoles(snowflake_t guildId)
 	return guildData[guildId].roles;
 }
 
+const QString& UmikoBot::getNickname(snowflake_t guildId, snowflake_t userId)
+{
+	return guildData[guildId].userData[userId].nickname;
+}
+
+const QString& UmikoBot::getUsername(snowflake_t guildId, snowflake_t userId)
+{
+	return guildData[guildId].userData[userId].username;
+}
+
+const QString& UmikoBot::getName(snowflake_t guildId, snowflake_t userId)
+{
+	if (getNickname(guildId, userId) != "")
+	{
+		return getNickname(guildId, userId);
+	}
+
+	return getUsername(guildId, userId);
+}
+
+Promise<QString>& UmikoBot::getAvatar(snowflake_t guildId, snowflake_t userId)
+{
+	Promise<QString>* promise = new Promise<QString>();
+
+	getGuildMember(guildId, userId).then([promise, userId](const GuildMember& member)
+	{
+		QString icon = member.user().avatar();
+		if (icon != "")
+		{
+			icon = "https://cdn.discordapp.com/avatars/" + QString::number(userId) + "/" + icon + ".png";
+		}
+		else
+		{
+			icon = "https://cdn.discordapp.com/embed/avatars/" + QString::number(member.user().discriminator().toULongLong() % 5) + ".png";
+		}
+
+		promise->resolve(icon);
+	});
+
+	return *promise;
+}
+
 void UmikoBot::umikoOnReady()
 {
 	printf("Ready!\n");

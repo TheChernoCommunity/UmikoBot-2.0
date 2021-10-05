@@ -21,6 +21,11 @@ public:
 	const QList<Module*>& getModules() const { return modules; }
 	QMap<snowflake_t, GuildData>& getGuildData() { return guildData; }
 
+	const QString& getNickname(snowflake_t guildId, snowflake_t userId);
+	const QString& getUsername(snowflake_t guildId, snowflake_t userId);
+	const QString& getName(snowflake_t guildId, snowflake_t userId);
+	Discord::Promise<QString>& getAvatar(snowflake_t guildId, snowflake_t userId);
+	
 private:
 	UmikoBot(QObject* parent = nullptr);
 

@@ -36,6 +36,7 @@ CREATE_COMMANDS(
 	Disable,
 
 	// Currency Module
+	Wallet,
 	Daily,
 );
 
