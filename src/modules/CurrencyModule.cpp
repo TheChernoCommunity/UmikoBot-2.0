@@ -61,7 +61,7 @@ void CurrencyModule::wallet(Module* module, const Discord::Message& message, con
 	{
 		const GuildCurrencyConfig& guildCurrencyConfig = self->currencyConfigs[channel.guildId()];
 		QString desc = QString("Current %1s: **%2 %3**").arg(guildCurrencyConfig.currencyName,
-															QString::number(self->getUserCurrencyData(channel.guildId(), userId).balance / 100.0f),
+															QString::number(self->getUserCurrencyData(channel.guildId(), userId).balanceInCents / 100.0f),
 															guildCurrencyConfig.currencyAbbreviation);
 
 		Embed embed;
@@ -85,7 +85,7 @@ void CurrencyModule::daily(Module* module, const Discord::Message& message, cons
 		return;
 	}
 
-	userCurrencyData.balance += guildCurrencyConfig.rewardForDaily;
+	userCurrencyData.balanceInCents += guildCurrencyConfig.rewardForDaily;
 	userCurrencyData.hasClaimedDaily = true;
 	
 	QString output = QString("You now have **%1** more %2s in your wallet!").arg(QString::number(guildCurrencyConfig.rewardForDaily / 100.0f),

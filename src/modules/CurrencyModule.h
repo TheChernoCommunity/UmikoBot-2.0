@@ -5,7 +5,7 @@
 struct UserCurrencyData
 {
 	snowflake_t userId;
-	int balance = 0;
+	int balanceInCents = 0;
 
 	bool hasClaimedDaily = false;
 };
