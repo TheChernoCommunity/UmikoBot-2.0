@@ -5,6 +5,12 @@
 #include <Discord/Client.h>
 #include <QString>
 
+// For use when registering commands
+#define OPTIONAL(x) "(" x ")?"
+#define IDENTIFIER "\\s\\S+"
+#define TEXT "\\s.+"
+#define USER "\\s\\S+"
+
 // Intended to be used by modules
 #define SEND_MESSAGE(msg) UmikoBot::get().createMessage(message.channelId(), msg);
 

@@ -23,8 +23,8 @@ CurrencyModule::CurrencyModule()
 		}
 	});
 	
+	registerCommand(Commands::Wallet, "wallet" OPTIONAL(USER), CommandPermission::User, wallet);
 	registerCommand(Commands::Daily, "daily", CommandPermission::User, daily);
-	registerCommand(Commands::Wallet, "wallet", CommandPermission::User, wallet);
 }
 
 CurrencyModule::~CurrencyModule()
@@ -55,6 +55,17 @@ void CurrencyModule::wallet(Module* module, const Discord::Message& message, con
 	if (args.size() == 1)
 	{
 		userId = message.author().id();
+	}
+	else
+	{
+		userId = UmikoBot::get().getUserFromArgument(channel.guildId(), args[1]);
+		printf("User ID: %llu\n", userId);
+	}
+
+	if (!userId)
+	{
+		SEND_MESSAGE("Could not find user!");
+		return;
 	}
 
 	UmikoBot::get().getAvatar(channel.guildId(), userId).then([self, message, channel, userId](const QString& icon)

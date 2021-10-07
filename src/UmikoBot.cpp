@@ -258,6 +258,36 @@ Promise<QString>& UmikoBot::getAvatar(snowflake_t guildId, snowflake_t userId)
 	return *promise;
 }
 
+snowflake_t UmikoBot::getUserFromArgument(snowflake_t guildId, const QString& argument)
+{
+	snowflake_t result;
+	
+	result = getUserIdFromMention(guildId, argument);
+	if (result)
+	{
+		return result;
+	}
+
+	return 0;
+}
+
+snowflake_t UmikoBot::getUserIdFromMention(snowflake_t guildId, const QString& mention)
+{
+	static const QRegularExpression mentionRegex { "^<@!?([0-9]+)>$" };
+	QRegularExpressionMatch match = mentionRegex.match(mention);
+
+	if (match.hasMatch())
+	{
+		snowflake_t userId = match.captured(1).toULongLong();
+		if (getName(guildId, userId) != "")
+		{
+			return userId;
+		}
+	}
+
+	return 0;
+}
+
 void UmikoBot::umikoOnReady()
 {
 	printf("Ready!\n");

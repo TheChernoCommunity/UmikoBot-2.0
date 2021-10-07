@@ -25,7 +25,10 @@ public:
 	const QString& getUsername(snowflake_t guildId, snowflake_t userId);
 	const QString& getName(snowflake_t guildId, snowflake_t userId);
 	Discord::Promise<QString>& getAvatar(snowflake_t guildId, snowflake_t userId);
-	
+
+	snowflake_t getUserFromArgument(snowflake_t guildId, const QString& argument);
+	snowflake_t getUserIdFromMention(snowflake_t guildId, const QString& mention);
+
 private:
 	UmikoBot(QObject* parent = nullptr);
 
