@@ -262,12 +262,53 @@ snowflake_t UmikoBot::getUserFromArgument(snowflake_t guildId, const QString& ar
 {
 	snowflake_t result;
 	
+	// Direct mention
 	result = getUserIdFromMention(guildId, argument);
-	if (result)
+	if (result) return result;
+
+	// User ID
+	result = argument.toULongLong();
+	if (result != 0)
 	{
-		return result;
+		if (getName(guildId, result) != "")
+		{
+			return result;
+		}
+
+		// Not valid, let's reset
+		result = 0;
 	}
 
+	// Checks for a username/nickname match
+	snowflake_t completeNickname = 0;
+	snowflake_t partialUsername = 0;
+	snowflake_t partialNickname = 0;
+	
+	for (auto it = guildData[guildId].userData.begin(); it != guildData[guildId].userData.end(); it++)
+	{
+		if (argument == it.value().username)
+		{
+			return it.key();
+		}
+
+		if (argument == it.value().nickname)
+		{
+			completeNickname = it.key();
+		}
+		else if (it.value().username.startsWith(argument))
+		{
+			partialUsername = it.key();
+		}
+		else if (it.value().nickname.startsWith(argument))
+		{
+			partialNickname = it.key();
+		}
+	}
+
+	if (completeNickname) return completeNickname;
+	if (partialUsername) return partialUsername;
+	if (partialNickname) return partialNickname;
+	
 	return 0;
 }
 

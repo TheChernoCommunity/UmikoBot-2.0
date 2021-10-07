@@ -59,7 +59,6 @@ void CurrencyModule::wallet(Module* module, const Discord::Message& message, con
 	else
 	{
 		userId = UmikoBot::get().getUserFromArgument(channel.guildId(), args[1]);
-		printf("User ID: %llu\n", userId);
 	}
 
 	if (!userId)
