@@ -12,8 +12,8 @@ GlobalModule::GlobalModule()
 	registerCommand(Commands::Help, "help" OPTIONAL(IDENTIFIER), CommandPermission::User, help);
 	registerCommand(Commands::Echo, "echo" TEXT, CommandPermission::User, echo);
 	registerCommand(Commands::SetPrefix, "set-prefix" IDENTIFIER, CommandPermission::Moderator, setPrefix);
-	registerCommand(Commands::Enable, "enable" "\\s(module|command)" IDENTIFIER, CommandPermission::Moderator, enable);
-	registerCommand(Commands::Disable, "disable" "\\s(module|command)" IDENTIFIER, CommandPermission::Moderator, disable);
+	registerCommand(Commands::Enable, "enable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, enable);
+	registerCommand(Commands::Disable, "disable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, disable);
 }
 
 GlobalModule::~GlobalModule()
@@ -22,7 +22,7 @@ GlobalModule::~GlobalModule()
 
 void GlobalModule::help(Module* module, const Discord::Message& message, const Discord::Channel& channel)
 {
-	QStringList args = message.content().split(QRegularExpression("\\s"));
+	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QString prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
 	QString output = "";
 	
@@ -94,7 +94,7 @@ void GlobalModule::echo(Module* module, const Discord::Message& message, const D
 
 void GlobalModule::setPrefix(Module* module, const Discord::Message& message, const Discord::Channel& channel)
 {
-	QStringList args = message.content().split(QRegularExpression("\\s"));
+	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QString& prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
 
 	if (prefix == args[1])
@@ -125,7 +125,7 @@ bool canBeDisabled(const Command& command)
 
 void GlobalModule::enableDisableImpl(Module* module, const Discord::Message& message, const Discord::Channel& channel, bool enable)
 {
-	QStringList args = message.content().split(QRegularExpression("\\s"));
+	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QString output = "";
 
 	for (Module* module : UmikoBot::get().getModules())

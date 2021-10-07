@@ -369,7 +369,7 @@ void UmikoBot::umikoOnMessageCreate(const Message& message)
 		QString messageString = message.content();
 		const QString& prefix = getGuildData()[channel.guildId()].prefix;
 		QString fullCommand = messageString.mid(prefix.length());
-		QString commandName = messageString.mid(prefix.length(), messageString.indexOf(QRegularExpression("\\s")) - prefix.length());
+		QString commandName = messageString.mid(prefix.length(), messageString.indexOf(QRegularExpression(SPACE)) - prefix.length());
 
 		bool isCommand = false;
 

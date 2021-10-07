@@ -49,7 +49,7 @@ UserCurrencyData& CurrencyModule::getUserCurrencyData(snowflake_t guildId, snowf
 void CurrencyModule::wallet(Module* module, const Discord::Message& message, const Discord::Channel& channel)
 {
 	CurrencyModule* self = (CurrencyModule*) module;
-	QStringList args = message.content().split(QRegularExpression("\\s"));
+	QStringList args = message.content().split(QRegularExpression(SPACE));
 	snowflake_t userId = 0;
 
 	if (args.size() == 1)

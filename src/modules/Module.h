@@ -7,9 +7,10 @@
 
 // For use when registering commands
 #define OPTIONAL(x) "(" x ")?"
-#define IDENTIFIER "\\s\\S+"
-#define TEXT "\\s.+"
-#define USER "\\s\\S+"
+#define SPACE "\\s+"
+#define IDENTIFIER SPACE "\\S+"
+#define TEXT SPACE ".+"
+#define USER SPACE "\\S+"
 
 // Intended to be used by modules
 #define SEND_MESSAGE(msg) UmikoBot::get().createMessage(message.channelId(), msg);
