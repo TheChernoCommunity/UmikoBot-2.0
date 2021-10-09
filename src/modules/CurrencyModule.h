@@ -27,6 +27,10 @@ public:
 	static void wallet(Module*, const Discord::Message&, const Discord::Channel&);
 	static void daily(Module*, const Discord::Message&, const Discord::Channel&);
 
+protected:
+	void onSave(QJsonDocument& document) const override;
+	void onLoad(const QJsonDocument& document) override;
+	
 private:
 	UserCurrencyData& getUserCurrencyData(snowflake_t guildId, snowflake_t userId);
 
