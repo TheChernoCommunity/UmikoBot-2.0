@@ -4,6 +4,7 @@
 #include <QRegularExpression>
 #include <Discord/Client.h>
 #include <QString>
+#include <QJsonDocument>
 
 // For use when registering commands
 #define OPTIONAL(x) "(" x ")?"
@@ -54,7 +55,7 @@ struct Command
 	using Callback = std::function<void(Module*, const Discord::Message&, const Discord::Channel&)>;
 
 	Commands id;
-	bool enabled;
+	bool enabled; 	// TODO(fkp): Enabled state per guild
 	unsigned int requiredPermissions;
 
 	QString name;
@@ -67,13 +68,20 @@ class Module
 public:
 	virtual ~Module();
 
-	void onMessage(const Discord::Message& message);
+	virtual void onMessage(const Discord::Message& message) {};
+
+	void save() const;
+	void load();
+	
 	QList<Command>& getCommands() { return commands; }
 	const QString& getName() const { return name; }
 
 protected:
 	Module(const QString& name);
 
+	virtual void onSave(QJsonDocument& doc) const {}
+	virtual void onLoad(const QJsonDocument& doc) {}
+	
 	void registerCommand(Commands id, const QString& signature, unsigned int requiredPermissions, Command::Callback callback);
 
 private:

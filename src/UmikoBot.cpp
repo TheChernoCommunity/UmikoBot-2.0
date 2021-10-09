@@ -22,9 +22,8 @@ UmikoBot::UmikoBot(QObject* parent)
 	: Client("umiko-bot", parent)
 {
 	printf("Starting bot...\n");
-
 	QDir().mkdir("configs");
-	load();
+
 	saveTimer.setInterval(60 * 1000);
 	QObject::connect(&saveTimer, &QTimer::timeout, [this]()
 	{
@@ -60,6 +59,11 @@ UmikoBot::~UmikoBot()
 void UmikoBot::save()
 {
 	saveGuildData();
+
+	for (Module* module : modules)
+	{
+		module->save();
+	}
 }
 
 void UmikoBot::saveGuildData()
@@ -126,6 +130,12 @@ void UmikoBot::load()
 	}
 
 	file.close();
+
+	// Loads the modules
+	for (Module* module : modules)
+	{
+		module->load();
+	}
 }
 
 void UmikoBot::loadGuildData()
@@ -332,6 +342,8 @@ snowflake_t UmikoBot::getUserIdFromMention(snowflake_t guildId, const QString& m
 void UmikoBot::umikoOnReady()
 {
 	printf("Ready!\n");
+
+	load();
 	initialiseGuilds();
 }
 

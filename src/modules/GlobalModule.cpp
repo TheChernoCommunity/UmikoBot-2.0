@@ -3,6 +3,7 @@
 #include "core/Permissions.h"
 
 #include <Discord/Objects/Embed.h>
+#include <QFile>
 
 using namespace Discord;
 
@@ -18,6 +19,37 @@ GlobalModule::GlobalModule()
 
 GlobalModule::~GlobalModule()
 {
+}
+
+void GlobalModule::onSave(QJsonDocument& document) const
+{
+	QJsonObject object {};
+	QJsonObject commandsEnabledObject {};
+
+	for (Module* module : UmikoBot::get().getModules())
+	{
+		for (const Command& command : module->getCommands())
+		{
+			commandsEnabledObject[command.name] = command.enabled;;
+		}
+	}
+
+	object["commandsEnabled"] = commandsEnabledObject;
+	document.setObject(object);
+}
+
+void GlobalModule::onLoad(const QJsonDocument& document)
+{
+	QJsonObject object = document.object();
+	QJsonObject commandsEnabledObject = object["commandsEnabled"].toObject();
+
+	for (Module* module : UmikoBot::get().getModules())
+	{
+		for (Command& command : module->getCommands())
+		{
+			command.enabled = commandsEnabledObject[command.name].toBool(true);
+		}
+	}
 }
 
 void GlobalModule::help(Module* module, const Discord::Message& message, const Discord::Channel& channel)
