@@ -10,11 +10,11 @@ using namespace Discord;
 GlobalModule::GlobalModule()
 	: Module("Global")
 {
-	registerCommand(Commands::Help, "help" OPTIONAL(IDENTIFIER), CommandPermission::User, help);
-	registerCommand(Commands::Echo, "echo" TEXT, CommandPermission::User, echo);
-	registerCommand(Commands::SetPrefix, "set-prefix" IDENTIFIER, CommandPermission::Moderator, setPrefix);
-	registerCommand(Commands::Enable, "enable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, enable);
-	registerCommand(Commands::Disable, "disable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, disable);
+	registerCommand(Commands::Help, "help" OPTIONAL(IDENTIFIER), CommandPermission::User, CALLBACK(help));
+	registerCommand(Commands::Echo, "echo" TEXT, CommandPermission::User, CALLBACK(echo));
+	registerCommand(Commands::SetPrefix, "set-prefix" IDENTIFIER, CommandPermission::Moderator, CALLBACK(setPrefix));
+	registerCommand(Commands::Enable, "enable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(enable));
+	registerCommand(Commands::Disable, "disable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(disable));
 }
 
 GlobalModule::~GlobalModule()
@@ -49,7 +49,7 @@ void GlobalModule::onLoad(const QJsonObject& mainObject)
 	}
 }
 
-void GlobalModule::help(Module* module, const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::help(const Discord::Message& message, const Discord::Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QString prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
@@ -115,13 +115,13 @@ void GlobalModule::help(Module* module, const Discord::Message& message, const D
 	SEND_MESSAGE(embed);
 }
 
-void GlobalModule::echo(Module* module, const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::echo(const Discord::Message& message, const Discord::Channel& channel)
 {
 	QString restOfMessage = message.content().mid(message.content().indexOf(QRegularExpression("\\s")));
 	SEND_MESSAGE(restOfMessage);
 }
 
-void GlobalModule::setPrefix(Module* module, const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::setPrefix(const Discord::Message& message, const Discord::Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QString& prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
@@ -137,14 +137,14 @@ void GlobalModule::setPrefix(Module* module, const Discord::Message& message, co
 	}
 }
 
-void GlobalModule::enable(Module* module, const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::enable(const Discord::Message& message, const Discord::Channel& channel)
 {
-	enableDisableImpl(module, message, channel, true);
+	enableDisableImpl(message, channel, true);
 }
 
-void GlobalModule::disable(Module* module, const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::disable(const Discord::Message& message, const Discord::Channel& channel)
 {
-	enableDisableImpl(module, message, channel, false);
+	enableDisableImpl(message, channel, false);
 }
 
 bool canBeDisabled(const Command& command)
@@ -152,7 +152,7 @@ bool canBeDisabled(const Command& command)
 	return command.name != "help" && command.name != "enable" && command.name != "disable";
 }
 
-void GlobalModule::enableDisableImpl(Module* module, const Discord::Message& message, const Discord::Channel& channel, bool enable)
+void GlobalModule::enableDisableImpl(const Discord::Message& message, const Discord::Channel& channel, bool enable)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QString output = "";

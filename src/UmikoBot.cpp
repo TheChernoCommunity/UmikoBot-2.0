@@ -450,7 +450,7 @@ void UmikoBot::umikoOnMessageCreate(const Message& message)
 								if (command.enabled)
 								{
 
-									command.callback(module, message, channel);
+									command.callback(message, channel);
 
 								}
 								else

@@ -23,17 +23,16 @@ CurrencyModule::CurrencyModule()
 		}
 	});
 	
-	registerCommand(Commands::Wallet, "wallet" OPTIONAL(USER), CommandPermission::User, wallet);
-	registerCommand(Commands::Daily, "daily", CommandPermission::User, daily);
+	registerCommand(Commands::Wallet, "wallet" OPTIONAL(USER), CommandPermission::User, CALLBACK(wallet));
+	registerCommand(Commands::Daily, "daily", CommandPermission::User, CALLBACK(daily));
 }
 
 CurrencyModule::~CurrencyModule()
 {
 }
 
-void CurrencyModule::wallet(Module* module, const Discord::Message& message, const Discord::Channel& channel)
+void CurrencyModule::wallet(const Discord::Message& message, const Discord::Channel& channel)
 {
-	CurrencyModule* self = (CurrencyModule*) module;
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	snowflake_t userId = 0;
 
@@ -52,11 +51,11 @@ void CurrencyModule::wallet(Module* module, const Discord::Message& message, con
 		return;
 	}
 
-	UmikoBot::get().getAvatar(channel.guildId(), userId).then([self, message, channel, userId](const QString& icon)
+	UmikoBot::get().getAvatar(channel.guildId(), userId).then([this, message, channel, userId](const QString& icon)
 	{
-		const GuildCurrencyConfig& guildCurrencyConfig = self->currencyConfigs[channel.guildId()];
+		const GuildCurrencyConfig& guildCurrencyConfig = currencyConfigs[channel.guildId()];
 		QString desc = QString("Current %1s: **%2 %3**").arg(guildCurrencyConfig.currencyName,
-															QString::number(self->getUserCurrencyData(channel.guildId(), userId).balanceInCents / 100.0f),
+															QString::number(getUserCurrencyData(channel.guildId(), userId).balanceInCents / 100.0f),
 															guildCurrencyConfig.currencyAbbreviation);
 
 		Embed embed;
@@ -67,11 +66,10 @@ void CurrencyModule::wallet(Module* module, const Discord::Message& message, con
 	});
 }
 
-void CurrencyModule::daily(Module* module, const Discord::Message& message, const Discord::Channel& channel)
+void CurrencyModule::daily(const Discord::Message& message, const Discord::Channel& channel)
 {
-	CurrencyModule* self = (CurrencyModule*) module;
-	UserCurrencyData& userCurrencyData = self->getUserCurrencyData(channel.guildId(), message.author().id());
-	const GuildCurrencyConfig& guildCurrencyConfig = self->currencyConfigs[channel.guildId()];
+	UserCurrencyData& userCurrencyData = getUserCurrencyData(channel.guildId(), message.author().id());
+	const GuildCurrencyConfig& guildCurrencyConfig = currencyConfigs[channel.guildId()];
 
 	if (userCurrencyData.hasClaimedDaily)
 	{

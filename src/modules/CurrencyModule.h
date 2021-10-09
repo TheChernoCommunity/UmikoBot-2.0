@@ -24,8 +24,8 @@ public:
 	CurrencyModule();
 	~CurrencyModule();
 
-	static void wallet(Module*, const Discord::Message&, const Discord::Channel&);
-	static void daily(Module*, const Discord::Message&, const Discord::Channel&);
+	void wallet(const Discord::Message&, const Discord::Channel&);
+	void daily(const Discord::Message&, const Discord::Channel&);
 
 protected:
 	void onSave(QJsonObject& mainObject) const override;

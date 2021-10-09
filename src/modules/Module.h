@@ -14,6 +14,7 @@
 #define USER SPACE "\\S+"
 
 // Intended to be used by modules
+#define CALLBACK(name) [this](const Message& message, const Channel& channel){ name(message, channel); }
 #define SEND_MESSAGE(msg) UmikoBot::get().createMessage(message.channelId(), msg);
 
 #define CREATE_COMMANDS(...)											\
@@ -52,7 +53,7 @@ class Module;
 
 struct Command
 {
-	using Callback = std::function<void(Module*, const Discord::Message&, const Discord::Channel&)>;
+	using Callback = std::function<void(const Discord::Message&, const Discord::Channel&)>;
 
 	Commands id;
 	bool enabled; 	// TODO(fkp): Enabled state per guild
