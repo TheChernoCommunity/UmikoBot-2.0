@@ -31,6 +31,60 @@ CurrencyModule::~CurrencyModule()
 {
 }
 
+void CurrencyModule::onSave(QJsonObject& mainObject) const
+{
+	for (snowflake_t guildId : currencyData.keys())
+	{
+		QJsonObject guildJson {};
+		for (const UserCurrencyData& userCurrencyData : currencyData[guildId])
+		{
+			QJsonObject userJson {};
+			userJson["balanceInCents"] = userCurrencyData.balanceInCents;
+			userJson["hasClaimedDaily"] = userCurrencyData.hasClaimedDaily;
+
+			guildJson[QString::number(userCurrencyData.userId)] = userJson;
+		}
+
+		mainObject[QString::number(guildId)] = guildJson;
+	}
+}
+
+void CurrencyModule::onLoad(const QJsonObject& mainObject)
+{
+	for (const QString& guildIdString : mainObject.keys())
+	{
+		QJsonObject guildJson = mainObject[guildIdString].toObject();
+		snowflake_t guildId = guildIdString.toULongLong();
+
+		for (const QString& userIdString : guildJson.keys())
+		{
+			QJsonObject userJson = guildJson[userIdString].toObject();
+			snowflake_t userId = userIdString.toULongLong();
+			
+			currencyData[guildId].append(UserCurrencyData {
+				userId,
+				userJson["balanceInCents"].toInt(),
+				userJson["hasClaimedDaily"].toBool(),
+			});
+		}
+	}
+}
+
+UserCurrencyData& CurrencyModule::getUserCurrencyData(snowflake_t guildId, snowflake_t userId)
+{
+	for (UserCurrencyData& userCurrencyData : currencyData[guildId])
+	{
+		if (userCurrencyData.userId == userId)
+		{
+			return userCurrencyData;
+		}
+	}
+
+	// The user does not exist yet, make a new one
+	currencyData[guildId].append(UserCurrencyData { userId });
+	return currencyData[guildId].back();
+}
+
 void CurrencyModule::wallet(const Discord::Message& message, const Discord::Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
@@ -84,58 +138,4 @@ void CurrencyModule::daily(const Discord::Message& message, const Discord::Chann
 	QString output = QString("You now have **%1** more %2s in your wallet!").arg(QString::number(guildCurrencyConfig.rewardForDaily / 100.0f),
 																				 guildCurrencyConfig.currencyName);
 	SEND_MESSAGE(output);
-}
-
-void CurrencyModule::onSave(QJsonObject& mainObject) const
-{
-	for (snowflake_t guildId : currencyData.keys())
-	{
-		QJsonObject guildJson {};
-		for (const UserCurrencyData& userCurrencyData : currencyData[guildId])
-		{
-			QJsonObject userJson {};
-			userJson["balanceInCents"] = userCurrencyData.balanceInCents;
-			userJson["hasClaimedDaily"] = userCurrencyData.hasClaimedDaily;
-
-			guildJson[QString::number(userCurrencyData.userId)] = userJson;
-		}
-
-		mainObject[QString::number(guildId)] = guildJson;
-	}
-}
-
-void CurrencyModule::onLoad(const QJsonObject& mainObject)
-{
-	for (const QString& guildIdString : mainObject.keys())
-	{
-		QJsonObject guildJson = mainObject[guildIdString].toObject();
-		snowflake_t guildId = guildIdString.toULongLong();
-
-		for (const QString& userIdString : guildJson.keys())
-		{
-			QJsonObject userJson = guildJson[userIdString].toObject();
-			snowflake_t userId = userIdString.toULongLong();
-			
-			currencyData[guildId].append(UserCurrencyData {
-				userId,
-				userJson["balanceInCents"].toInt(),
-				userJson["hasClaimedDaily"].toBool(),
-			});
-		}
-	}
-}
-
-UserCurrencyData& CurrencyModule::getUserCurrencyData(snowflake_t guildId, snowflake_t userId)
-{
-	for (UserCurrencyData& userCurrencyData : currencyData[guildId])
-	{
-		if (userCurrencyData.userId == userId)
-		{
-			return userCurrencyData;
-		}
-	}
-
-	// The user does not exist yet, make a new one
-	currencyData[guildId].append(UserCurrencyData { userId });
-	return currencyData[guildId].back();
 }
