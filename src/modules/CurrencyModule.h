@@ -28,8 +28,8 @@ public:
 	static void daily(Module*, const Discord::Message&, const Discord::Channel&);
 
 protected:
-	void onSave(QJsonDocument& document) const override;
-	void onLoad(const QJsonDocument& document) override;
+	void onSave(QJsonObject& mainObject) const override;
+	void onLoad(const QJsonObject& mainObject) override;
 	
 private:
 	UserCurrencyData& getUserCurrencyData(snowflake_t guildId, snowflake_t userId);

@@ -4,7 +4,7 @@
 #include <QRegularExpression>
 #include <Discord/Client.h>
 #include <QString>
-#include <QJsonDocument>
+#include <QJsonObject>
 
 // For use when registering commands
 #define OPTIONAL(x) "(" x ")?"
@@ -79,8 +79,8 @@ public:
 protected:
 	Module(const QString& name);
 
-	virtual void onSave(QJsonDocument& doc) const {}
-	virtual void onLoad(const QJsonDocument& doc) {}
+	virtual void onSave(QJsonObject& mainObject) const {}
+	virtual void onLoad(const QJsonObject& mainObject) {}
 	
 	void registerCommand(Commands id, const QString& signature, unsigned int requiredPermissions, Command::Callback callback);
 

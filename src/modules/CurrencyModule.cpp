@@ -88,10 +88,8 @@ void CurrencyModule::daily(Module* module, const Discord::Message& message, cons
 	SEND_MESSAGE(output);
 }
 
-void CurrencyModule::onSave(QJsonDocument& document) const
+void CurrencyModule::onSave(QJsonObject& mainObject) const
 {
-	QJsonObject object {};
-
 	for (snowflake_t guildId : currencyData.keys())
 	{
 		QJsonObject guildJson {};
@@ -104,19 +102,15 @@ void CurrencyModule::onSave(QJsonDocument& document) const
 			guildJson[QString::number(userCurrencyData.userId)] = userJson;
 		}
 
-		object[QString::number(guildId)] = guildJson;
+		mainObject[QString::number(guildId)] = guildJson;
 	}
-
-	document.setObject(object);
 }
 
-void CurrencyModule::onLoad(const QJsonDocument& document)
+void CurrencyModule::onLoad(const QJsonObject& mainObject)
 {
-	QJsonObject object = document.object();
-
-	for (const QString& guildIdString : object.keys())
+	for (const QString& guildIdString : mainObject.keys())
 	{
-		QJsonObject guildJson = object[guildIdString].toObject();
+		QJsonObject guildJson = mainObject[guildIdString].toObject();
 		snowflake_t guildId = guildIdString.toULongLong();
 
 		for (const QString& userIdString : guildJson.keys())

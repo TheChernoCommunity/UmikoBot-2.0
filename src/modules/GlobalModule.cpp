@@ -21,9 +21,8 @@ GlobalModule::~GlobalModule()
 {
 }
 
-void GlobalModule::onSave(QJsonDocument& document) const
+void GlobalModule::onSave(QJsonObject& mainObject) const
 {
-	QJsonObject object {};
 	QJsonObject commandsEnabledObject {};
 
 	for (Module* module : UmikoBot::get().getModules())
@@ -34,14 +33,12 @@ void GlobalModule::onSave(QJsonDocument& document) const
 		}
 	}
 
-	object["commandsEnabled"] = commandsEnabledObject;
-	document.setObject(object);
+	mainObject["commandsEnabled"] = commandsEnabledObject;
 }
 
-void GlobalModule::onLoad(const QJsonDocument& document)
+void GlobalModule::onLoad(const QJsonObject& mainObject)
 {
-	QJsonObject object = document.object();
-	QJsonObject commandsEnabledObject = object["commandsEnabled"].toObject();
+	QJsonObject commandsEnabledObject = mainObject["commandsEnabled"].toObject();
 
 	for (Module* module : UmikoBot::get().getModules())
 	{

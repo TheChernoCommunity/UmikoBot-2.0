@@ -2,6 +2,8 @@
 #include "core/Permissions.h"
 
 #include <QFile>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 Module::Module(const QString& name)
 	: name(name)
@@ -18,9 +20,10 @@ void Module::save() const
 	QFile file { path };
 	if (file.open(QFile::ReadWrite | QFile::Truncate))
 	{
-		QJsonDocument document;
-		onSave(document);
+		QJsonObject mainObject {};
+		onSave(mainObject);
 		
+		QJsonDocument document { mainObject };
 		file.write(document.toJson(QJsonDocument::Indented));
 		file.close();
 	}
@@ -36,7 +39,8 @@ void Module::load()
 	QFile file { path };
 	if (file.open(QFile::ReadOnly))
 	{
-		onLoad(QJsonDocument::fromJson(file.readAll()));
+		QJsonDocument document = QJsonDocument::fromJson(file.readAll());
+		onLoad(document.object());
 		file.close();
 	}
 	else

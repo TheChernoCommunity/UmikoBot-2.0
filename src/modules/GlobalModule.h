@@ -15,8 +15,8 @@ public:
 	static void disable(Module*, const Discord::Message&, const Discord::Channel&);
 
 protected:
-	void onSave(QJsonDocument& document) const override;
-	void onLoad(const QJsonDocument& document) override;
+	void onSave(QJsonObject& mainObject) const override;
+	void onLoad(const QJsonObject& mainObject) override;
 	
 private:
 	static void enableDisableImpl(Module*, const Discord::Message&, const Discord::Channel&, bool enable);
