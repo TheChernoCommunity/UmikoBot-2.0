@@ -16,6 +16,7 @@ struct GuildCurrencyConfig
 	QString currencyAbbreviation = "PC";
 	
 	int rewardForDaily = 10000;
+	int maxDebt = -10000;
 };
 
 class CurrencyModule : public Module
@@ -26,6 +27,7 @@ public:
 
 	void wallet(const Discord::Message&, const Discord::Channel&);
 	void daily(const Discord::Message&, const Discord::Channel&);
+	void donate(const Discord::Message&, const Discord::Channel&);
 
 protected:
 	void onSave(QJsonObject& mainObject) const override;

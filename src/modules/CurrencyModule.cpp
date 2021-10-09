@@ -25,6 +25,7 @@ CurrencyModule::CurrencyModule()
 	
 	registerCommand(Commands::Wallet, "wallet" OPTIONAL(USER), CommandPermission::User, CALLBACK(wallet));
 	registerCommand(Commands::Daily, "daily", CommandPermission::User, CALLBACK(daily));
+	registerCommand(Commands::Donate, "donate" UNSIGNED_DECIMAL USER, CommandPermission::User, CALLBACK(donate));
 }
 
 CurrencyModule::~CurrencyModule()
@@ -138,4 +139,50 @@ void CurrencyModule::daily(const Discord::Message& message, const Discord::Chann
 	QString output = QString("You now have **%1** more %2s in your wallet!").arg(QString::number(guildCurrencyConfig.rewardForDaily / 100.0f),
 																				 guildCurrencyConfig.currencyName);
 	SEND_MESSAGE(output);
+}
+
+void CurrencyModule::donate(const Discord::Message& message, const Discord::Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	
+	int amountInCents = (args[1].toDouble() * 100);
+	snowflake_t receiverId = UmikoBot::get().getUserFromArgument(channel.guildId(), args[2]);
+	snowflake_t senderId = message.author().id();
+
+	if (!receiverId)
+	{
+		SEND_MESSAGE("Could not find user!");
+		return;
+	}
+
+	if (senderId == receiverId)
+	{
+		SEND_MESSAGE("You cannot donate to yourself!");
+		return;
+	}
+
+	if (amountInCents == 0)
+	{
+		SEND_MESSAGE("Why waste my time with feeble donations?");
+		return;
+	}
+
+	if (getUserCurrencyData(channel.guildId(), senderId).balanceInCents - amountInCents < currencyConfigs[channel.guildId()].maxDebt)
+	{
+		SEND_MESSAGE("You're too poor to be donating!");
+		return;
+	}
+	
+	getUserCurrencyData(channel.guildId(), senderId).balanceInCents -= amountInCents;
+	getUserCurrencyData(channel.guildId(), receiverId).balanceInCents += amountInCents;
+
+	Embed embed {};
+	embed.setTitle("Donation by " + UmikoBot::get().getName(channel.guildId(), senderId));
+	embed.setDescription(QString("Transferred %1%2 from the account of %3 to %4's balance!")
+						 .arg(QString::number(amountInCents / 100.0f),
+							  currencyConfigs[channel.guildId()].currencyAbbreviation,
+							  UmikoBot::get().getName(channel.guildId(), senderId),
+							  UmikoBot::get().getName(channel.guildId(), receiverId)));
+	embed.setColor(qrand() % 0xffffff);
+	SEND_MESSAGE(embed);
 }

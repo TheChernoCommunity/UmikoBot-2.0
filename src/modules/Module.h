@@ -9,9 +9,15 @@
 // For use when registering commands
 #define OPTIONAL(x) "(" x ")?"
 #define SPACE "\\s+"
+
 #define IDENTIFIER SPACE "\\S+"
-#define TEXT SPACE ".+"
 #define USER SPACE "\\S+"
+
+#define TEXT SPACE ".+"
+#define INTEGER SPACE "[+-]?[0-9]+"
+#define UNSIGNED_INTEGER SPACE "[+]?[0-9]+"
+#define DECIMAL SPACE "[+-]?[0-9]+(\\.[0-9]+)?"
+#define UNSIGNED_DECIMAL SPACE "[+]?[0-9]+(\\.[0-9]+)?"
 
 // Intended to be used by modules
 #define CALLBACK(name) [this](const Message& message, const Channel& channel){ name(message, channel); }
@@ -47,6 +53,7 @@ CREATE_COMMANDS(
 	// Currency Module
 	Wallet,
 	Daily,
+	Donate,
 );
 
 class Module;
