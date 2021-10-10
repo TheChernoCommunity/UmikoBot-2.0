@@ -80,7 +80,7 @@ void CurrencyModule::onLoad(const QJsonObject& mainObject)
 
 void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 {
-	if (gambleData[channel.guildId()].currentUser == message.author().id())
+	if (gambleData[channel.guildId()].currentUserId == message.author().id())
 	{
 		unsigned int guess = message.content().toUInt(); // Returns 0 if failed
 
@@ -100,7 +100,7 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 		if (distribution(prng) == guess)
 		{
 			int amountWon = gambleData[channel.guildId()].amountBetInCents * 4;
-			getUserCurrencyData(channel.guildId(), gambleData[channel.guildId()].currentUser).balanceInCents += amountWon;
+			getUserCurrencyData(channel.guildId(), gambleData[channel.guildId()].currentUserId).balanceInCents += amountWon;
 			
 			embed.setColor(0x00ff00);
 			embed.setTitle("You Won!!!");
@@ -111,7 +111,7 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 		else
 		{
 			int amountLost = gambleData[channel.guildId()].amountBetInCents;
-			getUserCurrencyData(channel.guildId(), gambleData[channel.guildId()].currentUser).balanceInCents -= amountLost;
+			getUserCurrencyData(channel.guildId(), gambleData[channel.guildId()].currentUserId).balanceInCents -= amountLost;
 			
 			embed.setColor(0xff0000);
 			embed.setTitle("You Lost!");
@@ -120,7 +120,7 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 									  currencyConfigs[channel.guildId()].currencyAbbreviation));
 		}
 
-		gambleData[channel.guildId()].currentUser = 0;
+		gambleData[channel.guildId()].currentUserId = 0;
 		SEND_MESSAGE(embed);
 	}
 }
@@ -437,10 +437,10 @@ void CurrencyModule::gamble(const Message& message, const Channel& channel)
 	GuildGambleData& guildGambleData = gambleData[channel.guildId()];
 	GuildCurrencyConfig& guildCurrencyConfig = currencyConfigs[channel.guildId()];
 
-	if (guildGambleData.currentUser != 0)
+	if (guildGambleData.currentUserId != 0)
 	{
 		SEND_MESSAGE(QString("Sorry, but this feature is currently being used by **%1**. Please try again later!")
-					 .arg(UmikoBot::get().getName(channel.guildId(), guildGambleData.currentUser)));
+					 .arg(UmikoBot::get().getName(channel.guildId(), guildGambleData.currentUserId)));
 		return;
 	}
 
@@ -465,10 +465,10 @@ void CurrencyModule::gamble(const Message& message, const Channel& channel)
 	}
 
 	// TODO(fkp): Idle timeout
-	guildGambleData.currentUser = message.author().id();
+	guildGambleData.currentUserId = message.author().id();
 	
 	Embed embed;
-	embed.setTitle(QString("%1 is Gambling").arg(UmikoBot::get().getName(channel.guildId(), guildGambleData.currentUser)));
+	embed.setTitle(QString("%1 is Gambling").arg(UmikoBot::get().getName(channel.guildId(), guildGambleData.currentUserId)));
 	embed.setDescription(QString("All you need to do to win is to correctly guess a number between **1** and **5**!\n"
 								 "Your Bet: **%1 %2**\n"
 								 "Potential Winnings: **%3 %2**\n").arg(QString::number(guildGambleData.amountBetInCents / 100.0f),

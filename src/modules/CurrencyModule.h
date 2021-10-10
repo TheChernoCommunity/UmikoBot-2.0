@@ -27,7 +27,7 @@ struct GuildCurrencyConfig
 
 struct GuildGambleData
 {
-	snowflake_t currentUser = 0;
+	snowflake_t currentUserId = 0;
 	int amountBetInCents;
 };
 
