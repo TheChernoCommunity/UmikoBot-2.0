@@ -31,6 +31,7 @@ CurrencyModule::CurrencyModule()
 	registerCommand(Commands::Donate, "donate" UNSIGNED_DECIMAL USER, CommandPermission::User, CALLBACK(donate));
 	registerCommand(Commands::Steal, "steal" UNSIGNED_DECIMAL USER, CommandPermission::User, CALLBACK(steal));
 	registerCommand(Commands::Compensate, "compensate" DECIMAL OPTIONAL(USER), CommandPermission::Moderator, CALLBACK(compensate));
+	registerCommand(Commands::Richlist, "richlist" OPTIONAL(UNSIGNED_INTEGER) OPTIONAL(UNSIGNED_INTEGER), CommandPermission::User, CALLBACK(richlist));
 }
 
 CurrencyModule::~CurrencyModule()
@@ -307,4 +308,77 @@ void CurrencyModule::compensate(const Message& message, const Channel& channel)
 		SEND_MESSAGE(QString("%1 has been compensated with **%2 %3**!").arg(UmikoBot::get().getName(channel.guildId(), userId),
 																			QString::number(amountInCents / 100.0f), currencyAbbreviation));
 	}
+}
+
+void CurrencyModule::richlist(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	unsigned int min = 1;
+	unsigned int max = 30;
+
+	if (args.size() == 2)
+	{
+		max = args[1].toUInt();
+	}
+	else if (args.size() == 3)
+	{	
+		min = args[1].toUInt();
+		max = args[2].toUInt();
+	}
+
+	if (min == 0 || max == 0)
+	{
+		SEND_MESSAGE("Your arguments must be greater than 0!");
+		return;
+	}
+
+	QList<UserCurrencyData>& leaderboard = currencyData[channel.guildId()];
+	if (min > leaderboard.size())
+	{
+		SEND_MESSAGE("Not enough members to create the list!");
+		return;
+	}
+	if (max > leaderboard.size())
+	{
+		max = leaderboard.size();
+	}
+	if (min > max)
+	{
+		SEND_MESSAGE("The upper bound must be greater than the lower bound!");
+		return;
+	}
+
+	qSort(leaderboard.begin(), leaderboard.end(), [](const UserCurrencyData& first, const UserCurrencyData& second)
+	{
+		return first.balanceInCents > second.balanceInCents;
+	});
+
+	QString description = "";
+	unsigned int numberOfDigits = QString::number(max).size();
+	unsigned int rank = min;
+
+	for (unsigned int i = min; i <= max; i++)
+	{
+		QString name = UmikoBot::get().getName(channel.guildId(), leaderboard[i - 1].userId);
+		if (name.isEmpty())
+		{
+			if (max < leaderboard.size())
+			{
+				max += 1;
+			}
+
+			continue;
+		}
+
+		rank += 1;
+		description += QString("`%1`) **%2** - %3 %4\n").arg(QString::number(rank).rightJustified(numberOfDigits, ' '), name,
+															 QString::number(leaderboard[i - 1].balanceInCents / 100.0f),
+															 currencyConfigs[channel.guildId()].currencyAbbreviation);
+	}
+
+	Embed embed;
+	embed.setTitle(QString("Currency Leaderboard (From %1 To %2)").arg(QString::number(min), QString::number(max)));
+	embed.setDescription(description);
+	embed.setColor(qrand() % 0xffffff);
+	SEND_MESSAGE(embed);
 }

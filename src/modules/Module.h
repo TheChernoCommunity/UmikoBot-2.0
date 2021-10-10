@@ -56,6 +56,7 @@ CREATE_COMMANDS(
 	Donate,
 	Steal,
 	Compensate,
+	Richlist,
 );
 
 class Module;
