@@ -55,6 +55,7 @@ CREATE_COMMANDS(
 	Daily,
 	Donate,
 	Steal,
+	Compensate,
 );
 
 class Module;

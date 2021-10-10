@@ -30,6 +30,7 @@ CurrencyModule::CurrencyModule()
 	registerCommand(Commands::Daily, "daily", CommandPermission::User, CALLBACK(daily));
 	registerCommand(Commands::Donate, "donate" UNSIGNED_DECIMAL USER, CommandPermission::User, CALLBACK(donate));
 	registerCommand(Commands::Steal, "steal" UNSIGNED_DECIMAL USER, CommandPermission::User, CALLBACK(steal));
+	registerCommand(Commands::Compensate, "compensate" DECIMAL OPTIONAL(USER), CommandPermission::Moderator, CALLBACK(compensate));
 }
 
 CurrencyModule::~CurrencyModule()
@@ -275,5 +276,35 @@ void CurrencyModule::steal(const Message& message, const Channel& channel)
 								  UmikoBot::get().getName(channel.guildId(), victimId),
 								  QString::number((amountInCents * guildConfig.stealVictimBonus) / 100.0f)));
 		SEND_MESSAGE(embed);
+	}
+}
+
+void CurrencyModule::compensate(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	int amountInCents = args[1].toDouble() * 100;
+	const QString& currencyAbbreviation = currencyConfigs[channel.guildId()].currencyAbbreviation;
+
+	if (args.size() == 2)
+	{
+		for (UserCurrencyData& userCurrencyData : currencyData[channel.guildId()])
+		{
+			userCurrencyData.balanceInCents += amountInCents;
+		}
+
+		SEND_MESSAGE(QString("Everyone has been compensated with **%1 %2**!").arg(QString::number(amountInCents / 100.0f), currencyAbbreviation));
+	}
+	else
+	{
+		snowflake_t userId = UmikoBot::get().getUserFromArgument(channel.guildId(), args[2]);
+		if (!userId)
+		{
+			SEND_MESSAGE("Could not find user!");
+			return;
+		}
+
+		getUserCurrencyData(channel.guildId(), userId).balanceInCents += amountInCents;
+		SEND_MESSAGE(QString("%1 has been compensated with **%2 %3**!").arg(UmikoBot::get().getName(channel.guildId(), userId),
+																			QString::number(amountInCents / 100.0f), currencyAbbreviation));
 	}
 }

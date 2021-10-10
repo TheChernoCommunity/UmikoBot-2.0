@@ -33,6 +33,7 @@ public:
 	void daily(const Discord::Message&, const Discord::Channel&);
 	void donate(const Discord::Message&, const Discord::Channel&);
 	void steal(const Discord::Message&, const Discord::Channel&);
+	void compensate(const Discord::Message&, const Discord::Channel&);
 
 protected:
 	void onSave(QJsonObject& mainObject) const override;
