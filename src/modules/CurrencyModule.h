@@ -23,12 +23,14 @@ struct GuildCurrencyConfig
 	double stealVictimBonus = 0.25; // Portion of attempted steal amount
 
 	int gambleDefaultAmountBet = 2500;
+	int gambleTimeoutSeconds = 20;
 };
 
 struct GuildGambleData
 {
 	snowflake_t currentUserId = 0;
 	int amountBetInCents;
+	QTimer* idleTimeoutTimer = nullptr;
 };
 
 class CurrencyModule : public Module

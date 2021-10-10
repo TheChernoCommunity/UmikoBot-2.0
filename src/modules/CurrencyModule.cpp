@@ -121,6 +121,9 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 		}
 
 		gambleData[channel.guildId()].currentUserId = 0;
+		delete gambleData[channel.guildId()].idleTimeoutTimer;
+		gambleData[channel.guildId()].idleTimeoutTimer = nullptr;
+		
 		SEND_MESSAGE(embed);
 	}
 }
@@ -464,8 +467,27 @@ void CurrencyModule::gamble(const Message& message, const Channel& channel)
 		return;
 	}
 
-	// TODO(fkp): Idle timeout
 	guildGambleData.currentUserId = message.author().id();
+
+	// Timeout for a response that takes too long
+	if (guildGambleData.idleTimeoutTimer) delete guildGambleData.idleTimeoutTimer;
+	guildGambleData.idleTimeoutTimer = new QTimer();
+	guildGambleData.idleTimeoutTimer->setSingleShot(true);
+	guildGambleData.idleTimeoutTimer->start(guildCurrencyConfig.gambleTimeoutSeconds * 1000);
+	QObject::connect(guildGambleData.idleTimeoutTimer, &QTimer::timeout, [this, message, channel]()
+	{
+		GuildGambleData& guildGambleData = gambleData[channel.guildId()];
+		
+		if (guildGambleData.currentUserId != 0)
+		{
+			SEND_MESSAGE(QString("%1's gamble session has timed out!")
+						 .arg(UmikoBot::get().getName(channel.guildId(), guildGambleData.currentUserId)));
+			guildGambleData.currentUserId = 0;
+		}
+
+		delete guildGambleData.idleTimeoutTimer;
+		guildGambleData.idleTimeoutTimer = nullptr;
+	});
 	
 	Embed embed;
 	embed.setTitle(QString("%1 is Gambling").arg(UmikoBot::get().getName(channel.guildId(), guildGambleData.currentUserId)));
