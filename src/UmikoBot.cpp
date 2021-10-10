@@ -23,6 +23,7 @@ UmikoBot::UmikoBot(QObject* parent)
 {
 	printf("Starting bot...\n");
 	QDir().mkdir("configs");
+	qsrand(QTime::currentTime().msec());
 
 	saveTimer.setInterval(60 * 1000);
 	QObject::connect(&saveTimer, &QTimer::timeout, [this]()
