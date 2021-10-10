@@ -8,6 +8,7 @@ struct UserCurrencyData
 	int balanceInCents = 0;
 
 	bool hasClaimedDaily = false;
+	QTimer* jailTimer = nullptr;
 };
 
 struct GuildCurrencyConfig
@@ -21,6 +22,7 @@ struct GuildCurrencyConfig
 	double stealSuccessBaseChance = 0.4;
 	double stealFineAmount = 0.5; // Portion of attempted steal amount
 	double stealVictimBonus = 0.25; // Portion of attempted steal amount
+	int stealJailTimeMinutes = 60;
 
 	int gambleDefaultAmountBet = 2500;
 	int gambleTimeoutSeconds = 20;
