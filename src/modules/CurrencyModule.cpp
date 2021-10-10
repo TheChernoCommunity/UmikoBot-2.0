@@ -32,6 +32,7 @@ CurrencyModule::CurrencyModule()
 	registerCommand(Commands::Steal, "steal" UNSIGNED_DECIMAL USER, CommandPermission::User, CALLBACK(steal));
 	registerCommand(Commands::Compensate, "compensate" DECIMAL OPTIONAL(USER), CommandPermission::Moderator, CALLBACK(compensate));
 	registerCommand(Commands::Richlist, "richlist" OPTIONAL(UNSIGNED_INTEGER) OPTIONAL(UNSIGNED_INTEGER), CommandPermission::User, CALLBACK(richlist));
+	registerCommand(Commands::Gamble, "gamble" OPTIONAL(UNSIGNED_DECIMAL), CommandPermission::User, CALLBACK(gamble));
 }
 
 CurrencyModule::~CurrencyModule()
@@ -379,6 +380,53 @@ void CurrencyModule::richlist(const Message& message, const Channel& channel)
 	Embed embed;
 	embed.setTitle(QString("Currency Leaderboard (From %1 To %2)").arg(QString::number(min), QString::number(max)));
 	embed.setDescription(description);
+	embed.setColor(qrand() % 0xffffff);
+	SEND_MESSAGE(embed);
+}
+
+void CurrencyModule::gamble(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	GuildGambleData& guildGambleData = gambleData[channel.guildId()];
+	GuildCurrencyConfig& guildCurrencyConfig = currencyConfigs[channel.guildId()];
+
+	if (guildGambleData.currentUser != 0)
+	{
+		SEND_MESSAGE(QString("Sorry, but this feature is currently being used by **%1**. Please try again later!")
+					 .arg(UmikoBot::get().getName(channel.guildId(), guildGambleData.currentUser)));
+		return;
+	}
+
+	if (args.size() == 1)
+	{
+		guildGambleData.amountBetInCents = guildCurrencyConfig.gambleDefaultAmountBet;
+	}
+	else
+	{
+		guildGambleData.amountBetInCents = args[1].toDouble() * 100;
+		if (guildGambleData.amountBetInCents == 0)
+		{
+			SEND_MESSAGE("You must gamble *something*!");
+			return;
+		}
+	}
+
+	if (getUserCurrencyData(channel.guildId(), message.author().id()).balanceInCents - guildGambleData.amountBetInCents < guildCurrencyConfig.maxDebt)
+	{
+		SEND_MESSAGE("You're too poor to be gambling that much!");
+		return;
+	}
+
+	// TODO(fkp): Idle timeout
+	guildGambleData.currentUser = message.author().id();
+	
+	Embed embed;
+	embed.setTitle(QString("%1 is Gambling").arg(UmikoBot::get().getName(channel.guildId(), guildGambleData.currentUser)));
+	embed.setDescription(QString("All you need to do to win is to correctly guess a number between **1** and **5**!\n"
+								 "Your Bet: **%1 %2**\n"
+								 "Potential Winnings: **%3 %2**\n").arg(QString::number(guildGambleData.amountBetInCents / 100.0f),
+																		guildCurrencyConfig.currencyAbbreviation,
+																		QString::number(guildGambleData.amountBetInCents * 4 / 100.0f)));
 	embed.setColor(qrand() % 0xffffff);
 	SEND_MESSAGE(embed);
 }

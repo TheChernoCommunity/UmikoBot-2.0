@@ -21,6 +21,14 @@ struct GuildCurrencyConfig
 	double stealSuccessBaseChance = 0.4;
 	double stealFineAmount = 0.5; // Portion of attempted steal amount
 	double stealVictimBonus = 0.25; // Portion of attempted steal amount
+
+	int gambleDefaultAmountBet = 2500;
+};
+
+struct GuildGambleData
+{
+	snowflake_t currentUser = 0;
+	int amountBetInCents;
 };
 
 class CurrencyModule : public Module
@@ -35,6 +43,7 @@ public:
 	void steal(const Discord::Message&, const Discord::Channel&);
 	void compensate(const Discord::Message&, const Discord::Channel&);
 	void richlist(const Discord::Message&, const Discord::Channel&);
+	void gamble(const Discord::Message&, const Discord::Channel&);
 
 protected:
 	void onSave(QJsonObject& mainObject) const override;
@@ -46,6 +55,7 @@ private:
 private:
 	QMap<snowflake_t /* guildId */, GuildCurrencyConfig> currencyConfigs;
 	QMap<snowflake_t /* guildId */, QList<UserCurrencyData>> currencyData;
+	QMap<snowflake_t /* guildId */, GuildGambleData> gambleData;
 
 	QTimer dayTimer;
 };
