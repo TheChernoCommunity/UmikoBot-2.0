@@ -48,6 +48,8 @@ public:
 protected:
 	void onSave(QJsonObject& mainObject) const override;
 	void onLoad(const QJsonObject& mainObject) override;
+
+	void onMessage(const Discord::Message&, const Discord::Channel&) override;
 	
 private:
 	UserCurrencyData& getUserCurrencyData(snowflake_t guildId, snowflake_t userId);

@@ -78,6 +78,53 @@ void CurrencyModule::onLoad(const QJsonObject& mainObject)
 	}
 }
 
+void CurrencyModule::onMessage(const Message& message, const Channel& channel)
+{
+	if (gambleData[channel.guildId()].currentUser == message.author().id())
+	{
+		unsigned int guess = message.content().toUInt(); // Returns 0 if failed
+
+		if (guess == 0 || guess > 5)
+		{
+			SEND_MESSAGE("Your guess must be a number between **1** and **5**!");
+			return;
+		}
+
+		double successChance = 0.2;
+		std::random_device randomDevice;
+		std::mt19937 prng { randomDevice() };
+		std::uniform_int_distribution<> distribution { 1, 5 };
+		
+		Embed embed;
+
+		if (distribution(prng) == guess)
+		{
+			int amountWon = gambleData[channel.guildId()].amountBetInCents * 4;
+			getUserCurrencyData(channel.guildId(), gambleData[channel.guildId()].currentUser).balanceInCents += amountWon;
+			
+			embed.setColor(0x00ff00);
+			embed.setTitle("You Won!!!");
+			embed.setDescription(QString("Congrats! **%1 %2** has been placed in your bank account!")
+								 .arg(QString::number(amountWon / 100.0f),
+									  currencyConfigs[channel.guildId()].currencyAbbreviation));
+		}
+		else
+		{
+			int amountLost = gambleData[channel.guildId()].amountBetInCents;
+			getUserCurrencyData(channel.guildId(), gambleData[channel.guildId()].currentUser).balanceInCents -= amountLost;
+			
+			embed.setColor(0xff0000);
+			embed.setTitle("You Lost!");
+			embed.setDescription(QString("Better luck next time! **%1 %2** has been taken from your account.")
+								 .arg(QString::number(amountLost / 100.0f),
+									  currencyConfigs[channel.guildId()].currencyAbbreviation));
+		}
+
+		gambleData[channel.guildId()].currentUser = 0;
+		SEND_MESSAGE(embed);
+	}
+}
+
 UserCurrencyData& CurrencyModule::getUserCurrencyData(snowflake_t guildId, snowflake_t userId)
 {
 	for (UserCurrencyData& userCurrencyData : currencyData[guildId])

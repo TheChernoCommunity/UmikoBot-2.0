@@ -80,7 +80,7 @@ class Module
 public:
 	virtual ~Module();
 
-	virtual void onMessage(const Discord::Message& message) {};
+	virtual void onMessage(const Discord::Message& message, const Discord::Channel& channel) {};
 
 	void save() const;
 	void load();

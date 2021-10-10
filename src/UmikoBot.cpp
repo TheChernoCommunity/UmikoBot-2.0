@@ -475,7 +475,7 @@ void UmikoBot::umikoOnMessageCreate(const Message& message)
 		{
 			for (Module* module : modules)
 			{
-				module->onMessage(message);
+				module->onMessage(message, channel);
 			}
 		}
 	});
