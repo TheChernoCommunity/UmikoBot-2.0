@@ -54,6 +54,7 @@ CREATE_COMMANDS(
 	Wallet,
 	Daily,
 	Donate,
+	Steal,
 );
 
 class Module;

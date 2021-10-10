@@ -2,6 +2,9 @@
 #include "UmikoBot.h"
 #include "core/Permissions.h"
 
+#include <random>
+#include <QtMath>
+
 using namespace Discord;
 
 CurrencyModule::CurrencyModule()
@@ -26,6 +29,7 @@ CurrencyModule::CurrencyModule()
 	registerCommand(Commands::Wallet, "wallet" OPTIONAL(USER), CommandPermission::User, CALLBACK(wallet));
 	registerCommand(Commands::Daily, "daily", CommandPermission::User, CALLBACK(daily));
 	registerCommand(Commands::Donate, "donate" UNSIGNED_DECIMAL USER, CommandPermission::User, CALLBACK(donate));
+	registerCommand(Commands::Steal, "steal" UNSIGNED_DECIMAL USER, CommandPermission::User, CALLBACK(steal));
 }
 
 CurrencyModule::~CurrencyModule()
@@ -86,7 +90,7 @@ UserCurrencyData& CurrencyModule::getUserCurrencyData(snowflake_t guildId, snowf
 	return currencyData[guildId].back();
 }
 
-void CurrencyModule::wallet(const Discord::Message& message, const Discord::Channel& channel)
+void CurrencyModule::wallet(const Message& message, const Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	snowflake_t userId = 0;
@@ -121,7 +125,7 @@ void CurrencyModule::wallet(const Discord::Message& message, const Discord::Chan
 	});
 }
 
-void CurrencyModule::daily(const Discord::Message& message, const Discord::Channel& channel)
+void CurrencyModule::daily(const Message& message, const Channel& channel)
 {
 	UserCurrencyData& userCurrencyData = getUserCurrencyData(channel.guildId(), message.author().id());
 	const GuildCurrencyConfig& guildCurrencyConfig = currencyConfigs[channel.guildId()];
@@ -141,11 +145,11 @@ void CurrencyModule::daily(const Discord::Message& message, const Discord::Chann
 	SEND_MESSAGE(output);
 }
 
-void CurrencyModule::donate(const Discord::Message& message, const Discord::Channel& channel)
+void CurrencyModule::donate(const Message& message, const Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	
-	int amountInCents = (args[1].toDouble() * 100);
+	int amountInCents = args[1].toDouble() * 100;
 	snowflake_t receiverId = UmikoBot::get().getUserFromArgument(channel.guildId(), args[2]);
 	snowflake_t senderId = message.author().id();
 
@@ -178,11 +182,98 @@ void CurrencyModule::donate(const Discord::Message& message, const Discord::Chan
 
 	Embed embed {};
 	embed.setTitle("Donation by " + UmikoBot::get().getName(channel.guildId(), senderId));
-	embed.setDescription(QString("Transferred %1%2 from the account of %3 to %4's balance!")
+	embed.setDescription(QString("Transferred **%1 %2** from the account of %3 to %4's balance!")
 						 .arg(QString::number(amountInCents / 100.0f),
 							  currencyConfigs[channel.guildId()].currencyAbbreviation,
 							  UmikoBot::get().getName(channel.guildId(), senderId),
 							  UmikoBot::get().getName(channel.guildId(), receiverId)));
 	embed.setColor(qrand() % 0xffffff);
 	SEND_MESSAGE(embed);
+}
+
+void CurrencyModule::steal(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+
+	int amountInCents = args[1].toDouble() * 100;
+	snowflake_t victimId = UmikoBot::get().getUserFromArgument(channel.guildId(), args[2]);
+	snowflake_t thiefId = message.author().id();
+
+	if (!victimId)
+	{
+		SEND_MESSAGE("Could not find user!");
+		return;
+	}
+
+	if (thiefId == victimId)
+	{
+		SEND_MESSAGE("You cannot steal from yourself!");
+		return;
+	}
+
+	if (amountInCents == 0)
+	{
+		SEND_MESSAGE(QString("What are you even trying to steal? %1's dignity?").arg(UmikoBot::get().getName(channel.guildId(), victimId)));
+		return;
+	}
+
+	// TODO(fkp): Check if victim is a bot
+
+	// Just for ease of use
+	UserCurrencyData& victimData = getUserCurrencyData(channel.guildId(), victimId);
+	UserCurrencyData& thiefData = getUserCurrencyData(channel.guildId(), thiefId);
+	const GuildCurrencyConfig& guildConfig = currencyConfigs[channel.guildId()];
+	
+	if (victimData.balanceInCents - amountInCents < guildConfig.maxDebt)
+	{
+		SEND_MESSAGE("I can't let your victim go into serious debt!");
+		return;
+	}
+
+	if (thiefData.balanceInCents - (amountInCents * guildConfig.stealFineAmount) < guildConfig.maxDebt)
+	{
+		SEND_MESSAGE("I can't let you go into serious debt!");
+		return;
+	}
+
+	// https://www.desmos.com/calculator/lp80egcojn
+	// This success chance is in the range of 0 to 1
+	double successChance = guildConfig.stealSuccessBaseChance * qExp(-0.0001 * qPow(amountInCents / 100.0f, 1.5));
+	std::random_device randomDevice;
+	std::mt19937 prng { randomDevice() };
+	std::uniform_real_distribution<> distribution { 0, 1 };
+
+	if (distribution(prng) <= successChance)
+	{
+		// Steal success
+		victimData.balanceInCents -= amountInCents;
+		thiefData.balanceInCents += amountInCents;
+
+		Embed embed;
+		embed.setTitle(":man_detective: Steal Success! :man_detective:");
+		embed.setColor(0x00ff00);
+		embed.setDescription(QString("%1 has discreetly stolen **%2 %3** from right under %4's nose!")
+							 .arg(UmikoBot::get().getName(channel.guildId(), thiefId),
+								  QString::number(amountInCents / 100.0f), guildConfig.currencyAbbreviation,
+								  UmikoBot::get().getName(channel.guildId(), victimId)));
+		SEND_MESSAGE(embed);
+	}
+	else
+	{
+		// Steal failure
+		victimData.balanceInCents += amountInCents * guildConfig.stealVictimBonus;
+		thiefData.balanceInCents -= amountInCents * guildConfig.stealFineAmount;
+
+		Embed embed;
+		embed.setTitle(":rotating_light: You Got Caught! :rotating_light:");
+		embed.setColor(0xff0000);
+		embed.setDescription(QString("%1 has been fined **%2 %3** and placed in jail.\n" // TODO(fkp): Jail
+									 "%4 has been granted **%5 %3** as compensation.")
+							 .arg(UmikoBot::get().getName(channel.guildId(), thiefId),
+								  QString::number((amountInCents * guildConfig.stealFineAmount) / 100.0f),
+								  guildConfig.currencyAbbreviation,
+								  UmikoBot::get().getName(channel.guildId(), victimId),
+								  QString::number((amountInCents * guildConfig.stealVictimBonus) / 100.0f)));
+		SEND_MESSAGE(embed);
+	}
 }
