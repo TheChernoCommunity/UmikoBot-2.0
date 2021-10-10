@@ -344,7 +344,7 @@ void CurrencyModule::steal(const Message& message, const Channel& channel)
 		Embed embed;
 		embed.setTitle(":rotating_light: You Got Caught! :rotating_light:");
 		embed.setColor(0xff0000);
-		embed.setDescription(QString("%1 has been fined **%2 %3** and placed in jail.\n" // TODO(fkp): Jail
+		embed.setDescription(QString("%1 has been fined **%2 %3** and placed in jail.\n"
 									 "%4 has been granted **%5 %3** as compensation.")
 							 .arg(UmikoBot::get().getName(channel.guildId(), thiefId),
 								  QString::number((amountInCents * guildCurrencyConfig.stealFineAmount) / 100.0f),

@@ -1,0 +1,76 @@
+{
+	"Help": {
+		"brief": "Returns the usage of a command.",
+		"usage": "help [command]",
+		"additional": "",
+		"admin": false
+	},
+	"Echo": {
+		"brief": "The bot says what you want it to.",
+		"usage": "echo <text>",
+		"additional": "",
+		"admin": false
+	},
+	"SetPrefix": {
+		"brief": "Sets the prefix of the bot.",
+		"usage": "setprefix <newprefix>",
+		"additional": "",
+		"admin": true
+	},
+	"Enable": {
+		"brief": "Enables a command or module for use.",
+		"usage": "enable <module|command> <name>",
+		"additional": "",
+		"admin": true
+	},
+	"Disable": {
+		"brief": "Disables a command or module from being used.",
+		"usage": "disable <module|command> <name>",
+		"additional": "",
+		"admin": true
+	},
+
+
+	"Wallet": {
+		"brief": "Shows info relating to the user's currency data.",
+		"usage": "wallet [@mention|name|id]",
+		"additional": "If no argument is provided, it shows the wallet of the user who queried.",
+		"admin": false
+	},
+	"Daily": {
+		"brief": "Collects the user's extra credits for the day.",
+		"usage": "daily",
+		"additional": "The daily reward resets every 24 hours. Make sure to collect it every time!",
+		"admin": false
+	},
+	"Donate": {
+		"brief": "Gives the specified user currency from your wallet.",
+		"usage": "donate <amount> <@mention|name|id>",
+		"additional": "",
+		"admin": false
+	},
+	"Steal": {
+		"brief": "Chance to steal an amount from a user, otherwise it will fine you.",
+		"usage": "steal <amount> <@mention|name|id>",
+		"additional": "The more you try to steal, the less likely it will be to succeed.",
+		"admin": false
+	},
+	"Compensate": {
+		"brief": "Adds some amount to everyone's (or a specified user's) balance.",
+		"usage": "compensate <amount> [@mention|name|id]",
+		"additional": "Negative values will take money away.",
+		"admin": true
+	},
+	"Richlist": {
+		"brief": "Displays a list of the richest people on the server.",
+		"usage": "richlist [min] [max]",
+		"additional": "Providing a single argument will treat it as the max.",
+		"admin": false
+	},
+	"Gamble": {
+		"brief": "Play a game of chance with this command.",
+		"usage": "gamble [bet]",
+		"additional": "If no bet is provided by the user, one will be provided by default.",
+		"admin": false
+	}
+}
