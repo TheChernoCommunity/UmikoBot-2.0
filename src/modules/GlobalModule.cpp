@@ -57,11 +57,11 @@ void GlobalModule::help(const Message& message, const Channel& channel)
 		QStringList args = message.content().split(QRegularExpression(SPACE));
 		QString prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
 	
-		// TODO(fkp): Separate admin commands
 		if (args.size() == 1)
 		{
 			for (Module* module : UmikoBot::get().getModules())
 			{
+				QString adminCommandsOutput = "";
 				output += "**" + module->getName() + "**\n";
 			
 				for (const Command& command : module->getCommands())
@@ -77,10 +77,16 @@ void GlobalModule::help(const Message& message, const Channel& channel)
 					{
 						description = "*No description found*";
 					}
-				
-					output += QString("`%1%2` - %3\n").arg(prefix, command.name, description);
+
+					// Admin commands are displayed at the end
+					QString& outputToUse = adminRequired ? adminCommandsOutput : output;
+					outputToUse += QString("`%1%2` - %3\n").arg(prefix, command.name, description);
 				}
 
+				if (adminCommandsOutput != "")
+				{
+					output += "\n" + adminCommandsOutput;
+				}
 				output += "\n";
 			}
 		}
