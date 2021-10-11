@@ -14,6 +14,8 @@ public:
 	void enable(const Discord::Message&, const Discord::Channel&);
 	void disable(const Discord::Message&, const Discord::Channel&);
 
+	QString commandHelp(const QString& request, const QString& prefix);
+
 protected:
 	void onSave(QJsonObject& mainObject) const override;
 	void onLoad(const QJsonObject& mainObject) override;

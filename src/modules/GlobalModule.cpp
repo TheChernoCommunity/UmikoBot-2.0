@@ -49,79 +49,67 @@ void GlobalModule::onLoad(const QJsonObject& mainObject)
 	}
 }
 
-void GlobalModule::help(const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::help(const Message& message, const Channel& channel)
 {
-	QStringList args = message.content().split(QRegularExpression(SPACE));
-	QString prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
-	QString output = "";
+	::Permissions::contains(channel.guildId(), message.author().id(), CommandPermission::Moderator, [this, message, channel](bool result)
+	{
+		QString output = "";
+		QStringList args = message.content().split(QRegularExpression(SPACE));
+		QString prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
 	
-	// TODO(fkp): Separate admin commands
-	if (args.size() == 1)
-	{
-		for (Module* module : UmikoBot::get().getModules())
+		// TODO(fkp): Separate admin commands
+		if (args.size() == 1)
 		{
-			output += "**" + module->getName() + "**\n";
+			for (Module* module : UmikoBot::get().getModules())
+			{
+				output += "**" + module->getName() + "**\n";
 			
-			for (const Command& command : module->getCommands())
-			{
-				QString description = CommandInfo::briefDescription[(unsigned int) command.id];
-				if (description == "")
+				for (const Command& command : module->getCommands())
 				{
-					description = "*No description found*";
-				}
-				
-				output += QString("`%1%2` - %3\n").arg(prefix, command.name, description);
-			}
-
-			output += "\n";
-		}
-	}
-	else
-	{
-		const QString& request = args[1];
-		for (Module* module : UmikoBot::get().getModules())
-		{
-			for (const Command& command : module->getCommands())
-			{
-				if (command.name == request)
-				{
-					const QString& description = CommandInfo::briefDescription[(unsigned int) command.id];
-					const QString& usage = CommandInfo::usage[(unsigned int) command.id];
-					const QString& additionalInfo = CommandInfo::additionalInfo[(unsigned int) command.id];
 					bool adminRequired = CommandInfo::adminRequired[(unsigned int) command.id];
-
-					output += "**Command name:** `" + command.name + "`\n\n";
-					output += description + "\n" + additionalInfo + "\n";
-					if (additionalInfo != "")
+					if (adminRequired && !result)
 					{
-						output += "\n";
+						continue;
 					}
-					output += "**Usage:**`" + prefix + usage + "`";
+				
+					QString description = CommandInfo::briefDescription[(unsigned int) command.id];
+					if (description == "")
+					{
+						description = "*No description found*";
+					}
+				
+					output += QString("`%1%2` - %3\n").arg(prefix, command.name, description);
 				}
+
+				output += "\n";
+			}
+		}
+		else
+		{
+			output = commandHelp(args[1], prefix);
+
+			if (output == "")
+			{
+				SEND_MESSAGE("I could not find that command!");
+				return;
 			}
 		}
 
-		if (output == "")
-		{
-			SEND_MESSAGE("I could not find that command!");
-			return;
-		}
-	}
-
-	Embed embed {};
-	embed.setColor(qrand() % 0xffffff);
-	embed.setTitle("Help");
-	embed.setDescription(output);
-	SEND_MESSAGE(embed);
+		Embed embed {};
+		embed.setColor(qrand() % 0xffffff);
+		embed.setTitle("Help");
+		embed.setDescription(output);
+		SEND_MESSAGE(embed);
+	});
 }
 
-void GlobalModule::echo(const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::echo(const Message& message, const Channel& channel)
 {
 	QString restOfMessage = message.content().mid(message.content().indexOf(QRegularExpression("\\s")));
 	SEND_MESSAGE(restOfMessage);
 }
 
-void GlobalModule::setPrefix(const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::setPrefix(const Message& message, const Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QString& prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
@@ -137,14 +125,44 @@ void GlobalModule::setPrefix(const Discord::Message& message, const Discord::Cha
 	}
 }
 
-void GlobalModule::enable(const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::enable(const Message& message, const Channel& channel)
 {
 	enableDisableImpl(message, channel, true);
 }
 
-void GlobalModule::disable(const Discord::Message& message, const Discord::Channel& channel)
+void GlobalModule::disable(const Message& message, const Channel& channel)
 {
 	enableDisableImpl(message, channel, false);
+}
+
+QString GlobalModule::commandHelp(const QString& request, const QString& prefix)
+{
+	for (Module* module : UmikoBot::get().getModules())
+	{
+		for (const Command& command : module->getCommands())
+		{
+			if (command.name == request)
+			{
+				const QString& description = CommandInfo::briefDescription[(unsigned int) command.id];
+				const QString& usage = CommandInfo::usage[(unsigned int) command.id];
+				const QString& additionalInfo = CommandInfo::additionalInfo[(unsigned int) command.id];
+				bool adminRequired = CommandInfo::adminRequired[(unsigned int) command.id];
+
+				QString output = "";
+				output += "**Command name:** `" + command.name + "`\n\n";
+				output += description + "\n" + additionalInfo + "\n";
+				if (additionalInfo != "")
+				{
+					output += "\n";
+				}
+				output += "**Usage:**`" + prefix + usage + "`";
+
+				return output;
+			}
+		}
+	}
+
+	return "";
 }
 
 bool canBeDisabled(const Command& command)
@@ -152,7 +170,7 @@ bool canBeDisabled(const Command& command)
 	return command.name != "help" && command.name != "enable" && command.name != "disable";
 }
 
-void GlobalModule::enableDisableImpl(const Discord::Message& message, const Discord::Channel& channel, bool enable)
+void GlobalModule::enableDisableImpl(const Message& message, const Channel& channel, bool enable)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QString output = "";
