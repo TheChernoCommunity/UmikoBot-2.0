@@ -438,7 +438,7 @@ void UmikoBot::umikoOnMessageCreate(const Message& message)
 						isCommand = true;
 						
 						::Permissions::contains(channel.guildId(), message.author().id(), command.requiredPermissions,
-												[this, message, channel, command, fullCommand, module](bool result)
+												[this, message, channel, command, fullCommand, module, prefix](bool result)
 						{
 							if (!result)
 							{
@@ -461,7 +461,22 @@ void UmikoBot::umikoOnMessageCreate(const Message& message)
 							}
 							else
 							{
-								SEND_MESSAGE("Wrong usage of command!");
+								// Looks for global module and outputs help text
+								for (Module* globalModule : modules)
+								{
+									if (globalModule->getName() == "Global")
+									{
+										QString helpText = ((GlobalModule*) globalModule)->commandHelp(command.name, prefix);
+										
+										Embed embed {};
+										embed.setColor(qrand() % 0xffffff);
+										embed.setTitle("Incorrect Usage of Command");
+										embed.setDescription(helpText);
+										SEND_MESSAGE(embed);
+
+										break;
+									}
+								}
 							}
 						});
 
