@@ -34,6 +34,10 @@ CurrencyModule::CurrencyModule()
 	registerCommand(Commands::Richlist, "richlist" OPTIONAL(UNSIGNED_INTEGER) OPTIONAL(UNSIGNED_INTEGER), CommandPermission::User, CALLBACK(richlist));
 	registerCommand(Commands::Gamble, "gamble" OPTIONAL(UNSIGNED_DECIMAL), CommandPermission::User, CALLBACK(gamble));
 	registerCommand(Commands::Bribe, "bribe" UNSIGNED_DECIMAL, CommandPermission::User, CALLBACK(bribe));
+
+	registerCommand(Commands::SetCurrencyName, "set-currency-name" IDENTIFIER IDENTIFIER, CommandPermission::Moderator, CALLBACK(setCurrencyName));
+	registerCommand(Commands::SetDailyReward, "set-daily-reward" UNSIGNED_DECIMAL, CommandPermission::Moderator, CALLBACK(setDailyReward));
+	registerCommand(Commands::SetMaxDebt, "set-max-debt" DECIMAL, CommandPermission::Moderator, CALLBACK(setMaxDebt));
 }
 
 CurrencyModule::~CurrencyModule()
@@ -663,4 +667,32 @@ void CurrencyModule::bribe(const Message& message, const Channel& channel)
 		SEND_MESSAGE(QString(":police_officer: Your bribes don't affect my loyalty! :police_officer:\n"
 							 "Enjoy rotting in jail for another **%1 minutes**!\n").arg(guildConfig.bribeExtraJailTimeMinutes));
 	}
+}
+
+void CurrencyModule::setCurrencyName(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	currencyConfigs[channel.guildId()].currencyName = args[1];
+	currencyConfigs[channel.guildId()].currencyAbbreviation = args[2];
+
+	SEND_MESSAGE(QString("Set currency name to **%1** and abbreviation to **%2**").arg(currencyConfigs[channel.guildId()].currencyName,
+																					   currencyConfigs[channel.guildId()].currencyAbbreviation));
+}
+
+void CurrencyModule::setDailyReward(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	currencyConfigs[channel.guildId()].rewardForDaily = args[1].toDouble() * 100;
+
+	SEND_MESSAGE(QString("Set reward for daily to **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].rewardForDaily / 100.0f),
+																  currencyConfigs[channel.guildId()].currencyAbbreviation));
+}
+
+void CurrencyModule::setMaxDebt(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	currencyConfigs[channel.guildId()].maxDebt = args[1].toDouble() * 100;
+
+	SEND_MESSAGE(QString("Set maximum debt to **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].maxDebt / 100.0f),
+															  currencyConfigs[channel.guildId()].currencyAbbreviation));
 }

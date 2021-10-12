@@ -58,6 +58,10 @@ public:
 	void gamble(const Discord::Message&, const Discord::Channel&);
 	void bribe(const Discord::Message&, const Discord::Channel&);
 
+	void setCurrencyName(const Discord::Message&, const Discord::Channel&);
+	void setDailyReward(const Discord::Message&, const Discord::Channel&);
+	void setMaxDebt(const Discord::Message&, const Discord::Channel&);
+	
 protected:
 	void onSave(QJsonObject& mainObject) const override;
 	void onLoad(const QJsonObject& mainObject) override;

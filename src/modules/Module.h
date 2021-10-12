@@ -59,6 +59,10 @@ CREATE_COMMANDS(
 	Richlist,
 	Gamble,
 	Bribe,
+
+	SetCurrencyName,
+	SetDailyReward,
+	SetMaxDebt,
 );
 
 class Module;
