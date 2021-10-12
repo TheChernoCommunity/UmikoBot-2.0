@@ -63,6 +63,15 @@ CREATE_COMMANDS(
 	SetCurrencyName,
 	SetDailyReward,
 	SetMaxDebt,
+	SetStealSuccessChance,
+	SetStealFine,
+	SetStealVictimBonus,
+	SetStealJailTime,
+	SetBribeSuccessChance,
+	SetBribeAmount,
+	SetBribeExtraJailTime,
+	SetGambleDefaultBet,
+	SetGambleTimeout,
 );
 
 class Module;

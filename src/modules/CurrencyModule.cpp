@@ -38,6 +38,15 @@ CurrencyModule::CurrencyModule()
 	registerCommand(Commands::SetCurrencyName, "set-currency-name" OPTIONAL(IDENTIFIER IDENTIFIER), CommandPermission::Moderator, CALLBACK(setCurrencyName));
 	registerCommand(Commands::SetDailyReward, "set-daily-reward" OPTIONAL(UNSIGNED_DECIMAL), CommandPermission::Moderator, CALLBACK(setDailyReward));
 	registerCommand(Commands::SetMaxDebt, "set-max-debt" OPTIONAL(DECIMAL), CommandPermission::Moderator, CALLBACK(setMaxDebt));
+	registerCommand(Commands::SetStealSuccessChance, "set-steal-success-chance" OPTIONAL(UNSIGNED_DECIMAL), CommandPermission::Moderator, CALLBACK(setStealSuccessChance));
+	registerCommand(Commands::SetStealFine, "set-steal-fine" OPTIONAL(DECIMAL), CommandPermission::Moderator, CALLBACK(setStealFine));
+	registerCommand(Commands::SetStealVictimBonus, "set-steal-victim-bonus" OPTIONAL(DECIMAL), CommandPermission::Moderator, CALLBACK(setStealVictimBonus));
+	registerCommand(Commands::SetStealJailTime, "set-steal-jail-time" OPTIONAL(UNSIGNED_INTEGER), CommandPermission::Moderator, CALLBACK(setStealJailTime));
+	registerCommand(Commands::SetBribeSuccessChance, "set-bribe-success-chance" OPTIONAL(UNSIGNED_DECIMAL UNSIGNED_DECIMAL), CommandPermission::Moderator, CALLBACK(setBribeSuccessChance));
+	registerCommand(Commands::SetBribeAmount, "set-bribe-amount" OPTIONAL(DECIMAL DECIMAL), CommandPermission::Moderator, CALLBACK(setBribeAmount));
+	registerCommand(Commands::SetBribeExtraJailTime, "set-bribe-extra-jail-time" OPTIONAL(UNSIGNED_INTEGER), CommandPermission::Moderator, CALLBACK(setBribeExtraJailTime));
+	registerCommand(Commands::SetGambleDefaultBet, "set-gamble-default-bet" OPTIONAL(UNSIGNED_DECIMAL), CommandPermission::Moderator, CALLBACK(setGambleDefaultBet));
+	registerCommand(Commands::SetGambleTimeout, "set-gamble-timeout" OPTIONAL(UNSIGNED_INTEGER), CommandPermission::Moderator, CALLBACK(setGambleTimeout));
 }
 
 CurrencyModule::~CurrencyModule()
@@ -716,5 +725,173 @@ void CurrencyModule::setMaxDebt(const Message& message, const Channel& channel)
 		currencyConfigs[channel.guildId()].maxDebt = args[1].toDouble() * 100;
 		SEND_MESSAGE(QString("Set maximum debt to **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].maxDebt / 100.0f),
 																  currencyConfigs[channel.guildId()].currencyAbbreviation));
+	}
+}
+
+void CurrencyModule::setStealSuccessChance(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() == 1)
+	{
+		SEND_MESSAGE(QString("Cuurent steal success chance is **%1**").arg(QString::number(currencyConfigs[channel.guildId()].stealSuccessBaseChance)));
+	}
+	else
+	{
+		double newChance = args[1].toDouble();
+		if (newChance > 1.0)
+		{
+			SEND_MESSAGE("The new steal success chance must be between 0 and 1!");
+			return;
+		}
+		
+		currencyConfigs[channel.guildId()].stealSuccessBaseChance = newChance;
+		SEND_MESSAGE(QString("Set steal success chance to **%1**").arg(QString::number(newChance)));
+	}
+}
+
+void CurrencyModule::setStealFine(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() == 1)
+	{
+		SEND_MESSAGE(QString("Current steal fine portion is **%1**").arg(QString::number(currencyConfigs[channel.guildId()].stealFineAmount)));
+	}
+	else
+	{
+		currencyConfigs[channel.guildId()].stealFineAmount = args[1].toDouble();
+		SEND_MESSAGE(QString("Set steal fine portion to **%1**").arg(QString::number(currencyConfigs[channel.guildId()].stealFineAmount)));
+	}
+}
+
+void CurrencyModule::setStealVictimBonus(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() == 1)
+	{
+		SEND_MESSAGE(QString("Current steal victim bonus portion is **%1**").arg(QString::number(currencyConfigs[channel.guildId()].stealVictimBonus)));
+	}
+	else
+	{
+		currencyConfigs[channel.guildId()].stealVictimBonus = args[1].toDouble();
+		SEND_MESSAGE(QString("Set steal victim bonus portion to **%1**").arg(QString::number(currencyConfigs[channel.guildId()].stealVictimBonus)));;
+	}
+}
+
+void CurrencyModule::setStealJailTime(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() == 1)
+	{
+		SEND_MESSAGE(QString("Current jail time for a failed steal is **%1 minutes**")
+					 .arg(QString::number(currencyConfigs[channel.guildId()].stealJailTimeMinutes)));
+	}
+	else
+	{
+		currencyConfigs[channel.guildId()].stealJailTimeMinutes = args[1].toUInt();
+		SEND_MESSAGE(QString("Set jail time for a failed steal to **%1 minutes**")
+					 .arg(QString::number(currencyConfigs[channel.guildId()].stealJailTimeMinutes)));
+	}
+}
+
+void CurrencyModule::setBribeSuccessChance(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() == 1)
+	{
+		SEND_MESSAGE(QString("Current bribe success chance ranges from **%1** to **%2**")
+					 .arg(QString::number(currencyConfigs[channel.guildId()].bribeMinSuccessChance),
+						  QString::number(currencyConfigs[channel.guildId()].bribeMaxSuccessChance)));
+	}
+	else
+	{
+		if (args[1].toDouble() > 1.0 || args[2].toDouble() > 1.0)
+		{
+			SEND_MESSAGE("Chances must be between 0 and 1!");
+			return;
+		}
+		if (args[1].toDouble() > args[2].toDouble())
+		{
+			SEND_MESSAGE("Maximum value must be larger than the minimum!");
+			return;
+		}
+
+		currencyConfigs[channel.guildId()].bribeMinSuccessChance = args[1].toDouble();
+		currencyConfigs[channel.guildId()].bribeMaxSuccessChance = args[2].toDouble();
+		SEND_MESSAGE(QString("Set bribe success chance to range from **%1** to **%2**")
+					 .arg(QString::number(currencyConfigs[channel.guildId()].bribeMinSuccessChance),
+						  QString::number(currencyConfigs[channel.guildId()].bribeMaxSuccessChance)));
+	}
+}
+
+void CurrencyModule::setBribeAmount(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() == 1)
+	{
+		SEND_MESSAGE(QString("Current accepted bribes range from **%1 %3** to **%2 %3**")
+					 .arg(QString::number(currencyConfigs[channel.guildId()].bribeMinAmountInCents / 100.0f),
+						  QString::number(currencyConfigs[channel.guildId()].bribeMaxAmountInCents / 100.0f),
+						  currencyConfigs[channel.guildId()].currencyAbbreviation));;
+	}
+	else
+	{
+		if (args[1].toDouble() > args[2].toDouble())
+		{
+			SEND_MESSAGE("Maximum value must be larger than the minimum!");
+			return;
+		}
+
+		currencyConfigs[channel.guildId()].bribeMinAmountInCents = args[1].toDouble() * 100;
+		currencyConfigs[channel.guildId()].bribeMaxAmountInCents = args[2].toDouble() * 100;
+		SEND_MESSAGE(QString("Set accepted bribes to range from **%1 %3** to **%2 %3**")
+					 .arg(QString::number(currencyConfigs[channel.guildId()].bribeMinAmountInCents / 100.0f),
+						  QString::number(currencyConfigs[channel.guildId()].bribeMaxAmountInCents / 100.0f),
+						  currencyConfigs[channel.guildId()].currencyAbbreviation));
+	}
+}
+
+void CurrencyModule::setBribeExtraJailTime(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() == 1)
+	{
+		SEND_MESSAGE(QString("Current extra jail time from failed bribe is **%1 minutes**")
+					 .arg(QString::number(currencyConfigs[channel.guildId()].bribeExtraJailTimeMinutes)));
+	}
+	else
+	{
+		currencyConfigs[channel.guildId()].bribeExtraJailTimeMinutes = args[1].toUInt();
+		SEND_MESSAGE(QString("Set extra jail time from failed bribe to **%1 minutes**")
+					 .arg(QString::number(currencyConfigs[channel.guildId()].bribeExtraJailTimeMinutes)));
+	}
+}
+
+void CurrencyModule::setGambleDefaultBet(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() == 1)
+	{
+		SEND_MESSAGE(QString("Current default bet for gamble is **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].gambleDefaultAmountBet),
+																				currencyConfigs[channel.guildId()].currencyAbbreviation));
+	}
+	else
+	{
+		currencyConfigs[channel.guildId()].gambleDefaultAmountBet = args[1].toDouble() * 100;
+		SEND_MESSAGE(QString("Set default bet for gamble to **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].gambleDefaultAmountBet),
+																			currencyConfigs[channel.guildId()].currencyAbbreviation));
+	}
+}
+
+void CurrencyModule::setGambleTimeout(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() == 1)
+	{
+		SEND_MESSAGE(QString("Current gamble timeout is **%1 seconds**").arg(currencyConfigs[channel.guildId()].gambleTimeoutSeconds));
+	}
+	else
+	{
+		currencyConfigs[channel.guildId()].gambleTimeoutSeconds = args[1].toUInt();
+		SEND_MESSAGE(QString("Set gamble timeout to **%1 seconds**").arg(currencyConfigs[channel.guildId()].gambleTimeoutSeconds));
 	}
 }

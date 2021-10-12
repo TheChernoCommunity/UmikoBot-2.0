@@ -61,6 +61,15 @@ public:
 	void setCurrencyName(const Discord::Message&, const Discord::Channel&);
 	void setDailyReward(const Discord::Message&, const Discord::Channel&);
 	void setMaxDebt(const Discord::Message&, const Discord::Channel&);
+	void setStealSuccessChance(const Discord::Message&, const Discord::Channel&);
+	void setStealFine(const Discord::Message&, const Discord::Channel&);
+	void setStealVictimBonus(const Discord::Message&, const Discord::Channel&);
+	void setStealJailTime(const Discord::Message&, const Discord::Channel&);
+	void setBribeSuccessChance(const Discord::Message&, const Discord::Channel&);
+	void setBribeAmount(const Discord::Message&, const Discord::Channel&);
+	void setBribeExtraJailTime(const Discord::Message&, const Discord::Channel&);
+	void setGambleDefaultBet(const Discord::Message&, const Discord::Channel&);
+	void setGambleTimeout(const Discord::Message&, const Discord::Channel&);
 	
 protected:
 	void onSave(QJsonObject& mainObject) const override;
