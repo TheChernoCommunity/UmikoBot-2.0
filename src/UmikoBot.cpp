@@ -396,6 +396,7 @@ void UmikoBot::umikoOnGuildMemberAdd(const GuildMember& member, snowflake_t guil
 
 void UmikoBot::umikoOnGuildMemberUpdate(snowflake_t guildId, const QList<snowflake_t>& roles, const User& user, const QString& nickname)
 {
+	(void) roles;
 	guildData[guildId].userData[user.id()].username = user.username();
 	guildData[guildId].userData[user.id()].nickname = nickname;
 }

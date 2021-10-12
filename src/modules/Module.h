@@ -94,7 +94,7 @@ class Module
 public:
 	virtual ~Module();
 
-	virtual void onMessage(const Discord::Message& message, const Discord::Channel& channel) {};
+	virtual void onMessage(const Discord::Message&, const Discord::Channel&) {};
 
 	void save() const;
 	void load();
@@ -105,8 +105,8 @@ public:
 protected:
 	Module(const QString& name);
 
-	virtual void onSave(QJsonObject& mainObject) const {}
-	virtual void onLoad(const QJsonObject& mainObject) {}
+	virtual void onSave(QJsonObject& mainObject) const { (void) mainObject; }
+	virtual void onLoad(const QJsonObject& mainObject) { (void) mainObject; }
 	
 	void registerCommand(Commands id, const QString& signature, unsigned int requiredPermissions, Command::Callback callback);
 

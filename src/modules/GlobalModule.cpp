@@ -111,6 +111,7 @@ void GlobalModule::help(const Message& message, const Channel& channel)
 
 void GlobalModule::echo(const Message& message, const Channel& channel)
 {
+	(void) channel;
 	QString restOfMessage = message.content().mid(message.content().indexOf(QRegularExpression("\\s")));
 	SEND_MESSAGE(restOfMessage);
 }
@@ -140,12 +141,14 @@ void GlobalModule::setPrefix(const Message& message, const Channel& channel)
 
 void GlobalModule::enable(const Message& message, const Channel& channel)
 {
-	enableDisableImpl(message, channel, true);
+	(void) channel;
+	enableDisableImpl(message, true);
 }
 
 void GlobalModule::disable(const Message& message, const Channel& channel)
 {
-	enableDisableImpl(message, channel, false);
+	(void) channel;
+	enableDisableImpl(message, false);
 }
 
 QString GlobalModule::commandHelp(const QString& request, const QString& prefix)
@@ -159,7 +162,6 @@ QString GlobalModule::commandHelp(const QString& request, const QString& prefix)
 				const QString& description = CommandInfo::briefDescription[(unsigned int) command.id];
 				const QString& usage = CommandInfo::usage[(unsigned int) command.id];
 				const QString& additionalInfo = CommandInfo::additionalInfo[(unsigned int) command.id];
-				bool adminRequired = CommandInfo::adminRequired[(unsigned int) command.id];
 
 				QString output = "";
 				output += "**Command name:** `" + command.name + "`\n\n";
@@ -183,7 +185,7 @@ bool canBeDisabled(const Command& command)
 	return command.name != "help" && command.name != "enable" && command.name != "disable";
 }
 
-void GlobalModule::enableDisableImpl(const Message& message, const Channel& channel, bool enable)
+void GlobalModule::enableDisableImpl(const Message& message, bool enable)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QString output = "";

@@ -21,5 +21,5 @@ protected:
 	void onLoad(const QJsonObject& mainObject) override;
 	
 private:
-	void enableDisableImpl(const Discord::Message&, const Discord::Channel&, bool enable);
+	void enableDisableImpl(const Discord::Message&, bool enable);
 };

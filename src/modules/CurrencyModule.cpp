@@ -167,14 +167,13 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 			return;
 		}
 
-		double successChance = 0.2;
 		std::random_device randomDevice;
 		std::mt19937 prng { randomDevice() };
 		std::uniform_int_distribution<> distribution { 1, 5 };
 		
 		Embed embed;
 
-		if (distribution(prng) == guess)
+		if ((unsigned int) distribution(prng) == guess)
 		{
 			int amountWon = gambleData[channel.guildId()].amountBetInCents * 4;
 			getUserCurrencyData(channel.guildId(), gambleData[channel.guildId()].currentUserId).balanceInCents += amountWon;
@@ -485,14 +484,14 @@ void CurrencyModule::richlist(const Message& message, const Channel& channel)
 	}
 
 	QList<UserCurrencyData>& leaderboard = currencyData[channel.guildId()];
-	if (min > leaderboard.size())
+	if (min > (unsigned int) leaderboard.size())
 	{
 		SEND_MESSAGE("Not enough members to create the list!");
 		return;
 	}
-	if (max > leaderboard.size())
+	if (max > (unsigned int) leaderboard.size())
 	{
-		max = leaderboard.size();
+		max = (unsigned int) leaderboard.size();
 	}
 	if (min > max)
 	{
@@ -514,7 +513,7 @@ void CurrencyModule::richlist(const Message& message, const Channel& channel)
 		QString name = UmikoBot::get().getName(channel.guildId(), leaderboard[i - 1].userId);
 		if (name.isEmpty())
 		{
-			if (max < leaderboard.size())
+			if (max < (unsigned int) leaderboard.size())
 			{
 				max += 1;
 			}
