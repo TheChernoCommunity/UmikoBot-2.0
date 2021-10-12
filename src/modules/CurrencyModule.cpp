@@ -42,6 +42,35 @@ CurrencyModule::~CurrencyModule()
 
 void CurrencyModule::onSave(QJsonObject& mainObject) const
 {
+	QJsonObject guildConfigObject {};
+	QJsonObject userDataObject {};
+	
+	for (snowflake_t guildId : currencyConfigs.keys())
+	{
+		QJsonObject guildJson {};
+		guildJson["currencyName"] = currencyConfigs[guildId].currencyName;
+		guildJson["currencyAbbreviation"] = currencyConfigs[guildId].currencyAbbreviation;
+		
+		guildJson["rewardForDaily"] = currencyConfigs[guildId].rewardForDaily;
+		guildJson["maxDebt"] = currencyConfigs[guildId].maxDebt;
+		
+		guildJson["stealSuccessBaseChance"] = currencyConfigs[guildId].stealSuccessBaseChance;
+		guildJson["stealFineAmount"] = currencyConfigs[guildId].stealFineAmount;
+		guildJson["stealVictimBonus"] = currencyConfigs[guildId].stealVictimBonus;
+		guildJson["stealJailTimeMinutes"] = currencyConfigs[guildId].stealJailTimeMinutes;
+		
+		guildJson["bribeMinSuccessChance"] = currencyConfigs[guildId].bribeMinSuccessChance;
+		guildJson["bribeMaxSuccessChance"] = currencyConfigs[guildId].bribeMaxSuccessChance;
+		guildJson["bribeMinAmountInCents"] = currencyConfigs[guildId].bribeMinAmountInCents;
+		guildJson["bribeMaxAmountInCents"] = currencyConfigs[guildId].bribeMaxAmountInCents;
+		guildJson["bribeExtraJailTimeMinutes"] = currencyConfigs[guildId].bribeExtraJailTimeMinutes;
+		
+		guildJson["gambleDefaultAmountBet"] = currencyConfigs[guildId].gambleDefaultAmountBet;
+		guildJson["gambleTimeoutSeconds"] = currencyConfigs[guildId].gambleTimeoutSeconds;
+
+		guildConfigObject[QString::number(guildId)] = guildJson;
+	}
+
 	for (snowflake_t guildId : currencyData.keys())
 	{
 		QJsonObject guildJson {};
@@ -54,15 +83,47 @@ void CurrencyModule::onSave(QJsonObject& mainObject) const
 			guildJson[QString::number(userCurrencyData.userId)] = userJson;
 		}
 
-		mainObject[QString::number(guildId)] = guildJson;
+		userDataObject[QString::number(guildId)] = guildJson;
 	}
+
+	mainObject["guildConfig"] = guildConfigObject;
+	mainObject["userData"] = userDataObject;
 }
 
 void CurrencyModule::onLoad(const QJsonObject& mainObject)
 {
-	for (const QString& guildIdString : mainObject.keys())
+	QJsonObject guildConfigObject = mainObject["guildConfig"].toObject();
+	QJsonObject userDataObject = mainObject["userData"].toObject();
+
+	for (const QString& guildIdString : guildConfigObject.keys())
 	{
-		QJsonObject guildJson = mainObject[guildIdString].toObject();
+		QJsonObject guildJson = guildConfigObject[guildIdString].toObject();
+		snowflake_t guildId = guildIdString.toULongLong();
+
+		currencyConfigs[guildId].currencyName = guildJson["currencyName"].toString();
+		currencyConfigs[guildId].currencyAbbreviation = guildJson["currencyAbbreviation"].toString();
+		
+		currencyConfigs[guildId].rewardForDaily = guildJson["rewardForDaily"].toInt();
+		currencyConfigs[guildId].maxDebt = guildJson["maxDebt"].toInt();
+		
+		currencyConfigs[guildId].stealSuccessBaseChance = guildJson["stealSuccessBaseChance"].toDouble();
+		currencyConfigs[guildId].stealFineAmount = guildJson["stealFineAmount"].toDouble();
+		currencyConfigs[guildId].stealVictimBonus = guildJson["stealVictimBonus"].toDouble();
+		currencyConfigs[guildId].stealJailTimeMinutes = guildJson["stealJailTimeMinutes"].toInt();
+		
+		currencyConfigs[guildId].bribeMinSuccessChance = guildJson["bribeMinSuccessChance"].toDouble();
+		currencyConfigs[guildId].bribeMaxSuccessChance = guildJson["bribeMaxSuccessChance"].toDouble();
+		currencyConfigs[guildId].bribeMinAmountInCents = guildJson["bribeMinAmountInCents"].toInt();
+		currencyConfigs[guildId].bribeMaxAmountInCents = guildJson["bribeMaxAmountInCents"].toInt();
+		currencyConfigs[guildId].bribeExtraJailTimeMinutes = guildJson["bribeExtraJailTimeMinutes"].toInt();
+		
+		currencyConfigs[guildId].gambleDefaultAmountBet = guildJson["gambleDefaultAmountBet"].toInt();
+		currencyConfigs[guildId].gambleTimeoutSeconds = guildJson["gambleTimeoutSeconds"].toInt();
+	}
+	
+	for (const QString& guildIdString : userDataObject.keys())
+	{
+		QJsonObject guildJson = userDataObject[guildIdString].toObject();
 		snowflake_t guildId = guildIdString.toULongLong();
 
 		for (const QString& userIdString : guildJson.keys())
