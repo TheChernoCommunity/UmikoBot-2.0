@@ -8,7 +8,9 @@ struct UserCurrencyData
 	int balanceInCents = 0;
 
 	bool hasClaimedDaily = false;
+	
 	QTimer* jailTimer = nullptr;
+	bool hasUsedBribe = false;
 };
 
 struct GuildCurrencyConfig
@@ -24,6 +26,12 @@ struct GuildCurrencyConfig
 	double stealVictimBonus = 0.25; // Portion of attempted steal amount
 	int stealJailTimeMinutes = 60;
 
+	double bribeMinSuccessChance = 0.3;
+	double bribeMaxSuccessChance = 0.7;
+	int bribeMinAmountInCents = 2000;
+	int bribeMaxAmountInCents = 15000;
+	int bribeExtraJailTimeMinutes = 60;
+	
 	int gambleDefaultAmountBet = 2500;
 	int gambleTimeoutSeconds = 20;
 };
@@ -48,6 +56,7 @@ public:
 	void compensate(const Discord::Message&, const Discord::Channel&);
 	void richlist(const Discord::Message&, const Discord::Channel&);
 	void gamble(const Discord::Message&, const Discord::Channel&);
+	void bribe(const Discord::Message&, const Discord::Channel&);
 
 protected:
 	void onSave(QJsonObject& mainObject) const override;

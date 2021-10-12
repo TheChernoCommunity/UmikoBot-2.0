@@ -33,6 +33,7 @@ CurrencyModule::CurrencyModule()
 	registerCommand(Commands::Compensate, "compensate" DECIMAL OPTIONAL(USER), CommandPermission::Moderator, CALLBACK(compensate));
 	registerCommand(Commands::Richlist, "richlist" OPTIONAL(UNSIGNED_INTEGER) OPTIONAL(UNSIGNED_INTEGER), CommandPermission::User, CALLBACK(richlist));
 	registerCommand(Commands::Gamble, "gamble" OPTIONAL(UNSIGNED_DECIMAL), CommandPermission::User, CALLBACK(gamble));
+	registerCommand(Commands::Bribe, "bribe" UNSIGNED_DECIMAL, CommandPermission::User, CALLBACK(bribe));
 }
 
 CurrencyModule::~CurrencyModule()
@@ -529,4 +530,76 @@ void CurrencyModule::gamble(const Message& message, const Channel& channel)
 																		QString::number(guildGambleData.amountBetInCents * 4 / 100.0f)));
 	embed.setColor(qrand() % 0xffffff);
 	SEND_MESSAGE(embed);
+}
+
+void CurrencyModule::bribe(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	UserCurrencyData& userCurrencyData = getUserCurrencyData(channel.guildId(), message.author().id());
+	GuildCurrencyConfig guildConfig = currencyConfigs[channel.guildId()];
+	int amountToBribeInCents = args[1].toDouble() * 100;
+
+	if (!userCurrencyData.jailTimer)
+	{
+		SEND_MESSAGE(":police_officer: **HEY!** You're not in jail! :police_officer:");
+		return;
+	}
+
+	if (userCurrencyData.hasUsedBribe)
+	{
+		SEND_MESSAGE(":police_officer: You've already failed to bribe me... *do you want me to extend your sentence again?* :police_officer:");
+		return;
+	}
+
+	if (amountToBribeInCents < guildConfig.bribeMinAmountInCents)
+	{
+		SEND_MESSAGE(QString(":police_officer: Pfft! Such a measly bribe! :police_officer: \n"
+							 "I don't accept anything less than **%1 %2** for my time...")
+					 .arg(QString::number(guildConfig.bribeMinAmountInCents / 100.0f), guildConfig.currencyAbbreviation));
+		return;
+	}
+
+	if (amountToBribeInCents > guildConfig.bribeMaxAmountInCents)
+	{
+		SEND_MESSAGE(QString(":police_officer: Yikes! I can't accept more than **%1 %2**, too much risk!")
+					 .arg(QString::number(guildConfig.bribeMaxAmountInCents / 100.0f), guildConfig.currencyAbbreviation));
+		return;
+	}
+
+	if (userCurrencyData.balanceInCents - amountToBribeInCents < guildConfig.maxDebt)
+	{
+		SEND_MESSAGE("You need to sort out your *financial situation* before you can try to bribe me!");
+		return;
+	}
+
+	int bribeAmountRange = guildConfig.bribeMaxAmountInCents - guildConfig.bribeMinAmountInCents;
+	double bribeSuccessRange = guildConfig.bribeMaxSuccessChance - guildConfig.bribeMinSuccessChance;
+	// amountOffset gives a 0 to 1 range of how much was bribed with (compared to min and max bribes)
+	// successChance maps that 0 to 1 range between the min and max bribe success chances
+	double amountOffset = (double) (amountToBribeInCents - guildConfig.bribeMinAmountInCents) / bribeAmountRange;
+	double successChance = guildConfig.bribeMinSuccessChance + (amountOffset * bribeSuccessRange);
+
+	std::random_device randomDevice;
+	std::mt19937 prng { randomDevice() };
+	std::discrete_distribution<> distribution { { 1 - successChance, successChance } };
+
+	if (distribution(prng))
+	{
+		userCurrencyData.balanceInCents -= amountToBribeInCents;
+		delete userCurrencyData.jailTimer;
+		userCurrencyData.jailTimer = nullptr;
+
+		SEND_MESSAGE(QString(":unlock: Thanks for that **BRIBE**!!! :unlock:\nI have freed you from jail and taken **%1 %2** from your wallet")
+					 .arg(QString::number(amountToBribeInCents / 100.0f), guildConfig.currencyAbbreviation));;
+	}
+	else
+	{
+		userCurrencyData.hasUsedBribe = true;
+		int newRemainingTime = userCurrencyData.jailTimer->remainingTime() + (guildConfig.bribeExtraJailTimeMinutes * 60 * 1000);
+		userCurrencyData.jailTimer->start(newRemainingTime);
+
+		// TODO(fkp): Time left
+		SEND_MESSAGE(QString(":police_officer: Your bribes don't affect my loyalty! :police_officer:\n"
+							 "Enjoy rotting in jail for another **%1 minutes**!\n").arg(guildConfig.bribeExtraJailTimeMinutes));
+	}
 }

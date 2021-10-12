@@ -58,6 +58,7 @@ CREATE_COMMANDS(
 	Compensate,
 	Richlist,
 	Gamble,
+	Bribe,
 );
 
 class Module;
