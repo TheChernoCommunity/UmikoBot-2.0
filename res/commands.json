@@ -12,20 +12,20 @@
 		"admin": false
 	},
 	"SetPrefix": {
-		"brief": "Sets the prefix of the bot.",
-		"usage": "setprefix <newprefix>",
-		"additional": "",
+		"brief": "Sets/gets the prefix of the bot.",
+		"usage": "setprefix [newprefix]",
+		"additional": "Giving no arguments returns the current prefix.",
 		"admin": true
 	},
 	"Enable": {
 		"brief": "Enables a command or module for use.",
-		"usage": "enable <module|command> <name>",
+		"usage": "enable module|command <name>",
 		"additional": "",
 		"admin": true
 	},
 	"Disable": {
 		"brief": "Disables a command or module from being used.",
-		"usage": "disable <module|command> <name>",
+		"usage": "disable module|command <name>",
 		"additional": "",
 		"admin": true
 	},
@@ -72,5 +72,23 @@
 		"usage": "gamble [bet]",
 		"additional": "If no bet is provided by the user, one will be provided by default.",
 		"admin": false
+	},
+	"SetCurrencyName": {
+		"brief": "Sets the name and abbreviation for the currency unit.",
+		"usage": "set-currency-name [<name> <abbreviation>]",
+		"additional": "Giving no arguments returns the current currency name and abbreviation.",
+		"admin": true
+	},
+	"SetDailyReward": {
+		"brief": "Sets the reward for collecting a daily.",
+		"usage": "set-daily-reward [amount]",
+		"additional": "Giving no arguments returns the current daily reward.",
+		"admin": true
+	},
+	"SetMaxDebt": {
+		"brief": "Sets the maximum amount of debt a user can be in.",
+		"usage": "set-max-debt [amount]",
+		"additional": "A max debt of -100 means the user can go down to -100 coins.\nGiving no arugments returns the current maximum debt.",
+		"admin": true
 	}
 }
