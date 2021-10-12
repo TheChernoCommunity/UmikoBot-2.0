@@ -12,7 +12,7 @@ GlobalModule::GlobalModule()
 {
 	registerCommand(Commands::Help, "help" OPTIONAL(IDENTIFIER), CommandPermission::User, CALLBACK(help));
 	registerCommand(Commands::Echo, "echo" TEXT, CommandPermission::User, CALLBACK(echo));
-	registerCommand(Commands::SetPrefix, "set-prefix" IDENTIFIER, CommandPermission::Moderator, CALLBACK(setPrefix));
+	registerCommand(Commands::SetPrefix, "set-prefix" OPTIONAL(IDENTIFIER), CommandPermission::Moderator, CALLBACK(setPrefix));
 	registerCommand(Commands::Enable, "enable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(enable));
 	registerCommand(Commands::Disable, "disable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(disable));
 }
@@ -120,14 +120,21 @@ void GlobalModule::setPrefix(const Message& message, const Channel& channel)
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QString& prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
 
-	if (prefix == args[1])
+	if (args.size() == 1)
 	{
-		SEND_MESSAGE("That is already the prefix!");
+		SEND_MESSAGE(QString("Current prefix is **%1**").arg(prefix));
 	}
 	else
 	{
-		prefix = args[1];
-		SEND_MESSAGE(QString("Changed prefix to '%1'").arg(prefix));
+		if (prefix == args[1])
+		{
+			SEND_MESSAGE("That is already the prefix!");
+		}
+		else
+		{
+			prefix = args[1];
+			SEND_MESSAGE(QString("Changed prefix to '%1'").arg(prefix));
+		}
 	}
 }
 
