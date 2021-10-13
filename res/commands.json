@@ -73,6 +73,13 @@
 		"additional": "If no bet is provided by the user, one will be provided by default.",
 		"admin": false
 	},
+	"Bribe": {
+		"brief": "Attempt to bribe your way out of jail.",
+		"usage": "bribe <amount>",
+		"additional": "Careful! Your jail time might be extended...",
+		"admin": false
+	},
+	
 	"SetCurrencyName": {
 		"brief": "Sets the name and abbreviation for the currency unit.",
 		"usage": "set-currency-name [<name> <abbreviation>]",
@@ -89,6 +96,60 @@
 		"brief": "Sets the maximum amount of debt a user can be in.",
 		"usage": "set-max-debt [amount]",
 		"additional": "A max debt of -100 means the user can go down to -100 coins.\nGiving no arugments returns the current maximum debt.",
+		"admin": true
+	},
+	"SetStealSuccessChance": {
+		"brief": "Sets the base chance for a steal to succeed.",
+		"usage": "set-steal-success-chance [chance]",
+		"additional": "Must be a value between 0 and 1.\nGiving no arugments returns the current success chance",
+		"admin": true
+	},
+	"SetStealFine": {
+		"brief": "Sets the proportion of the attempted steal amount which will be taken as a fine.",
+		"usage": "set-steal-fine [amount]",
+		"additional": "Must be a value between 0 an 1.\nGiving no arugments returns the current fine.",
+		"admin": true
+	},
+	"SetStealVictimBonus": {
+		"brief": "Sets the proportion of the attempted steal amount which will be given to the victim.",
+		"usage": "set-steal-victim-bonus [amount]",
+		"additional": "Must be a value between 0 and 1.\nGiving no arugments returns the current victim bonus.",
+		"admin": true
+	},
+	"SetStealJailTime": {
+		"brief": "Sets the number of minutes in jail after a failed steal.",
+		"usage": "set-steal-jail-time [minutes]",
+		"additional": "Giving no arugments returns the current steal jail time.",
+		"admin": true
+	},
+	"SetBribeSuccessChance": {
+		"brief": "Sets the min and max chance of a bribe succeeding.",
+		"usage": "set-bribe-success-chance [<min> <max>]",
+		"additional": "Giving no arugments returns the current success chances.",
+		"admin": true
+	},
+	"SetBribeAmount": {
+		"brief": "Sets the min and max accepted bribe amounts.",
+		"usage": "set-bribe-amount [<min> <max>]",
+		"additional": "Giving no arugments returns the current range of accepted bribes.",
+		"admin": true
+	},
+	"SetBribeExtraJailTime": {
+		"brief": "Sets the amount of extra jail time (in minutes) after a failed bribe.",
+		"usage": "set-bribe-extra-jail-time [minutes]",
+		"additional": "Giving no arugments returns the current extra jail time.",
+		"admin": true
+	},
+	"SetGambleDefaultBet": {
+		"brief": "Sets the default bet for a gamble game.",
+		"usage": "set-gamble-default-bet [amount]",
+		"additional": "This is used when no argument is provided to gamble. \nGiving no arugments returns the current default bet.",
+		"admin": true
+	},
+	"SetGambleTimeout": {
+		"brief": "Sets how long the bot will wait for a response before timing-out a gamble game.",
+		"usage": "set-gamble-timeout [seconds]",
+		"additional": "Giving no arugments returns the current gamble timeout.",
 		"admin": true
 	}
 }
