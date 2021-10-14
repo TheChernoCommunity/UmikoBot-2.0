@@ -15,6 +15,7 @@ GlobalModule::GlobalModule()
 	registerCommand(Commands::SetPrefix, "set-prefix" OPTIONAL(IDENTIFIER), CommandPermission::Moderator, CALLBACK(setPrefix));
 	registerCommand(Commands::Enable, "enable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(enable));
 	registerCommand(Commands::Disable, "disable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(disable));
+	registerCommand(Commands::SetPrimaryChannel, "set-primary-channel" OPTIONAL(CHANNEL), CommandPermission::Moderator, CALLBACK(setPrimaryChannel));
 }
 
 GlobalModule::~GlobalModule()
@@ -149,6 +150,35 @@ void GlobalModule::disable(const Message& message, const Channel& channel)
 {
 	(void) channel;
 	enableDisableImpl(message, false);
+}
+
+void GlobalModule::setPrimaryChannel(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	
+	if (args.size() > 1)
+	{
+		UmikoBot::get().getChannelFromArgument(channel.guildId(), args[1]).then([this, message](const Channel& mentionedChannel)
+		{
+			UmikoBot::get().primaryChannel = mentionedChannel.id();
+			SEND_MESSAGE(QString("Primary channel is <#%1>").arg(QString::number(UmikoBot::get().primaryChannel)));
+		})
+		.otherwise([this, message]()
+		{
+			SEND_MESSAGE("Could not find channel!");
+		});
+	}
+	else
+	{
+		if (UmikoBot::get().primaryChannel)
+		{
+			SEND_MESSAGE(QString("Primary channel is <#%1>").arg(QString::number(UmikoBot::get().primaryChannel)));
+		}
+		else
+		{
+			SEND_MESSAGE("No primary channel has been set!");
+		}
+	}
 }
 
 QString GlobalModule::commandHelp(const QString& request, const QString& prefix)

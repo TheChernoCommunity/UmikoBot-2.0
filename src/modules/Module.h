@@ -12,6 +12,7 @@
 
 #define IDENTIFIER SPACE "\\S+"
 #define USER SPACE "\\S+"
+#define CHANNEL SPACE "\\S+"
 
 #define TEXT SPACE ".+"
 #define INTEGER SPACE "[+-]?[0-9]+"
@@ -49,6 +50,7 @@ CREATE_COMMANDS(
 	SetPrefix,
 	Enable,
 	Disable,
+	SetPrimaryChannel,
 
 	// Currency Module
 	Wallet,

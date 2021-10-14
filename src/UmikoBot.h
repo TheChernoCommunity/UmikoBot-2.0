@@ -28,6 +28,7 @@ public:
 
 	snowflake_t getUserFromArgument(snowflake_t guildId, const QString& argument);
 	snowflake_t getUserIdFromMention(snowflake_t guildId, const QString& mention);
+	Discord::Promise<Discord::Channel>& getChannelFromArgument(snowflake_t guildId, const QString& argument);
 
 private:
 	UmikoBot(QObject* parent = nullptr);
@@ -56,6 +57,9 @@ private slots:
 
 	void umikoOnMessageCreate(const Discord::Message& message);
 	
+public:
+	snowflake_t primaryChannel;
+
 private:
 	QTimer saveTimer;
 

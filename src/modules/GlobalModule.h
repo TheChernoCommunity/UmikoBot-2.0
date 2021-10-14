@@ -13,6 +13,7 @@ public:
 	void setPrefix(const Discord::Message&, const Discord::Channel&);
 	void enable(const Discord::Message&, const Discord::Channel&);
 	void disable(const Discord::Message&, const Discord::Channel&);
+	void setPrimaryChannel(const Discord::Message&, const Discord::Channel&);
 
 	QString commandHelp(const QString& request, const QString& prefix);
 

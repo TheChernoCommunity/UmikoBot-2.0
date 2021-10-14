@@ -340,6 +340,33 @@ snowflake_t UmikoBot::getUserIdFromMention(snowflake_t guildId, const QString& m
 	return 0;
 }
 
+Promise<Channel>& UmikoBot::getChannelFromArgument(snowflake_t guildId, const QString& argument)
+{
+	Promise<Channel>* promise = new Promise<Channel>();
+	getGuildChannels(guildId).then([this, argument, promise](const QList<Channel>& channels)
+	{
+		static const QRegularExpression channelMentionRegex { "^<#!?([0-9]+)>$" };
+		QRegularExpressionMatch match = channelMentionRegex.match(argument);
+
+		if (match.hasMatch())
+		{
+			snowflake_t channelId = match.captured(1).toULongLong();
+			for (const Channel& channel : channels)
+			{
+				if (channel.id() == channelId)
+				{
+					promise->resolve(channel);
+					return;
+				}
+			}
+		}
+
+		promise->reject();
+	});
+
+	return *promise;
+}
+
 void UmikoBot::umikoOnReady()
 {
 	printf("Ready!\n");
