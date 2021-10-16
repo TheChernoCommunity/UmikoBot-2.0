@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PREMAKE_VERSION="5.0.0-alpha16"
+
 # Directories
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 projectRoot=$scriptDir/..
@@ -21,7 +23,7 @@ elif [ "$os" == "linux" ]; then
 	if ! command -v premake5 &> /dev/null; then
 		if [ ! -f "$projectRoot/pmk/premake5" ]; then
 			mkdir "$projectRoot/tmp"
-			$(curl -L -o "$projectRoot/tmp/premake5.tar.gz" "https://github.com/premake/premake-core/releases/download/v$PREMAKE_VERSION/premake-5.0.0-alpha12-linux.tar.gz")
+			$(curl -L -o "$projectRoot/tmp/premake5.tar.gz" "https://github.com/premake/premake-core/releases/download/v$PREMAKE_VERSION/premake-$PREMAKE_VERSION-linux.tar.gz")
 			$(tar -xvzf "$projectRoot/tmp/premake5.tar.gz" -C "$projectRoot/pmk")
 			rm -r "$projectRoot/tmp/"
 		else
