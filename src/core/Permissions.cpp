@@ -3,7 +3,7 @@
 
 using namespace Discord;
 
-void ::Permissions::contains(snowflake_t guildId, snowflake_t userId, unsigned int permissions, PermissionCallback callback)
+void ::Permissions::contains(GuildId guildId, UserId userId, unsigned int permissions, PermissionCallback callback)
 {
 	UmikoBot::get().getGuildMember(guildId, userId).then([guildId, userId, permissions, callback](const GuildMember& user)
 	{
@@ -15,7 +15,7 @@ void ::Permissions::contains(snowflake_t guildId, snowflake_t userId, unsigned i
 		unsigned int totalPermissions = 0;
 		for (const Role& role : UmikoBot::get().getRoles(guildId))
 		{
-			for (snowflake_t roleId : user.roles())
+			for (RoleId roleId : user.roles())
 			{
 				if (roleId == role.id())
 				{
@@ -41,7 +41,7 @@ void ::Permissions::contains(snowflake_t guildId, snowflake_t userId, unsigned i
 	});
 }
 
-void ::Permissions::matches(snowflake_t guildId, snowflake_t userId, unsigned int permissions, PermissionCallback callback)
+void ::Permissions::matches(GuildId guildId, UserId userId, unsigned int permissions, PermissionCallback callback)
 {
 	UmikoBot::get().getGuildMember(guildId, userId).then([guildId, userId, permissions, callback](const GuildMember& user)
 	{
@@ -53,7 +53,7 @@ void ::Permissions::matches(snowflake_t guildId, snowflake_t userId, unsigned in
 		unsigned int totalPermissions = 0;
 		for (const Role& role : UmikoBot::get().getRoles(guildId))
 		{
-			for (snowflake_t roleId : user.roles())
+			for (RoleId roleId : user.roles())
 			{
 				if (roleId == role.id())
 				{

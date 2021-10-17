@@ -10,7 +10,7 @@ QJsonObject GuildData::writeToObject() const
 	return result;
 }
 
-GuildData GuildData::createFromObject(snowflake_t guildId, const QJsonObject& object)
+GuildData GuildData::createFromObject(GuildId guildId, const QJsonObject& object)
 {
 	GuildData result {};
 	result.guildId = guildId;

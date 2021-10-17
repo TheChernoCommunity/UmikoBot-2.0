@@ -162,7 +162,7 @@ void UmikoBot::loadGuildData()
 	file.close();
 }
 
-void UmikoBot::initialiseGuilds(snowflake_t afterId)
+void UmikoBot::initialiseGuilds(GuildId afterId)
 {
 	constexpr snowflake_t LIMIT = 100;
 	
@@ -195,7 +195,7 @@ void UmikoBot::initialiseGuilds(snowflake_t afterId)
 	});
 }
 
-void UmikoBot::initialiseGuildMembers(snowflake_t guildId, snowflake_t afterId)
+void UmikoBot::initialiseGuildMembers(GuildId guildId, UserId afterId)
 {
 	constexpr snowflake_t LIMIT = 1000;
 	
@@ -217,27 +217,27 @@ void UmikoBot::initialiseGuildMembers(snowflake_t guildId, snowflake_t afterId)
 	});
 }
 
-bool UmikoBot::isOwner(snowflake_t guildId, snowflake_t userId)
+bool UmikoBot::isOwner(GuildId guildId, UserId userId)
 {
 	return guildData[guildId].ownerId == userId;
 }
 
-const QList<Discord::Role>& UmikoBot::getRoles(snowflake_t guildId)
+const QList<Discord::Role>& UmikoBot::getRoles(GuildId guildId)
 {
 	return guildData[guildId].roles;
 }
 
-const QString& UmikoBot::getNickname(snowflake_t guildId, snowflake_t userId)
+const QString& UmikoBot::getNickname(GuildId guildId, UserId userId)
 {
 	return guildData[guildId].userData[userId].nickname;
 }
 
-const QString& UmikoBot::getUsername(snowflake_t guildId, snowflake_t userId)
+const QString& UmikoBot::getUsername(GuildId guildId, UserId userId)
 {
 	return guildData[guildId].userData[userId].username;
 }
 
-const QString& UmikoBot::getName(snowflake_t guildId, snowflake_t userId)
+const QString& UmikoBot::getName(GuildId guildId, UserId userId)
 {
 	if (getNickname(guildId, userId) != "")
 	{
@@ -247,7 +247,7 @@ const QString& UmikoBot::getName(snowflake_t guildId, snowflake_t userId)
 	return getUsername(guildId, userId);
 }
 
-Promise<QString>& UmikoBot::getAvatar(snowflake_t guildId, snowflake_t userId)
+Promise<QString>& UmikoBot::getAvatar(GuildId guildId, UserId userId)
 {
 	Promise<QString>* promise = new Promise<QString>();
 
@@ -269,9 +269,9 @@ Promise<QString>& UmikoBot::getAvatar(snowflake_t guildId, snowflake_t userId)
 	return *promise;
 }
 
-snowflake_t UmikoBot::getUserFromArgument(snowflake_t guildId, const QString& argument)
+UserId UmikoBot::getUserIdFromArgument(GuildId guildId, const QString& argument)
 {
-	snowflake_t result;
+	UserId result;
 	
 	// Direct mention
 	result = getUserIdFromMention(guildId, argument);
@@ -291,9 +291,9 @@ snowflake_t UmikoBot::getUserFromArgument(snowflake_t guildId, const QString& ar
 	}
 
 	// Checks for a username/nickname match
-	snowflake_t completeNickname = 0;
-	snowflake_t partialUsername = 0;
-	snowflake_t partialNickname = 0;
+	UserId completeNickname = 0;
+	UserId partialUsername = 0;
+	UserId partialNickname = 0;
 	
 	for (auto it = guildData[guildId].userData.begin(); it != guildData[guildId].userData.end(); it++)
 	{
@@ -323,14 +323,14 @@ snowflake_t UmikoBot::getUserFromArgument(snowflake_t guildId, const QString& ar
 	return 0;
 }
 
-snowflake_t UmikoBot::getUserIdFromMention(snowflake_t guildId, const QString& mention)
+UserId UmikoBot::getUserIdFromMention(GuildId guildId, const QString& mention)
 {
 	static const QRegularExpression mentionRegex { "^<@!?([0-9]+)>$" };
 	QRegularExpressionMatch match = mentionRegex.match(mention);
 
 	if (match.hasMatch())
 	{
-		snowflake_t userId = match.captured(1).toULongLong();
+		UserId userId = match.captured(1).toULongLong();
 		if (getName(guildId, userId) != "")
 		{
 			return userId;
@@ -340,7 +340,7 @@ snowflake_t UmikoBot::getUserIdFromMention(snowflake_t guildId, const QString& m
 	return 0;
 }
 
-Promise<Channel>& UmikoBot::getChannelFromArgument(snowflake_t guildId, const QString& argument)
+Promise<Channel>& UmikoBot::getChannelFromArgument(GuildId guildId, const QString& argument)
 {
 	Promise<Channel>* promise = new Promise<Channel>();
 	getGuildChannels(guildId).then([this, argument, promise](const QList<Channel>& channels)
@@ -350,7 +350,7 @@ Promise<Channel>& UmikoBot::getChannelFromArgument(snowflake_t guildId, const QS
 
 		if (match.hasMatch())
 		{
-			snowflake_t channelId = match.captured(1).toULongLong();
+			ChannelId channelId = match.captured(1).toULongLong();
 			for (const Channel& channel : channels)
 			{
 				if (channel.id() == channelId)
@@ -390,7 +390,7 @@ void UmikoBot::umikoOnGuildUpdate(const Guild& guild)
 	guildData[guild.id()].ownerId = guild.ownerId();
 }
 
-void UmikoBot::umikoOnGuildRoleUpdate(snowflake_t guildId, const Role& newRole)
+void UmikoBot::umikoOnGuildRoleUpdate(GuildId guildId, const Role& newRole)
 {
 	for (Role& role : guildData[guildId].roles)
 	{
@@ -404,7 +404,7 @@ void UmikoBot::umikoOnGuildRoleUpdate(snowflake_t guildId, const Role& newRole)
 	guildData[guildId].roles.push_back(newRole);
 }
 
-void UmikoBot::umikoOnGuildRoleDelete(snowflake_t guildId, snowflake_t roleId)
+void UmikoBot::umikoOnGuildRoleDelete(GuildId guildId, RoleId roleId)
 {
 	for (int i = 0; i < guildData[guildId].roles.size(); i++)
 	{
@@ -416,19 +416,19 @@ void UmikoBot::umikoOnGuildRoleDelete(snowflake_t guildId, snowflake_t roleId)
 	}
 }
 
-void UmikoBot::umikoOnGuildMemberAdd(const GuildMember& member, snowflake_t guildId)
+void UmikoBot::umikoOnGuildMemberAdd(const GuildMember& member, GuildId guildId)
 {
 	guildData[guildId].userData[member.user().id()].username = member.user().username();
 }
 
-void UmikoBot::umikoOnGuildMemberUpdate(snowflake_t guildId, const QList<snowflake_t>& roles, const User& user, const QString& nickname)
+void UmikoBot::umikoOnGuildMemberUpdate(GuildId guildId, const QList<RoleId>& roles, const User& user, const QString& nickname)
 {
 	(void) roles;
 	guildData[guildId].userData[user.id()].username = user.username();
 	guildData[guildId].userData[user.id()].nickname = nickname;
 }
 
-void UmikoBot::umikoOnGuildMemberRemove(snowflake_t guildId, const User& user)
+void UmikoBot::umikoOnGuildMemberRemove(GuildId guildId, const User& user)
 {
 	for (auto it = guildData[guildId].userData.begin(); it != guildData[guildId].userData.end(); it++)
 	{

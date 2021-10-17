@@ -3,6 +3,8 @@
 #include <functional>
 #include <Discord/Client.h>
 
+#include "core/Core.h"
+
 namespace CommandPermission
 {
 	enum Permission
@@ -18,6 +20,6 @@ using PermissionCallback = std::function<void(bool)>;
 class Permissions
 {
 public:
-	static void contains(snowflake_t guildId, snowflake_t userId, unsigned int permissions, PermissionCallback callback);
-	static void matches(snowflake_t guildId, snowflake_t userId, unsigned int permissions, PermissionCallback callback);
+	static void contains(GuildId guildId, UserId userId, unsigned int permissions, PermissionCallback callback);
+	static void matches(GuildId guildId, UserId userId, unsigned int permissions, PermissionCallback callback);
 };

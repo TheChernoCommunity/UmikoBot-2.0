@@ -15,7 +15,7 @@ CurrencyModule::CurrencyModule()
 	QObject::connect(&dayTimer, &QTimer::timeout, [this]()
 	{
 		// Resets daily collection timeout and removes users no longer in the server
-		for (snowflake_t guildId : currencyData.keys())
+		for (GuildId guildId : currencyData.keys())
 		{
 			for (int userIndex = 0; userIndex < currencyData[guildId].size(); userIndex++)
 			{
@@ -60,7 +60,7 @@ void CurrencyModule::onSave(QJsonObject& mainObject) const
 	QJsonObject guildConfigObject {};
 	QJsonObject userDataObject {};
 	
-	for (snowflake_t guildId : currencyConfigs.keys())
+	for (GuildId guildId : currencyConfigs.keys())
 	{
 		QJsonObject guildJson {};
 		guildJson["currencyName"] = currencyConfigs[guildId].currencyName;
@@ -86,7 +86,7 @@ void CurrencyModule::onSave(QJsonObject& mainObject) const
 		guildConfigObject[QString::number(guildId)] = guildJson;
 	}
 
-	for (snowflake_t guildId : currencyData.keys())
+	for (GuildId guildId : currencyData.keys())
 	{
 		QJsonObject guildJson {};
 		for (const UserCurrencyData& userCurrencyData : currencyData[guildId])
@@ -113,7 +113,7 @@ void CurrencyModule::onLoad(const QJsonObject& mainObject)
 	for (const QString& guildIdString : guildConfigObject.keys())
 	{
 		QJsonObject guildJson = guildConfigObject[guildIdString].toObject();
-		snowflake_t guildId = guildIdString.toULongLong();
+		GuildId guildId = guildIdString.toULongLong();
 
 		currencyConfigs[guildId].currencyName = guildJson["currencyName"].toString();
 		currencyConfigs[guildId].currencyAbbreviation = guildJson["currencyAbbreviation"].toString();
@@ -139,12 +139,12 @@ void CurrencyModule::onLoad(const QJsonObject& mainObject)
 	for (const QString& guildIdString : userDataObject.keys())
 	{
 		QJsonObject guildJson = userDataObject[guildIdString].toObject();
-		snowflake_t guildId = guildIdString.toULongLong();
+		GuildId guildId = guildIdString.toULongLong();
 
 		for (const QString& userIdString : guildJson.keys())
 		{
 			QJsonObject userJson = guildJson[userIdString].toObject();
-			snowflake_t userId = userIdString.toULongLong();
+			UserId userId = userIdString.toULongLong();
 			
 			currencyData[guildId].append(UserCurrencyData {
 				userId,
@@ -204,7 +204,7 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 	}
 }
 
-UserCurrencyData& CurrencyModule::getUserCurrencyData(snowflake_t guildId, snowflake_t userId)
+UserCurrencyData& CurrencyModule::getUserCurrencyData(GuildId guildId, UserId userId)
 {
 	for (UserCurrencyData& userCurrencyData : currencyData[guildId])
 	{
@@ -222,7 +222,7 @@ UserCurrencyData& CurrencyModule::getUserCurrencyData(snowflake_t guildId, snowf
 void CurrencyModule::wallet(const Message& message, const Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
-	snowflake_t userId = 0;
+	UserId userId = 0;
 
 	if (args.size() == 1)
 	{
@@ -230,7 +230,7 @@ void CurrencyModule::wallet(const Message& message, const Channel& channel)
 	}
 	else
 	{
-		userId = UmikoBot::get().getUserFromArgument(channel.guildId(), args[1]);
+		userId = UmikoBot::get().getUserIdFromArgument(channel.guildId(), args[1]);
 	}
 
 	if (!userId)
@@ -286,8 +286,8 @@ void CurrencyModule::donate(const Message& message, const Channel& channel)
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	
 	int amountInCents = args[1].toDouble() * 100;
-	snowflake_t receiverId = UmikoBot::get().getUserFromArgument(channel.guildId(), args[2]);
-	snowflake_t senderId = message.author().id();
+	UserId receiverId = UmikoBot::get().getUserIdFromArgument(channel.guildId(), args[2]);
+	UserId senderId = message.author().id();
 
 	if (!receiverId)
 	{
@@ -332,8 +332,8 @@ void CurrencyModule::steal(const Message& message, const Channel& channel)
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 
 	int amountInCents = args[1].toDouble() * 100;
-	snowflake_t victimId = UmikoBot::get().getUserFromArgument(channel.guildId(), args[2]);
-	snowflake_t thiefId = message.author().id();
+	UserId victimId = UmikoBot::get().getUserIdFromArgument(channel.guildId(), args[2]);
+	UserId thiefId = message.author().id();
 
 	// Just for ease of use
 	UserCurrencyData& victimData = getUserCurrencyData(channel.guildId(), victimId);
@@ -448,7 +448,7 @@ void CurrencyModule::compensate(const Message& message, const Channel& channel)
 	}
 	else
 	{
-		snowflake_t userId = UmikoBot::get().getUserFromArgument(channel.guildId(), args[2]);
+		UserId userId = UmikoBot::get().getUserIdFromArgument(channel.guildId(), args[2]);
 		if (!userId)
 		{
 			SEND_MESSAGE("Could not find user!");

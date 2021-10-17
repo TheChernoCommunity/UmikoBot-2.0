@@ -4,6 +4,7 @@
 #include <Discord/Objects/Guild.h>
 #include <Discord/Objects/GuildMember.h>
 
+#include "core/Core.h"
 #include "core/Data.h"
 #include "modules/Module.h"
 
@@ -16,19 +17,19 @@ public:
 	void operator=(const UmikoBot&) = delete;
 	~UmikoBot();
 
-	bool isOwner(snowflake_t guildId, snowflake_t userId);
-	const QList<Discord::Role>& getRoles(snowflake_t guildId);
+	bool isOwner(GuildId guildId, UserId userId);
+	const QList<Discord::Role>& getRoles(GuildId guildId);
 	const QList<Module*>& getModules() const { return modules; }
-	QMap<snowflake_t, GuildData>& getGuildData() { return guildData; }
+	QMap<GuildId, GuildData>& getGuildData() { return guildData; }
 
-	const QString& getNickname(snowflake_t guildId, snowflake_t userId);
-	const QString& getUsername(snowflake_t guildId, snowflake_t userId);
-	const QString& getName(snowflake_t guildId, snowflake_t userId);
-	Discord::Promise<QString>& getAvatar(snowflake_t guildId, snowflake_t userId);
+	const QString& getNickname(GuildId guildId, UserId userId);
+	const QString& getUsername(GuildId guildId, UserId userId);
+	const QString& getName(GuildId guildId, UserId userId);
+	Discord::Promise<QString>& getAvatar(GuildId guildId, UserId userId);
 
-	snowflake_t getUserFromArgument(snowflake_t guildId, const QString& argument);
-	snowflake_t getUserIdFromMention(snowflake_t guildId, const QString& mention);
-	Discord::Promise<Discord::Channel>& getChannelFromArgument(snowflake_t guildId, const QString& argument);
+	UserId getUserIdFromArgument(GuildId guildId, const QString& argument);
+	UserId getUserIdFromMention(GuildId guildId, const QString& mention);
+	Discord::Promise<Discord::Channel>& getChannelFromArgument(GuildId guildId, const QString& argument);
 
 private:
 	UmikoBot(QObject* parent = nullptr);
@@ -38,8 +39,8 @@ private:
 	void load();
 	void loadGuildData();
 	
-	void initialiseGuilds(snowflake_t afterId = 0);
-	void initialiseGuildMembers(snowflake_t guildId, snowflake_t afterId = 0);
+	void initialiseGuilds(GuildId afterId = 0);
+	void initialiseGuildMembers(GuildId guildId, UserId afterId = 0);
 
 private slots:
 	void umikoOnReady();
@@ -48,23 +49,23 @@ private slots:
 	void umikoOnGuildCreate(const Discord::Guild& guild);
 	void umikoOnGuildUpdate(const Discord::Guild& guild);
 
-	void umikoOnGuildRoleUpdate(snowflake_t guildId, const Discord::Role& role);
-	void umikoOnGuildRoleDelete(snowflake_t guildId, snowflake_t roleId);
+	void umikoOnGuildRoleUpdate(GuildId guildId, const Discord::Role& role);
+	void umikoOnGuildRoleDelete(GuildId guildId, RoleId roleId);
 
-	void umikoOnGuildMemberAdd(const Discord::GuildMember& member, snowflake_t guildId);
-	void umikoOnGuildMemberUpdate(snowflake_t guildId, const QList<snowflake_t>& roles, const Discord::User& user, const QString& nickname);
-	void umikoOnGuildMemberRemove(snowflake_t guildId, const Discord::User& user);
+	void umikoOnGuildMemberAdd(const Discord::GuildMember& member, GuildId guildId);
+	void umikoOnGuildMemberUpdate(GuildId guildId, const QList<RoleId>& roles, const Discord::User& user, const QString& nickname);
+	void umikoOnGuildMemberRemove(GuildId guildId, const Discord::User& user);
 
 	void umikoOnMessageCreate(const Discord::Message& message);
 	
 public:
-	snowflake_t primaryChannel;
+	ChannelId primaryChannel;
 
 private:
 	QTimer saveTimer;
 
 	QList<Module*> modules;
-	QMap<snowflake_t /* guildId */, GuildData> guildData;
+	QMap<GuildId, GuildData> guildData;
 
 	constexpr inline static const char* SETTINGS_LOCATION = "configs/settings.json";
 };

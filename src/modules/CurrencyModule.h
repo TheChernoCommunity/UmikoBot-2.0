@@ -1,10 +1,11 @@
 #pragma once
 
+#include "core/Core.h"
 #include "modules/Module.h"
 
 struct UserCurrencyData
 {
-	snowflake_t userId;
+	UserId userId;
 	int balanceInCents = 0;
 
 	bool hasClaimedDaily = false;
@@ -38,7 +39,7 @@ struct GuildCurrencyConfig
 
 struct GuildGambleData
 {
-	snowflake_t currentUserId = 0;
+	UserId currentUserId = 0;
 	int amountBetInCents;
 	QTimer* idleTimeoutTimer = nullptr;
 };
@@ -78,12 +79,12 @@ protected:
 	void onMessage(const Discord::Message&, const Discord::Channel&) override;
 	
 private:
-	UserCurrencyData& getUserCurrencyData(snowflake_t guildId, snowflake_t userId);
+	UserCurrencyData& getUserCurrencyData(GuildId guildId, UserId userId);
 
 private:
-	QMap<snowflake_t /* guildId */, GuildCurrencyConfig> currencyConfigs;
-	QMap<snowflake_t /* guildId */, QList<UserCurrencyData>> currencyData;
-	QMap<snowflake_t /* guildId */, GuildGambleData> gambleData;
+	QMap<GuildId, GuildCurrencyConfig> currencyConfigs;
+	QMap<GuildId, QList<UserCurrencyData>> currencyData;
+	QMap<GuildId, GuildGambleData> gambleData;
 
 	QTimer dayTimer;
 };
