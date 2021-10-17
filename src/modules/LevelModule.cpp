@@ -28,6 +28,7 @@ LevelModule::LevelModule()
 	
 	namespace CP = CommandPermission;
 
+	registerCommand(Commands::Top, "top" OPTIONAL(UNSIGNED_INTEGER) OPTIONAL(UNSIGNED_INTEGER), CP::User, CALLBACK(top));
 	registerCommand(Commands::GiveXp, "give-xp" USER INTEGER OPTIONAL(SPACE "level" OPTIONAL("s")), CP::Moderator, CALLBACK(giveXp));
 	registerCommand(Commands::GiveXp, "take-xp" USER INTEGER OPTIONAL(SPACE "level" OPTIONAL("s")), CP::Moderator, CALLBACK(takeXp));
 }
@@ -91,6 +92,78 @@ int LevelModule::getCurrentLevel(GuildId guildId, UserId userId)
 	}
 
 	return MAX_LEVEL;
+}
+
+void LevelModule::top(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	unsigned int min = 1;
+	unsigned int max = 30;
+
+	if (args.size() == 2)
+	{
+		max = args[1].toUInt();
+	}
+	else if (args.size() == 3)
+	{
+		min = args[1].toUInt();
+		max = args[2].toUInt();
+	}
+
+	if (min == 0 || max == 0)
+	{
+		SEND_MESSAGE("Your arguments must be greater than 0!");
+		return;
+	}
+
+	QList<UserLevelData>& leaderboard = levelData[channel.guildId()];
+	if (min > (unsigned int) leaderboard.size())
+	{
+		SEND_MESSAGE("Not enough members to create the list!");
+		return;
+	}
+	if (max > (unsigned int) leaderboard.size())
+	{
+		max = (unsigned int) leaderboard.size();
+	}
+	if (min > max)
+	{
+		SEND_MESSAGE("The upper bound must be greater than the lower bound!");
+		return;
+	}
+
+	qSort(leaderboard.begin(), leaderboard.end(), [](const UserLevelData& first, const UserLevelData& second)
+	{
+		return first.currentXp > second.currentXp;
+	});
+
+	QString description = "";
+	unsigned int numberOfDigits = QString::number(max).size();
+	unsigned int rank = min;
+
+	for (unsigned int i = min; i <= max; i++)
+	{
+		QString name = UmikoBot::get().getName(channel.guildId(), leaderboard[i - 1].userId);
+		if (name.isEmpty())
+		{
+			if (max < (unsigned int) leaderboard.size())
+			{
+				max += 1;
+			}
+
+			continue;
+		}
+
+		description += QString("`%1`) **%2** - Level %3\n").arg(QString::number(rank).rightJustified(numberOfDigits, ' '), name,
+																QString::number(getCurrentLevel(channel.guildId(), leaderboard[i - 1].userId)));
+		rank += 1;
+	}
+
+	Embed embed;
+	embed.setTitle(QString("XP Leaderboard (From %1 to %2)").arg(QString::number(min), QString::number(max)));
+	embed.setDescription(description);
+	embed.setColor(qrand() % 0xffffff);
+	SEND_MESSAGE(embed);
 }
 
 void LevelModule::giveXp(const Message& message, const Channel& channel)

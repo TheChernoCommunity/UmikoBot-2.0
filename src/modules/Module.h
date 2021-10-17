@@ -53,6 +53,7 @@ CREATE_COMMANDS(
 	SetPrimaryChannel,
 
 	// Level Module
+	Top,
 	GiveXp,
 	TakeXp,
 	

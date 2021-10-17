@@ -21,6 +21,7 @@ public:
 	LevelModule();
 	~LevelModule();
 
+	void top(const Discord::Message&, const Discord::Channel&);
 	void giveXp(const Discord::Message&, const Discord::Channel&);
 	void takeXp(const Discord::Message&, const Discord::Channel&);
 	

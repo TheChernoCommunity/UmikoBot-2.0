@@ -599,10 +599,10 @@ void CurrencyModule::richlist(const Message& message, const Channel& channel)
 			continue;
 		}
 
-		rank += 1;
 		description += QString("`%1`) **%2** - %3 %4\n").arg(QString::number(rank).rightJustified(numberOfDigits, ' '), name,
 															 QString::number(leaderboard[i - 1].balanceInCents / 100.0f),
 															 currencyConfigs[channel.guildId()].currencyAbbreviation);
+		rank += 1;
 	}
 
 	Embed embed;
