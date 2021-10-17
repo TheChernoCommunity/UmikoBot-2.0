@@ -360,7 +360,18 @@ Promise<Channel>& UmikoBot::getChannelFromArgument(GuildId guildId, const QStrin
 				}
 			}
 		}
-
+		else
+		{
+			for (const Channel& channel : channels)
+			{
+				if (channel.name() == argument)
+				{
+					promise->resolve(channel);
+					return;
+				}
+			}
+		}
+		
 		promise->reject();
 	});
 
