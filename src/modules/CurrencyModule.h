@@ -26,12 +26,12 @@ struct GuildCurrencyConfig
 	int dailyStreakBonus = 5000;
 	int dailyStreakBonusPeriod = 3;
 
-//	double randomGiveawayChance = 0.0005; // assuming approximately 2000 messages per day
-	double randomGiveawayChance = 0.05; // assuming approximately 2000 messages per day
+	double randomGiveawayChance = 0.0005; // assuming approximately 2000 messages per day
 	int randomGiveawayReward = 30000;
 	bool hasDoneRandomGiveaway = false;
 	bool randomGiveawayInProgress = false;
 	UserId randomGiveawayClaimer = 0;
+	QTimer* randomGiveawayTimer = nullptr;
 	
 	double stealSuccessBaseChance = 0.4;
 	double stealFineAmount = 0.5; // Portion of attempted steal amount

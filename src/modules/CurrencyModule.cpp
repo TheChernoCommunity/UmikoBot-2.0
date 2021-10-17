@@ -17,14 +17,42 @@ CurrencyModule::CurrencyModule()
 		// Resets daily collection timeout and removes users no longer in the server
 		for (GuildId guildId : currencyData.keys())
 		{
+			GuildCurrencyConfig& guildConfig = currencyConfigs[guildId];
+			
 			for (int userIndex = 0; userIndex < currencyData[guildId].size(); userIndex++)
 			{
 				UserCurrencyData& userCurrencyData = currencyData[guildId][userIndex];
+				if (!userCurrencyData.hasClaimedDaily)
+				{
+					userCurrencyData.dailyStreak = 0;
+				}
+				
 				userCurrencyData.hasClaimedDaily = false;
-				userCurrencyData.dailyStreak = 0;
 
 				// TODO(fkp): Each module should be able to react to guild member remove
 			}
+
+			if (!guildConfig.hasDoneRandomGiveaway)
+			{
+				guildConfig.randomGiveawayInProgress = true;
+				UmikoBot::get().createMessage(UmikoBot::get().primaryChannel,
+											  QString("Hey everyone! Today's freebie expires in **60 seconds**! Go `%1claim` it now!")
+											  .arg(UmikoBot::get().getGuildData()[guildId].prefix));
+			}
+
+			if (!guildConfig.randomGiveawayTimer)
+			{
+				guildConfig.randomGiveawayTimer = new QTimer();
+			}
+			guildConfig.randomGiveawayTimer->setSingleShot(true);
+			guildConfig.randomGiveawayTimer->setInterval(60 * 1000);
+			guildConfig.randomGiveawayTimer->start();
+			QObject::connect(guildConfig.randomGiveawayTimer, &QTimer::timeout, [this, guildId]()
+			{
+				currencyConfigs[guildId].randomGiveawayInProgress = false;
+				currencyConfigs[guildId].hasDoneRandomGiveaway = false;
+				currencyConfigs[guildId].randomGiveawayClaimer = 0;
+			});
 		}
 	});
 
@@ -724,6 +752,7 @@ void CurrencyModule::bribe(const Message& message, const Channel& channel)
 void CurrencyModule::claim(const Message& message, const Channel& channel)
 {
 	GuildCurrencyConfig& guildConfig = currencyConfigs[channel.guildId()];
+	UserCurrencyData& userCurrencyData = getUserCurrencyData(channel.guildId(), message.author().id());
 	Embed embed;
 	embed.setColor(qrand() % 0xffffff);;
 	
@@ -736,8 +765,13 @@ void CurrencyModule::claim(const Message& message, const Channel& channel)
 	}
 	else if (guildConfig.randomGiveawayInProgress)
 	{
-		// TODO(fkp): Jail check
-		getUserCurrencyData(channel.guildId(), message.author().id()).balanceInCents += guildConfig.randomGiveawayReward;
+		if (userCurrencyData.jailTimer)
+		{
+			SEND_MESSAGE("You are in jail!");
+			return;
+		}
+		
+		userCurrencyData.balanceInCents += guildConfig.randomGiveawayReward;
 		guildConfig.hasDoneRandomGiveaway = true;
 		guildConfig.randomGiveawayInProgress = false;
 		guildConfig.randomGiveawayClaimer = message.author().id();
