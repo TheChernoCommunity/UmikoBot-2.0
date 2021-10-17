@@ -61,6 +61,7 @@ CREATE_COMMANDS(
 	Richlist,
 	Gamble,
 	Bribe,
+	Claim,
 
 	SetCurrencyName,
 	SetMaxDebt,

@@ -38,6 +38,7 @@ CurrencyModule::CurrencyModule()
 	registerCommand(Commands::Richlist, "richlist" OPTIONAL(UNSIGNED_INTEGER) OPTIONAL(UNSIGNED_INTEGER), CP::User, CALLBACK(richlist));
 	registerCommand(Commands::Gamble, "gamble" OPTIONAL(UNSIGNED_DECIMAL), CP::User, CALLBACK(gamble));
 	registerCommand(Commands::Bribe, "bribe" UNSIGNED_DECIMAL, CP::User, CALLBACK(bribe));
+	registerCommand(Commands::Claim, "claim", CP::User, CALLBACK(claim));
 
 	registerCommand(Commands::SetCurrencyName, "set-currency-name" OPTIONAL(IDENTIFIER IDENTIFIER), CP::Moderator, CALLBACK(setCurrencyName));
 	registerCommand(Commands::SetMaxDebt, "set-max-debt" OPTIONAL(DECIMAL), CP::Moderator, CALLBACK(setMaxDebt));
@@ -169,6 +170,23 @@ void CurrencyModule::onLoad(const QJsonObject& mainObject)
 
 void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 {
+	std::random_device randomDevice;
+	std::mt19937 prng { randomDevice() };
+
+	// Random giveaway
+	GuildCurrencyConfig& guildConfig = currencyConfigs[channel.guildId()];
+	if (!guildConfig.hasDoneRandomGiveaway && !guildConfig.randomGiveawayInProgress)
+	{
+		std::uniform_real_distribution<> distribution { 0, 1 };
+		if (distribution(prng) <= guildConfig.randomGiveawayChance)
+		{
+			guildConfig.randomGiveawayInProgress = true;
+			SEND_MESSAGE(QString("Hey everyone! **FREEBIE** available now! Go `%1claim` some juicy coins!")
+						 .arg(UmikoBot::get().getGuildData()[channel.guildId()].prefix));
+		}
+	}
+	
+	// Gamble game
 	if (gambleData[channel.guildId()].currentUserId == message.author().id())
 	{
 		unsigned int guess = message.content().toUInt(); // Returns 0 if failed
@@ -179,8 +197,6 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 			return;
 		}
 
-		std::random_device randomDevice;
-		std::mt19937 prng { randomDevice() };
 		std::uniform_int_distribution<> distribution { 1, 5 };
 		
 		Embed embed;
@@ -193,8 +209,7 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 			embed.setColor(0x00ff00);
 			embed.setTitle("You Won!!!");
 			embed.setDescription(QString("Congrats! **%1 %2** has been placed in your bank account!")
-								 .arg(QString::number(amountWon / 100.0f),
-									  currencyConfigs[channel.guildId()].currencyAbbreviation));
+								 .arg(QString::number(amountWon / 100.0f), guildConfig.currencyAbbreviation));
 		}
 		else
 		{
@@ -204,8 +219,7 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 			embed.setColor(0xff0000);
 			embed.setTitle("You Lost!");
 			embed.setDescription(QString("Better luck next time! **%1 %2** has been taken from your account.")
-								 .arg(QString::number(amountLost / 100.0f),
-									  currencyConfigs[channel.guildId()].currencyAbbreviation));
+								 .arg(QString::number(amountLost / 100.0f), guildConfig.currencyAbbreviation));
 		}
 
 		gambleData[channel.guildId()].currentUserId = 0;
@@ -705,6 +719,43 @@ void CurrencyModule::bribe(const Message& message, const Channel& channel)
 		SEND_MESSAGE(QString(":police_officer: Your bribes don't affect my loyalty! :police_officer:\n"
 							 "Enjoy rotting in jail for another **%1 minutes**!\n").arg(guildConfig.bribeExtraJailTimeMinutes));
 	}
+}
+
+void CurrencyModule::claim(const Message& message, const Channel& channel)
+{
+	GuildCurrencyConfig& guildConfig = currencyConfigs[channel.guildId()];
+	Embed embed;
+	embed.setColor(qrand() % 0xffffff);;
+	
+	if (guildConfig.hasDoneRandomGiveaway)
+	{
+		embed.setTitle("Freebie Already Claimed");
+		embed.setDescription(QString("Sorry, today's freebie has been claimed by **%1** :cry:\n\n"
+									 "But you can always try again tomorrow!")
+							 .arg(UmikoBot::get().getName(channel.guildId(), guildConfig.randomGiveawayClaimer)));
+	}
+	else if (guildConfig.randomGiveawayInProgress)
+	{
+		// TODO(fkp): Jail check
+		getUserCurrencyData(channel.guildId(), message.author().id()).balanceInCents += guildConfig.randomGiveawayReward;
+		guildConfig.hasDoneRandomGiveaway = true;
+		guildConfig.randomGiveawayInProgress = false;
+		guildConfig.randomGiveawayClaimer = message.author().id();
+		
+		embed.setTitle("Congratulations!");
+		embed.setColor(0x00ff00);
+		embed.setDescription(QString(":drum: And today's freebie goes to **%1**!\n\n"
+									 "Congratulations! You just got **%2 %3**!").arg(UmikoBot::get().getName(channel.guildId(), message.author().id()),
+																					 QString::number(guildConfig.randomGiveawayReward / 100.0f),
+																					 guildConfig.currencyAbbreviation));
+	}
+	else
+	{
+		embed.setTitle("Not Yet!");
+		embed.setDescription("**BRUH**, yOu CaN't JuSt GeT fReE sTuFf aNyTiMe!");
+	}
+
+	SEND_MESSAGE(embed);
 }
 
 void CurrencyModule::setCurrencyName(const Message& message, const Channel& channel)
