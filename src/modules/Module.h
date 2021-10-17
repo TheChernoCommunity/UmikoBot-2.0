@@ -68,6 +68,8 @@ CREATE_COMMANDS(
 	SetDailyReward,
 	SetDailyStreakBonus,
 	SetDailyStreakBonusPeriod,
+	SetRandomGiveawayChance,
+	SetRandomGiveawayReward,
 	SetStealSuccessChance,
 	SetStealFine,
 	SetStealVictimBonus,

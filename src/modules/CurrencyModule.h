@@ -76,6 +76,8 @@ public:
 	void setDailyReward(const Discord::Message&, const Discord::Channel&);
 	void setDailyStreakBonus(const Discord::Message&, const Discord::Channel&);
 	void setDailyStreakBonusPeriod(const Discord::Message&, const Discord::Channel&);
+	void setRandomGiveawayChance(const Discord::Message&, const Discord::Channel&);
+	void setRandomGiveawayReward(const Discord::Message&, const Discord::Channel&);
 	void setStealSuccessChance(const Discord::Message&, const Discord::Channel&);
 	void setStealFine(const Discord::Message&, const Discord::Channel&);
 	void setStealVictimBonus(const Discord::Message&, const Discord::Channel&);

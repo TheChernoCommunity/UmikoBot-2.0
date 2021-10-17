@@ -73,6 +73,8 @@ CurrencyModule::CurrencyModule()
 	registerCommand(Commands::SetDailyReward, "set-daily-reward" OPTIONAL(UNSIGNED_DECIMAL), CP::Moderator, CALLBACK(setDailyReward));
 	registerCommand(Commands::SetDailyStreakBonus, "set-daily-streak-bonus" OPTIONAL(UNSIGNED_DECIMAL), CP::Moderator, CALLBACK(setDailyStreakBonus));
 	registerCommand(Commands::SetDailyStreakBonusPeriod, "set-daily-streak-bonus-period" OPTIONAL(UNSIGNED_INTEGER), CP::Moderator, CALLBACK(setDailyStreakBonusPeriod));
+	registerCommand(Commands::SetRandomGiveawayChance, "set-random-giveaway-chance" OPTIONAL(UNSIGNED_DECIMAL), CP::Moderator, CALLBACK(setRandomGiveawayChance));
+	registerCommand(Commands::SetRandomGiveawayReward, "set-random-giveaway-reward" OPTIONAL(UNSIGNED_DECIMAL), CP::Moderator, CALLBACK(setRandomGiveawayReward));
 	registerCommand(Commands::SetStealSuccessChance, "set-steal-success-chance" OPTIONAL(UNSIGNED_DECIMAL), CP::Moderator, CALLBACK(setStealSuccessChance));
 	registerCommand(Commands::SetStealFine, "set-steal-fine" OPTIONAL(DECIMAL), CP::Moderator, CALLBACK(setStealFine));
 	registerCommand(Commands::SetStealVictimBonus, "set-steal-victim-bonus" OPTIONAL(DECIMAL), CP::Moderator, CALLBACK(setStealVictimBonus));
@@ -104,7 +106,10 @@ void CurrencyModule::onSave(QJsonObject& mainObject) const
 		guildJson["rewardForDaily"] = currencyConfigs[guildId].rewardForDaily;
 		guildJson["dailyStreakBonus"] = currencyConfigs[guildId].dailyStreakBonus;
 		guildJson["dailyStreakBonusPeriod"] = currencyConfigs[guildId].dailyStreakBonusPeriod;
-		
+
+		guildJson["randomGiveawayChance"] = currencyConfigs[guildId].randomGiveawayChance;
+		guildJson["randomGiveawayReward"] = currencyConfigs[guildId].randomGiveawayReward;
+
 		guildJson["stealSuccessBaseChance"] = currencyConfigs[guildId].stealSuccessBaseChance;
 		guildJson["stealFineAmount"] = currencyConfigs[guildId].stealFineAmount;
 		guildJson["stealVictimBonus"] = currencyConfigs[guildId].stealVictimBonus;
@@ -161,6 +166,9 @@ void CurrencyModule::onLoad(const QJsonObject& mainObject)
 		currencyConfigs[guildId].dailyStreakBonus = guildJson["dailyStreakBonus"].toInt();
 		currencyConfigs[guildId].dailyStreakBonusPeriod = guildJson["dailyStreakBonusPeriod"].toInt();
 		
+		currencyConfigs[guildId].randomGiveawayChance = guildJson["randomGiveawayChance"].toDouble();
+		currencyConfigs[guildId].randomGiveawayReward = guildJson["randomGiveawayReward"].toInt();
+
 		currencyConfigs[guildId].stealSuccessBaseChance = guildJson["stealSuccessBaseChance"].toDouble();
 		currencyConfigs[guildId].stealFineAmount = guildJson["stealFineAmount"].toDouble();
 		currencyConfigs[guildId].stealVictimBonus = guildJson["stealVictimBonus"].toDouble();
@@ -851,6 +859,29 @@ void CurrencyModule::setDailyStreakBonusPeriod(const Message& message, const Cha
 
 	SEND_MESSAGE(QString("Period for daily streak bonus is **%1 days**")
 				 .arg(QString::number(currencyConfigs[channel.guildId()].dailyStreakBonusPeriod)));
+}
+
+void CurrencyModule::setRandomGiveawayChance(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() > 1)
+	{
+		currencyConfigs[channel.guildId()].randomGiveawayChance = args[1].toDouble();
+	}
+
+	SEND_MESSAGE(QString("Random giveaway chance is **%1**").arg(QString::number(currencyConfigs[channel.guildId()].randomGiveawayChance)));
+}
+
+void CurrencyModule::setRandomGiveawayReward(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() > 1)
+	{
+		currencyConfigs[channel.guildId()].randomGiveawayReward = args[1].toDouble() * 100;
+	}
+
+	SEND_MESSAGE(QString("Random giveaway reward is **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].randomGiveawayReward / 100.0f),
+																	currencyConfigs[channel.guildId()].currencyAbbreviation));
 }
 
 void CurrencyModule::setStealSuccessChance(const Message& message, const Channel& channel)
