@@ -32,7 +32,7 @@ CurrencyModule::CurrencyModule()
 				// TODO(fkp): Each module should be able to react to guild member remove
 			}
 
-			if (!guildConfig.hasDoneRandomGiveaway)
+			if (!guildConfig.randomGiveawayDone)
 			{
 				guildConfig.randomGiveawayInProgress = true;
 				UmikoBot::get().createMessage(UmikoBot::get().primaryChannel,
@@ -50,7 +50,7 @@ CurrencyModule::CurrencyModule()
 			QObject::connect(guildConfig.randomGiveawayTimer, &QTimer::timeout, [this, guildId]()
 			{
 				currencyConfigs[guildId].randomGiveawayInProgress = false;
-				currencyConfigs[guildId].hasDoneRandomGiveaway = false;
+				currencyConfigs[guildId].randomGiveawayDone = false;
 				currencyConfigs[guildId].randomGiveawayClaimer = 0;
 			});
 		}
@@ -203,7 +203,7 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 
 	// Random giveaway
 	GuildCurrencyConfig& guildConfig = currencyConfigs[channel.guildId()];
-	if (!guildConfig.hasDoneRandomGiveaway && !guildConfig.randomGiveawayInProgress)
+	if (!guildConfig.randomGiveawayDone && !guildConfig.randomGiveawayInProgress)
 	{
 		std::uniform_real_distribution<> distribution { 0, 1 };
 		if (distribution(prng) <= guildConfig.randomGiveawayChance)
@@ -756,7 +756,7 @@ void CurrencyModule::claim(const Message& message, const Channel& channel)
 	Embed embed;
 	embed.setColor(qrand() % 0xffffff);;
 	
-	if (guildConfig.hasDoneRandomGiveaway)
+	if (guildConfig.randomGiveawayDone)
 	{
 		embed.setTitle("Freebie Already Claimed");
 		embed.setDescription(QString("Sorry, today's freebie has been claimed by **%1** :cry:\n\n"
@@ -772,7 +772,7 @@ void CurrencyModule::claim(const Message& message, const Channel& channel)
 		}
 		
 		userCurrencyData.balanceInCents += guildConfig.randomGiveawayReward;
-		guildConfig.hasDoneRandomGiveaway = true;
+		guildConfig.randomGiveawayDone = true;
 		guildConfig.randomGiveawayInProgress = false;
 		guildConfig.randomGiveawayClaimer = message.author().id();
 		
