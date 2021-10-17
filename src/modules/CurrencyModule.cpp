@@ -40,8 +40,10 @@ CurrencyModule::CurrencyModule()
 	registerCommand(Commands::Bribe, "bribe" UNSIGNED_DECIMAL, CP::User, CALLBACK(bribe));
 
 	registerCommand(Commands::SetCurrencyName, "set-currency-name" OPTIONAL(IDENTIFIER IDENTIFIER), CP::Moderator, CALLBACK(setCurrencyName));
-	registerCommand(Commands::SetDailyReward, "set-daily-reward" OPTIONAL(UNSIGNED_DECIMAL), CP::Moderator, CALLBACK(setDailyReward));
 	registerCommand(Commands::SetMaxDebt, "set-max-debt" OPTIONAL(DECIMAL), CP::Moderator, CALLBACK(setMaxDebt));
+	registerCommand(Commands::SetDailyReward, "set-daily-reward" OPTIONAL(UNSIGNED_DECIMAL), CP::Moderator, CALLBACK(setDailyReward));
+	registerCommand(Commands::SetDailyStreakBonus, "set-daily-streak-bonus" OPTIONAL(UNSIGNED_DECIMAL), CP::Moderator, CALLBACK(setDailyStreakBonus));
+	registerCommand(Commands::SetDailyStreakBonusPeriod, "set-daily-streak-bonus-period" OPTIONAL(UNSIGNED_INTEGER), CP::Moderator, CALLBACK(setDailyStreakBonusPeriod));
 	registerCommand(Commands::SetStealSuccessChance, "set-steal-success-chance" OPTIONAL(UNSIGNED_DECIMAL), CP::Moderator, CALLBACK(setStealSuccessChance));
 	registerCommand(Commands::SetStealFine, "set-steal-fine" OPTIONAL(DECIMAL), CP::Moderator, CALLBACK(setStealFine));
 	registerCommand(Commands::SetStealVictimBonus, "set-steal-victim-bonus" OPTIONAL(DECIMAL), CP::Moderator, CALLBACK(setStealVictimBonus));
@@ -68,8 +70,11 @@ void CurrencyModule::onSave(QJsonObject& mainObject) const
 		guildJson["currencyName"] = currencyConfigs[guildId].currencyName;
 		guildJson["currencyAbbreviation"] = currencyConfigs[guildId].currencyAbbreviation;
 		
-		guildJson["rewardForDaily"] = currencyConfigs[guildId].rewardForDaily;
 		guildJson["maxDebt"] = currencyConfigs[guildId].maxDebt;
+		
+		guildJson["rewardForDaily"] = currencyConfigs[guildId].rewardForDaily;
+		guildJson["dailyStreakBonus"] = currencyConfigs[guildId].dailyStreakBonus;
+		guildJson["dailyStreakBonusPeriod"] = currencyConfigs[guildId].dailyStreakBonusPeriod;
 		
 		guildJson["stealSuccessBaseChance"] = currencyConfigs[guildId].stealSuccessBaseChance;
 		guildJson["stealFineAmount"] = currencyConfigs[guildId].stealFineAmount;
@@ -96,6 +101,7 @@ void CurrencyModule::onSave(QJsonObject& mainObject) const
 			QJsonObject userJson {};
 			userJson["balanceInCents"] = userCurrencyData.balanceInCents;
 			userJson["hasClaimedDaily"] = userCurrencyData.hasClaimedDaily;
+			userJson["dailyStreak"] = userCurrencyData.dailyStreak;
 
 			guildJson[QString::number(userCurrencyData.userId)] = userJson;
 		}
@@ -120,8 +126,11 @@ void CurrencyModule::onLoad(const QJsonObject& mainObject)
 		currencyConfigs[guildId].currencyName = guildJson["currencyName"].toString();
 		currencyConfigs[guildId].currencyAbbreviation = guildJson["currencyAbbreviation"].toString();
 		
-		currencyConfigs[guildId].rewardForDaily = guildJson["rewardForDaily"].toInt();
 		currencyConfigs[guildId].maxDebt = guildJson["maxDebt"].toInt();
+
+		currencyConfigs[guildId].rewardForDaily = guildJson["rewardForDaily"].toInt();
+		currencyConfigs[guildId].dailyStreakBonus = guildJson["dailyStreakBonus"].toInt();
+		currencyConfigs[guildId].dailyStreakBonusPeriod = guildJson["dailyStreakBonusPeriod"].toInt();
 		
 		currencyConfigs[guildId].stealSuccessBaseChance = guildJson["stealSuccessBaseChance"].toDouble();
 		currencyConfigs[guildId].stealFineAmount = guildJson["stealFineAmount"].toDouble();
@@ -152,6 +161,7 @@ void CurrencyModule::onLoad(const QJsonObject& mainObject)
 				userId,
 				userJson["balanceInCents"].toInt(),
 				userJson["hasClaimedDaily"].toBool(),
+				userJson["dailyStreak"].toInt(),
 			});
 		}
 	}
@@ -710,6 +720,18 @@ void CurrencyModule::setCurrencyName(const Message& message, const Channel& chan
 																				   currencyConfigs[channel.guildId()].currencyAbbreviation));
 }
 
+void CurrencyModule::setMaxDebt(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() > 1)
+	{
+		currencyConfigs[channel.guildId()].maxDebt = args[1].toDouble() * 100;
+	}
+	
+	SEND_MESSAGE(QString("Maximum debt is **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].maxDebt / 100.0f),
+														  currencyConfigs[channel.guildId()].currencyAbbreviation));
+}
+
 void CurrencyModule::setDailyReward(const Message& message, const Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
@@ -722,16 +744,28 @@ void CurrencyModule::setDailyReward(const Message& message, const Channel& chann
 															  currencyConfigs[channel.guildId()].currencyAbbreviation));
 }
 
-void CurrencyModule::setMaxDebt(const Message& message, const Channel& channel)
+void CurrencyModule::setDailyStreakBonus(const Message& message, const Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	if (args.size() > 1)
 	{
-		currencyConfigs[channel.guildId()].maxDebt = args[1].toDouble() * 100;
+		currencyConfigs[channel.guildId()].dailyStreakBonus = args[1].toDouble() * 100;
 	}
-	
-	SEND_MESSAGE(QString("Maximum debt is **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].maxDebt / 100.0f),
-														  currencyConfigs[channel.guildId()].currencyAbbreviation));
+
+	SEND_MESSAGE(QString("Bonus for daily streak is **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].dailyStreakBonus / 100.0f),
+																	currencyConfigs[channel.guildId()].currencyAbbreviation));
+}
+
+void CurrencyModule::setDailyStreakBonusPeriod(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() > 1)
+	{
+		currencyConfigs[channel.guildId()].dailyStreakBonusPeriod = args[1].toInt();
+	}
+
+	SEND_MESSAGE(QString("Period for daily streak bonus is **%1 days**")
+				 .arg(QString::number(currencyConfigs[channel.guildId()].dailyStreakBonusPeriod)));
 }
 
 void CurrencyModule::setStealSuccessChance(const Message& message, const Channel& channel)

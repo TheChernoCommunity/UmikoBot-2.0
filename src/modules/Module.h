@@ -63,8 +63,10 @@ CREATE_COMMANDS(
 	Bribe,
 
 	SetCurrencyName,
-	SetDailyReward,
 	SetMaxDebt,
+	SetDailyReward,
+	SetDailyStreakBonus,
+	SetDailyStreakBonusPeriod,
 	SetStealSuccessChance,
 	SetStealFine,
 	SetStealVictimBonus,

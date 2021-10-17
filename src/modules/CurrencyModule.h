@@ -9,7 +9,7 @@ struct UserCurrencyData
 	int balanceInCents = 0;
 
 	bool hasClaimedDaily = false;
-	unsigned int dailyStreak = 0;
+	int dailyStreak = 0;
 	
 	QTimer* jailTimer = nullptr;
 	bool hasUsedBribe = false;
@@ -24,7 +24,7 @@ struct GuildCurrencyConfig
 	
 	int rewardForDaily = 10000;
 	int dailyStreakBonus = 5000;
-	unsigned int dailyStreakBonusPeriod = 3;
+	int dailyStreakBonusPeriod = 3;
 
 	double stealSuccessBaseChance = 0.4;
 	double stealFineAmount = 0.5; // Portion of attempted steal amount
@@ -64,8 +64,10 @@ public:
 	void bribe(const Discord::Message&, const Discord::Channel&);
 
 	void setCurrencyName(const Discord::Message&, const Discord::Channel&);
-	void setDailyReward(const Discord::Message&, const Discord::Channel&);
 	void setMaxDebt(const Discord::Message&, const Discord::Channel&);
+	void setDailyReward(const Discord::Message&, const Discord::Channel&);
+	void setDailyStreakBonus(const Discord::Message&, const Discord::Channel&);
+	void setDailyStreakBonusPeriod(const Discord::Message&, const Discord::Channel&);
 	void setStealSuccessChance(const Discord::Message&, const Discord::Channel&);
 	void setStealFine(const Discord::Message&, const Discord::Channel&);
 	void setStealVictimBonus(const Discord::Message&, const Discord::Channel&);
