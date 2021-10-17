@@ -22,6 +22,7 @@ public:
 	~LevelModule();
 
 	void giveXp(const Discord::Message&, const Discord::Channel&);
+	void takeXp(const Discord::Message&, const Discord::Channel&);
 	
 protected:
 	void onSave(QJsonObject& mainObject) const override;
@@ -33,7 +34,9 @@ private:
 	UserLevelData& getUserLevelData(GuildId guildId, UserId userId);
 	void generateLevels();
 	int getCurrentLevel(GuildId guildId, UserId userId);
-	
+
+	void giveTakeXpImpl(const Discord::Message&, const Discord::Channel&, int multiplier);
+
 private:
 	QTimer messageXpTimer;
 	QList<long long int> levels; // index is level number, value is individual XP requirement (not cumulative)

@@ -54,6 +54,7 @@ CREATE_COMMANDS(
 
 	// Level Module
 	GiveXp,
+	TakeXp,
 	
 	// Currency Module
 	Wallet,

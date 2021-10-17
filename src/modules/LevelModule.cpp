@@ -29,6 +29,7 @@ LevelModule::LevelModule()
 	namespace CP = CommandPermission;
 
 	registerCommand(Commands::GiveXp, "give-xp" USER INTEGER OPTIONAL(SPACE "level" OPTIONAL("s")), CP::Moderator, CALLBACK(giveXp));
+	registerCommand(Commands::GiveXp, "take-xp" USER INTEGER OPTIONAL(SPACE "level" OPTIONAL("s")), CP::Moderator, CALLBACK(takeXp));
 }
 
 LevelModule::~LevelModule()
@@ -94,6 +95,16 @@ int LevelModule::getCurrentLevel(GuildId guildId, UserId userId)
 
 void LevelModule::giveXp(const Message& message, const Channel& channel)
 {
+	giveTakeXpImpl(message, channel, 1);
+}
+
+void LevelModule::takeXp(const Message& message, const Channel& channel)
+{
+	giveTakeXpImpl(message, channel, -1);
+}
+
+void LevelModule::giveTakeXpImpl(const Message& message, const Channel& channel, int multiplier)
+{
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 
 	UserId userId = UmikoBot::get().getUserIdFromArgument(channel.guildId(), args[1]);
@@ -103,7 +114,7 @@ void LevelModule::giveXp(const Message& message, const Channel& channel)
 		return;
 	}
 	
-	int amountToAdd = args[2].toInt();
+	int amountToAdd = args[2].toInt() * multiplier;
 	UserLevelData& userLevelData = getUserLevelData(channel.guildId(), userId);
 	long long int initialXp = userLevelData.currentXp;
 	int initialLevel = getCurrentLevel(channel.guildId(), userId);
@@ -112,24 +123,45 @@ void LevelModule::giveXp(const Message& message, const Channel& channel)
 	{
 		// Adds XP directly
 		userLevelData.currentXp += amountToAdd;
+
+		if (userLevelData.currentXp < 0)
+		{
+			userLevelData.currentXp = 0;
+		}
 	}
 	else
 	{
 		// Adds a number of levels
 		int currentLevel = getCurrentLevel(channel.guildId(), userId);
 
-		for (int i = 1; i < amountToAdd + 1; i++)
+		if (multiplier > 0)
 		{
-			if (currentLevel + i >= MAX_LEVEL)
+			for (int i = 1; i < amountToAdd + 1; i++)
 			{
-				break;
-			}
+				if (currentLevel + i >= MAX_LEVEL)
+				{
+					break;
+				}
 
-			userLevelData.currentXp += levels[currentLevel + i];
+				userLevelData.currentXp += levels[currentLevel + i];
+			}
+		}
+		else
+		{
+			for (int i = 0; i > amountToAdd; i--)
+			{
+				if (currentLevel + i < 0)
+				{
+					break;
+				}
+				
+				userLevelData.currentXp -= levels[currentLevel + i];
+			}
 		}
 	}
 
-	SEND_MESSAGE(QString("Added **%1 XP (%2 levels)** to %3!").arg(QString::number(userLevelData.currentXp - initialXp),
-																   QString::number(getCurrentLevel(channel.guildId(), userId) - initialLevel),
-																   UmikoBot::get().getName(channel.guildId(), userId)));
+	QString format = multiplier > 0 ? "Added **%1 XP (%2 levels)** to %3!" : "Removed **%1 XP (%2 levels)** from %3!";
+	SEND_MESSAGE(format.arg(QString::number(abs(userLevelData.currentXp - initialXp)),
+							QString::number(abs(getCurrentLevel(channel.guildId(), userId) - initialLevel)),
+							UmikoBot::get().getName(channel.guildId(), userId)));
 }
