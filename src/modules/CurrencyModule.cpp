@@ -21,6 +21,8 @@ CurrencyModule::CurrencyModule()
 			{
 				UserCurrencyData& userCurrencyData = currencyData[guildId][userIndex];
 				userCurrencyData.hasClaimedDaily = false;
+				userCurrencyData.dailyStreak = 0;
+
 				// TODO(fkp): Each module should be able to react to guild member remove
 			}
 		}
@@ -241,10 +243,10 @@ void CurrencyModule::wallet(const Message& message, const Channel& channel)
 
 	UmikoBot::get().getAvatar(channel.guildId(), userId).then([this, message, channel, userId](const QString& icon)
 	{
-		const GuildCurrencyConfig& guildCurrencyConfig = currencyConfigs[channel.guildId()];
-		QString desc = QString("Current %1s: **%2 %3**").arg(guildCurrencyConfig.currencyName,
+		const GuildCurrencyConfig& guildConfig = currencyConfigs[channel.guildId()];
+		QString desc = QString("Current %1s: **%2 %3**").arg(guildConfig.currencyName,
 															QString::number(getUserCurrencyData(channel.guildId(), userId).balanceInCents / 100.0f),
-															guildCurrencyConfig.currencyAbbreviation);
+															guildConfig.currencyAbbreviation);
 
 		Embed embed;
 		embed.setColor(qrand() % 0xffffff);
@@ -257,7 +259,7 @@ void CurrencyModule::wallet(const Message& message, const Channel& channel)
 void CurrencyModule::daily(const Message& message, const Channel& channel)
 {
 	UserCurrencyData& userCurrencyData = getUserCurrencyData(channel.guildId(), message.author().id());
-	const GuildCurrencyConfig& guildCurrencyConfig = currencyConfigs[channel.guildId()];
+	const GuildCurrencyConfig& guildConfig = currencyConfigs[channel.guildId()];
 
 	if (userCurrencyData.hasClaimedDaily)
 	{
@@ -273,11 +275,27 @@ void CurrencyModule::daily(const Message& message, const Channel& channel)
 		return;
 	}
 
-	userCurrencyData.balanceInCents += guildCurrencyConfig.rewardForDaily;
+	userCurrencyData.balanceInCents += guildConfig.rewardForDaily;
+	userCurrencyData.dailyStreak += 1;
 	userCurrencyData.hasClaimedDaily = true;
-	
-	QString output = QString("You now have **%1** more %2s in your wallet!").arg(QString::number(guildCurrencyConfig.rewardForDaily / 100.0f),
-																				 guildCurrencyConfig.currencyName);
+	QString output;
+	int streakDaysLeft = userCurrencyData.dailyStreak % guildConfig.dailyStreakBonusPeriod;
+
+	if (streakDaysLeft == 0)
+	{
+		userCurrencyData.balanceInCents += guildConfig.dailyStreakBonus;
+		output = QString("**Bonus!!!** You now have **%1** more %2s in your wallet!\n"
+						 "Streak: **%3**").arg(QString::number((guildConfig.rewardForDaily + guildConfig.dailyStreakBonus) / 100.0f),
+											   guildConfig.currencyName, QString::number(userCurrencyData.dailyStreak));
+	}
+	else
+	{
+		output = QString("You now have **%1** more %2s in your wallet!\n"
+						 "Streak: **%3/%4**").arg(QString::number(guildConfig.rewardForDaily / 100.0f), guildConfig.currencyName,
+												  QString::number(userCurrencyData.dailyStreak),
+												  QString::number(userCurrencyData.dailyStreak + (guildConfig.dailyStreakBonusPeriod - streakDaysLeft)));
+	}
+
 	SEND_MESSAGE(output);
 }
 
@@ -338,7 +356,7 @@ void CurrencyModule::steal(const Message& message, const Channel& channel)
 	// Just for ease of use
 	UserCurrencyData& victimData = getUserCurrencyData(channel.guildId(), victimId);
 	UserCurrencyData& thiefData = getUserCurrencyData(channel.guildId(), thiefId);
-	const GuildCurrencyConfig& guildCurrencyConfig = currencyConfigs[channel.guildId()];
+	const GuildCurrencyConfig& guildConfig = currencyConfigs[channel.guildId()];
 	
 	if (thiefData.jailTimer)
 	{
@@ -367,13 +385,13 @@ void CurrencyModule::steal(const Message& message, const Channel& channel)
 
 	// TODO(fkp): Check if victim is a bot
 
-	if (victimData.balanceInCents - amountInCents < guildCurrencyConfig.maxDebt)
+	if (victimData.balanceInCents - amountInCents < guildConfig.maxDebt)
 	{
 		SEND_MESSAGE("I can't let your victim go into serious debt!");
 		return;
 	}
 
-	if (thiefData.balanceInCents - (amountInCents * guildCurrencyConfig.stealFineAmount) < guildCurrencyConfig.maxDebt)
+	if (thiefData.balanceInCents - (amountInCents * guildConfig.stealFineAmount) < guildConfig.maxDebt)
 	{
 		SEND_MESSAGE("I can't let you go into serious debt!");
 		return;
@@ -381,7 +399,7 @@ void CurrencyModule::steal(const Message& message, const Channel& channel)
 
 	// https://www.desmos.com/calculator/lp80egcojn
 	// This success chance is in the range of 0 to 1
-	double successChance = guildCurrencyConfig.stealSuccessBaseChance * qExp(-0.0001 * qPow(amountInCents / 100.0f, 1.5));
+	double successChance = guildConfig.stealSuccessBaseChance * qExp(-0.0001 * qPow(amountInCents / 100.0f, 1.5));
 	std::random_device randomDevice;
 	std::mt19937 prng { randomDevice() };
 	std::uniform_real_distribution<> distribution { 0, 1 };
@@ -397,20 +415,20 @@ void CurrencyModule::steal(const Message& message, const Channel& channel)
 		embed.setColor(0x00ff00);
 		embed.setDescription(QString("%1 has discreetly stolen **%2 %3** from right under %4's nose!")
 							 .arg(UmikoBot::get().getName(channel.guildId(), thiefId),
-								  QString::number(amountInCents / 100.0f), guildCurrencyConfig.currencyAbbreviation,
+								  QString::number(amountInCents / 100.0f), guildConfig.currencyAbbreviation,
 								  UmikoBot::get().getName(channel.guildId(), victimId)));
 		SEND_MESSAGE(embed);
 	}
 	else
 	{
 		// Steal failure
-		victimData.balanceInCents += amountInCents * guildCurrencyConfig.stealVictimBonus;
-		thiefData.balanceInCents -= amountInCents * guildCurrencyConfig.stealFineAmount;
+		victimData.balanceInCents += amountInCents * guildConfig.stealVictimBonus;
+		thiefData.balanceInCents -= amountInCents * guildConfig.stealFineAmount;
 
 		if (thiefData.jailTimer) delete thiefData.jailTimer;
 		thiefData.jailTimer = new QTimer();
 		thiefData.jailTimer->setSingleShot(true);
-		thiefData.jailTimer->start(guildCurrencyConfig.stealJailTimeMinutes * 60 * 1000);
+		thiefData.jailTimer->start(guildConfig.stealJailTimeMinutes * 60 * 1000);
 		QObject::connect(thiefData.jailTimer, &QTimer::timeout, [this, channel, thiefId]()
 		{
 			delete getUserCurrencyData(channel.guildId(), thiefId).jailTimer;
@@ -423,10 +441,10 @@ void CurrencyModule::steal(const Message& message, const Channel& channel)
 		embed.setDescription(QString("%1 has been fined **%2 %3** and placed in jail.\n"
 									 "%4 has been granted **%5 %3** as compensation.")
 							 .arg(UmikoBot::get().getName(channel.guildId(), thiefId),
-								  QString::number((amountInCents * guildCurrencyConfig.stealFineAmount) / 100.0f),
-								  guildCurrencyConfig.currencyAbbreviation,
+								  QString::number((amountInCents * guildConfig.stealFineAmount) / 100.0f),
+								  guildConfig.currencyAbbreviation,
 								  UmikoBot::get().getName(channel.guildId(), victimId),
-								  QString::number((amountInCents * guildCurrencyConfig.stealVictimBonus) / 100.0f)));
+								  QString::number((amountInCents * guildConfig.stealVictimBonus) / 100.0f)));
 		SEND_MESSAGE(embed);
 	}
 }
@@ -538,7 +556,7 @@ void CurrencyModule::gamble(const Message& message, const Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	GuildGambleData& guildGambleData = gambleData[channel.guildId()];
-	GuildCurrencyConfig& guildCurrencyConfig = currencyConfigs[channel.guildId()];
+	GuildCurrencyConfig& guildConfig = currencyConfigs[channel.guildId()];
 
 	if (getUserCurrencyData(channel.guildId(), message.author().id()).jailTimer)
 	{
@@ -556,7 +574,7 @@ void CurrencyModule::gamble(const Message& message, const Channel& channel)
 
 	if (args.size() == 1)
 	{
-		guildGambleData.amountBetInCents = guildCurrencyConfig.gambleDefaultAmountBet;
+		guildGambleData.amountBetInCents = guildConfig.gambleDefaultAmountBet;
 	}
 	else
 	{
@@ -568,7 +586,7 @@ void CurrencyModule::gamble(const Message& message, const Channel& channel)
 		}
 	}
 
-	if (getUserCurrencyData(channel.guildId(), message.author().id()).balanceInCents - guildGambleData.amountBetInCents < guildCurrencyConfig.maxDebt)
+	if (getUserCurrencyData(channel.guildId(), message.author().id()).balanceInCents - guildGambleData.amountBetInCents < guildConfig.maxDebt)
 	{
 		SEND_MESSAGE("You're too poor to be gambling that much!");
 		return;
@@ -580,7 +598,7 @@ void CurrencyModule::gamble(const Message& message, const Channel& channel)
 	if (guildGambleData.idleTimeoutTimer) delete guildGambleData.idleTimeoutTimer;
 	guildGambleData.idleTimeoutTimer = new QTimer();
 	guildGambleData.idleTimeoutTimer->setSingleShot(true);
-	guildGambleData.idleTimeoutTimer->start(guildCurrencyConfig.gambleTimeoutSeconds * 1000);
+	guildGambleData.idleTimeoutTimer->start(guildConfig.gambleTimeoutSeconds * 1000);
 	QObject::connect(guildGambleData.idleTimeoutTimer, &QTimer::timeout, [this, message, channel]()
 	{
 		GuildGambleData& guildGambleData = gambleData[channel.guildId()];
@@ -601,7 +619,7 @@ void CurrencyModule::gamble(const Message& message, const Channel& channel)
 	embed.setDescription(QString("All you need to do to win is to correctly guess a number between **1** and **5**!\n"
 								 "Your Bet: **%1 %2**\n"
 								 "Potential Winnings: **%3 %2**\n").arg(QString::number(guildGambleData.amountBetInCents / 100.0f),
-																		guildCurrencyConfig.currencyAbbreviation,
+																		guildConfig.currencyAbbreviation,
 																		QString::number(guildGambleData.amountBetInCents * 4 / 100.0f)));
 	embed.setColor(qrand() % 0xffffff);
 	SEND_MESSAGE(embed);

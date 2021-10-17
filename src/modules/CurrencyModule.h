@@ -9,6 +9,7 @@ struct UserCurrencyData
 	int balanceInCents = 0;
 
 	bool hasClaimedDaily = false;
+	unsigned int dailyStreak = 0;
 	
 	QTimer* jailTimer = nullptr;
 	bool hasUsedBribe = false;
@@ -19,8 +20,11 @@ struct GuildCurrencyConfig
 	QString currencyName = "PandaCoin";
 	QString currencyAbbreviation = "PC";
 	
-	int rewardForDaily = 10000;
 	int maxDebt = -10000;
+	
+	int rewardForDaily = 10000;
+	int dailyStreakBonus = 5000;
+	unsigned int dailyStreakBonusPeriod = 3;
 
 	double stealSuccessBaseChance = 0.4;
 	double stealFineAmount = 0.5; // Portion of attempted steal amount
