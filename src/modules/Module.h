@@ -52,6 +52,9 @@ CREATE_COMMANDS(
 	Disable,
 	SetPrimaryChannel,
 
+	// Level Module
+	GiveXp,
+	
 	// Currency Module
 	Wallet,
 	Daily,
