@@ -35,6 +35,7 @@ void GlobalModule::onSave(QJsonObject& mainObject) const
 	}
 
 	mainObject["commandsEnabled"] = commandsEnabledObject;
+	mainObject["primaryChannel"] = QString::number(UmikoBot::get().primaryChannel);
 }
 
 void GlobalModule::onLoad(const QJsonObject& mainObject)
@@ -48,6 +49,8 @@ void GlobalModule::onLoad(const QJsonObject& mainObject)
 			command.enabled = commandsEnabledObject[command.name].toBool(true);
 		}
 	}
+
+	UmikoBot::get().primaryChannel = mainObject["primaryChannel"].toString().toULongLong();
 }
 
 void GlobalModule::help(const Message& message, const Channel& channel)
