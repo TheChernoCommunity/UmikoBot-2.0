@@ -99,6 +99,8 @@ void LevelModule::onLoad(const QJsonObject& mainObject)
 				(unsigned int) rankJson["minimumLevel"].toInt(),
 			});
 		}
+		
+		sortRanks(guildId);
 	}
 	
 	for (const QString& guildIdString : userDataObject.keys())
@@ -122,6 +124,29 @@ void LevelModule::onLoad(const QJsonObject& mainObject)
 void LevelModule::onMessage(const Message& message, const Channel& channel)
 {
 	getUserLevelData(channel.guildId(), message.author().id()).messageCount += 1;
+}
+
+void LevelModule::onStatus(QString& output, GuildId guildId, UserId userId)
+{
+	UserLevelData& userData = getUserLevelData(guildId, userId);
+	QList<UserLevelData>& leaderboard = levelData[guildId];
+	sortLeaderboard(guildId);
+
+	int leaderboardPosition = 0;
+	for (int i = 0; i < leaderboard.size(); i++)
+	{
+		if (leaderboard[i].userId == userId)
+		{
+			leaderboardPosition = i + 1;
+		}
+	}
+
+	int currentLevel = getCurrentLevel(guildId, userId);
+	output += QString("Rank: %1 (#%2)\n").arg(getCurrentRank(guildId, userId), QString::number(leaderboardPosition));
+	output += QString("Level: %1\n").arg(QString::number(currentLevel));
+	output += QString("Total XP: %1\n").arg(QString::number(userData.currentXp));
+	output += QString("XP until next level: %1\n").arg(QString::number(0)); // TODO(fkp): Calculate
+	output += "\n";
 }
 
 UserLevelData& LevelModule::getUserLevelData(GuildId guildId, UserId userId)
@@ -168,6 +193,31 @@ int LevelModule::getCurrentLevel(GuildId guildId, UserId userId)
 	return MAX_LEVEL;
 }
 
+QString LevelModule::getCurrentRank(GuildId guildId, UserId userId)
+{
+	if (levelRanks[guildId].size() == 0)
+	{
+		return "None";
+	}
+	
+	unsigned int currentLevel = getCurrentLevel(guildId, userId);
+	
+	for (int i = 0; i < levelRanks[guildId].size(); i++)
+	{
+		if (levelRanks[guildId][i].minimumLevel >= currentLevel)
+		{
+			if (i == 0)
+			{
+				return "None";
+			}
+
+			return levelRanks[guildId][i - 1].name;
+		}
+	}
+
+	return levelRanks[guildId].back().name;
+}
+
 void LevelModule::top(const Message& message, const Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
@@ -206,11 +256,7 @@ void LevelModule::top(const Message& message, const Channel& channel)
 		return;
 	}
 
-	qSort(leaderboard.begin(), leaderboard.end(), [](const UserLevelData& first, const UserLevelData& second)
-	{
-		return first.currentXp > second.currentXp;
-	});
-
+	sortLeaderboard(channel.guildId());
 	QString description = "";
 	unsigned int numberOfDigits = QString::number(max).size();
 	unsigned int rank = min;
@@ -254,10 +300,7 @@ void LevelModule::rank(const Message& message, const Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QList<LevelRank>& guildRanks = levelRanks[channel.guildId()];
-	qSort(guildRanks.begin(), guildRanks.end(), [](const LevelRank& first, const LevelRank& second)
-	{
-		return first.minimumLevel < second.minimumLevel;
-	});
+	sortRanks(channel.guildId());
 	
 	if (args[1] == "list")
 	{
@@ -388,4 +431,22 @@ void LevelModule::giveTakeXpImpl(const Message& message, const Channel& channel,
 	SEND_MESSAGE(format.arg(QString::number(abs(userLevelData.currentXp - initialXp)),
 							QString::number(abs(getCurrentLevel(channel.guildId(), userId) - initialLevel)),
 							UmikoBot::get().getName(channel.guildId(), userId)));
+}
+
+void LevelModule::sortRanks(GuildId guildId)
+{
+	QList<LevelRank>& ranks = levelRanks[guildId];
+	qSort(ranks.begin(), ranks.end(), [](const LevelRank& first, const LevelRank& second)
+	{
+		return first.minimumLevel < second.minimumLevel;
+	});
+}
+
+void LevelModule::sortLeaderboard(GuildId guildId)
+{
+	QList<UserLevelData>& leaderboard = levelData[guildId];
+	qSort(leaderboard.begin(), leaderboard.end(), [](const UserLevelData& first, const UserLevelData& second)
+	{
+		return first.currentXp > second.currentXp;
+	});
 }

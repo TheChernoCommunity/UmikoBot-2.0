@@ -10,6 +10,7 @@ public:
 
 	void help(const Discord::Message&, const Discord::Channel&);
 	void echo(const Discord::Message&, const Discord::Channel&);
+	void status(const Discord::Message&, const Discord::Channel&);
 	void setPrefix(const Discord::Message&, const Discord::Channel&);
 	void enable(const Discord::Message&, const Discord::Channel&);
 	void disable(const Discord::Message&, const Discord::Channel&);

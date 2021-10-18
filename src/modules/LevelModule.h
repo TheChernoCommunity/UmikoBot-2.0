@@ -36,14 +36,19 @@ protected:
 	void onSave(QJsonObject& mainObject) const override;
 	void onLoad(const QJsonObject& mainObject) override;
 
-	void onMessage(const Discord::Message&, const Discord::Channel&);
+	void onMessage(const Discord::Message&, const Discord::Channel&) override;
+	void onStatus(QString& output, GuildId guildId, UserId userId) override;
 
 private:
 	UserLevelData& getUserLevelData(GuildId guildId, UserId userId);
 	void generateLevels();
 	int getCurrentLevel(GuildId guildId, UserId userId);
+	QString getCurrentRank(GuildId guildId, UserId userId);
 
 	void giveTakeXpImpl(const Discord::Message&, const Discord::Channel&, int multiplier);
+	
+	void sortRanks(GuildId guildId);
+	void sortLeaderboard(GuildId guildId);
 
 private:
 	QList<long long int> levels; // index is level number, value is individual XP requirement (not cumulative)

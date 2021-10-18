@@ -12,6 +12,7 @@ GlobalModule::GlobalModule()
 {
 	registerCommand(Commands::Help, "help" OPTIONAL(IDENTIFIER), CommandPermission::User, CALLBACK(help));
 	registerCommand(Commands::Echo, "echo" TEXT, CommandPermission::User, CALLBACK(echo));
+	registerCommand(Commands::Status, "status" OPTIONAL(IDENTIFIER), CommandPermission::User, CALLBACK(status));
 	registerCommand(Commands::SetPrefix, "set-prefix" OPTIONAL(IDENTIFIER), CommandPermission::Moderator, CALLBACK(setPrefix));
 	registerCommand(Commands::Enable, "enable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(enable));
 	registerCommand(Commands::Disable, "disable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(disable));
@@ -118,6 +119,38 @@ void GlobalModule::echo(const Message& message, const Channel& channel)
 	(void) channel;
 	QString restOfMessage = message.content().mid(message.content().indexOf(QRegularExpression("\\s")));
 	SEND_MESSAGE(restOfMessage);
+}
+
+void GlobalModule::status(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	UserId userId = message.author().id();
+
+	if (args.size() == 2)
+	{
+		userId = UmikoBot::get().getUserIdFromArgument(channel.guildId(), args[1]);
+		if (!userId)
+		{
+			SEND_MESSAGE("Could not find user!");
+			return;
+		}
+	}
+
+	UmikoBot::get().getAvatar(channel.guildId(), userId).then([this, message, channel, userId](const QString& icon)
+	{
+		QString output = "";
+		for (Module* module : UmikoBot::get().getModules())
+		{
+			module->onStatus(output, channel.guildId(), userId);
+		}
+
+		Embed embed;
+		embed.setTitle("Status");
+		embed.setAuthor(EmbedAuthor { UmikoBot::get().getName(channel.guildId(), userId), "", icon });
+		embed.setColor(qrand() % 0xffffff);
+		embed.setDescription(output);
+		SEND_MESSAGE(embed);
+	});
 }
 
 void GlobalModule::setPrefix(const Message& message, const Channel& channel)

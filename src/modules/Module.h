@@ -6,6 +6,8 @@
 #include <QString>
 #include <QJsonObject>
 
+#include "core/Core.h"
+
 // For use when registering commands
 #define GROUP(x) "(" x ")"
 #define OPTIONAL(x) GROUP(x) "?"
@@ -48,6 +50,7 @@ CREATE_COMMANDS(
 	// Global Module
 	Help,
 	Echo,
+	Status,
 	SetPrefix,
 	Enable,
 	Disable,
@@ -109,6 +112,7 @@ public:
 	virtual ~Module();
 
 	virtual void onMessage(const Discord::Message&, const Discord::Channel&) {};
+	virtual void onStatus(QString& output, GuildId guildId, UserId userId) { (void) output; (void) guildId; (void) userId; };
 
 	void save() const;
 	void load();
