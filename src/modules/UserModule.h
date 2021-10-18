@@ -7,7 +7,6 @@ class UserModule : public Module
 {
 public:
 	UserModule();
-	~UserModule();
 
 	void setTimezone(const Discord::Message&, const Discord::Channel&);
 

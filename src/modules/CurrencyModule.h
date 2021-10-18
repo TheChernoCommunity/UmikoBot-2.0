@@ -59,7 +59,6 @@ class CurrencyModule : public Module
 {
 public:
 	CurrencyModule();
-	~CurrencyModule();
 
 	void wallet(const Discord::Message&, const Discord::Channel&);
 	void daily(const Discord::Message&, const Discord::Channel&);

@@ -25,7 +25,6 @@ class LevelModule : public Module
 {
 public:
 	LevelModule();
-	~LevelModule();
 
 	void top(const Discord::Message&, const Discord::Channel&);
 	void giveXp(const Discord::Message&, const Discord::Channel&);
@@ -54,7 +53,6 @@ private:
 	QList<long long int> levels; // index is level number, value is individual XP requirement (not cumulative)
 	QMap<GuildId, QList<LevelRank>> levelRanks;
 	QMap<GuildId, QList<UserLevelData>> levelData;
-	
 	
 	QTimer messageXpTimer;
 };

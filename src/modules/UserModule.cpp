@@ -12,10 +12,6 @@ UserModule::UserModule()
 	registerCommand(Commands::SetTimezone, "set-timezone" SPACE OPTIONAL("UTC") OPTIONAL("[+-]") "[0-9]{1,2}" OPTIONAL(":[0-9]{1,2}"), CP::User, CALLBACK(setTimezone));
 }
 
-UserModule::~UserModule()
-{
-}
-
 void UserModule::onSave(QJsonObject& mainObject) const
 {
 	QJsonObject timeDataObject {};

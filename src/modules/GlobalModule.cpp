@@ -19,10 +19,6 @@ GlobalModule::GlobalModule()
 	registerCommand(Commands::SetPrimaryChannel, "set-primary-channel" OPTIONAL(CHANNEL), CommandPermission::Moderator, CALLBACK(setPrimaryChannel));
 }
 
-GlobalModule::~GlobalModule()
-{
-}
-
 void GlobalModule::onSave(QJsonObject& mainObject) const
 {
 	QJsonObject commandsEnabledObject {};

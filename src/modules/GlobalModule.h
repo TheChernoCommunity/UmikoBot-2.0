@@ -6,7 +6,6 @@ class GlobalModule : public Module
 {
 public:
 	GlobalModule();
-	~GlobalModule();
 
 	void help(const Discord::Message&, const Discord::Channel&);
 	void echo(const Discord::Message&, const Discord::Channel&);

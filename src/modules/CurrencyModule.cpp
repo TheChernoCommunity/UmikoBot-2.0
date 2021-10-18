@@ -86,10 +86,6 @@ CurrencyModule::CurrencyModule()
 	registerCommand(Commands::SetGambleTimeout, "set-gamble-timeout" OPTIONAL(UNSIGNED_INTEGER), CP::Moderator, CALLBACK(setGambleTimeout));
 }
 
-CurrencyModule::~CurrencyModule()
-{
-}
-
 void CurrencyModule::onSave(QJsonObject& mainObject) const
 {
 	QJsonObject guildConfigObject {};

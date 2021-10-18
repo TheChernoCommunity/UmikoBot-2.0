@@ -38,10 +38,6 @@ LevelModule::LevelModule()
 	registerCommand(Commands::Rank, "rank" GROUP(RANK_LIST_SIGNATURE "|" RANK_ADD_SIGNATURE "|" RANK_REMOVE_SIGNATURE "|" RANK_EDIT_SIGNATURE), CP::Moderator, CALLBACK(rank));
 }
 
-LevelModule::~LevelModule()
-{
-}
-
 void LevelModule::onSave(QJsonObject& mainObject) const
 {
 	QJsonObject rankDataObject {};
