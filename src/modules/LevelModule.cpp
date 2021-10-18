@@ -128,7 +128,6 @@ void LevelModule::onMessage(const Message& message, const Channel& channel)
 
 void LevelModule::onStatus(QString& output, GuildId guildId, UserId userId)
 {
-	UserLevelData& userData = getUserLevelData(guildId, userId);
 	QList<UserLevelData>& leaderboard = levelData[guildId];
 	sortLeaderboard(guildId);
 
@@ -141,11 +140,22 @@ void LevelModule::onStatus(QString& output, GuildId guildId, UserId userId)
 		}
 	}
 
+	UserLevelData& userData = getUserLevelData(guildId, userId);
+	long long int cumulativeXp = 0;
+	for (int id = 0; id < levels.size(); id++)
+	{
+		cumulativeXp += levels[id];
+		if (cumulativeXp > userData.currentXp)
+		{
+			break;
+		}
+	}
+	
 	int currentLevel = getCurrentLevel(guildId, userId);
 	output += QString("Rank: %1 (#%2)\n").arg(getCurrentRank(guildId, userId), QString::number(leaderboardPosition));
 	output += QString("Level: %1\n").arg(QString::number(currentLevel));
 	output += QString("Total XP: %1\n").arg(QString::number(userData.currentXp));
-	output += QString("XP until next level: %1\n").arg(QString::number(0)); // TODO(fkp): Calculate
+	output += QString("XP until next level: %1\n").arg(QString::number(cumulativeXp - userData.currentXp));
 	output += "\n";
 }
 
