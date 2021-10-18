@@ -21,21 +21,18 @@ void UserModule::onSave(QJsonObject& mainObject) const
 	QJsonObject timeDataObject {};
 	for (UserId userId : userData.keys())
 	{
-		QJsonObject userJson {};
-		userJson["timezoneOffset"] = userData[userId];
-		timeDataObject[QString::number(userId)] = userJson;
+		timeDataObject[QString::number(userId)] = userData[userId];
 	}
 
-	mainObject["userData"] = timeDataObject;
+	mainObject["timezoneData"] = timeDataObject;
 }
 
 void UserModule::onLoad(const QJsonObject& mainObject)
 {
-	QJsonObject timeDataObject = mainObject["userData"].toObject();
+	QJsonObject timeDataObject = mainObject["timezoneData"].toObject();
 	for (const QString& userIdString : timeDataObject.keys())
 	{
-		QJsonObject userJson = timeDataObject[userIdString].toObject();
-		userData[userIdString.toULongLong()] = userJson["timezoneOffset"].toInt();
+		userData[userIdString.toULongLong()] = timeDataObject[userIdString].toInt();
 	}
 }
 
