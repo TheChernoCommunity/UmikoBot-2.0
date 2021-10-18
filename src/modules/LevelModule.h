@@ -24,6 +24,7 @@ public:
 	void top(const Discord::Message&, const Discord::Channel&);
 	void giveXp(const Discord::Message&, const Discord::Channel&);
 	void takeXp(const Discord::Message&, const Discord::Channel&);
+	void rank(const Discord::Message&, const Discord::Channel&);
 	
 protected:
 	void onSave(QJsonObject& mainObject) const override;

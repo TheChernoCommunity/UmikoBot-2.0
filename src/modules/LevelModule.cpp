@@ -27,10 +27,15 @@ LevelModule::LevelModule()
 	generateLevels();
 	
 	namespace CP = CommandPermission;
+#define RANK_LIST_SIGNATURE GROUP(SPACE "list")
+#define RANK_ADD_SIGNATURE GROUP(SPACE "add" UNSIGNED_INTEGER IDENTIFIER)
+#define RANK_REMOVE_SIGNATURE GROUP(SPACE "remove" UNSIGNED_INTEGER)
+#define RANK_EDIT_SIGNATURE GROUP(SPACE "edit" UNSIGNED_INTEGER GROUP(SPACE "name" IDENTIFIER "|" SPACE "level" UNSIGNED_INTEGER))
 
 	registerCommand(Commands::Top, "top" OPTIONAL(UNSIGNED_INTEGER) OPTIONAL(UNSIGNED_INTEGER), CP::User, CALLBACK(top));
 	registerCommand(Commands::GiveXp, "give-xp" USER INTEGER OPTIONAL(SPACE "level" OPTIONAL("s")), CP::Moderator, CALLBACK(giveXp));
-	registerCommand(Commands::GiveXp, "take-xp" USER INTEGER OPTIONAL(SPACE "level" OPTIONAL("s")), CP::Moderator, CALLBACK(takeXp));
+	registerCommand(Commands::TakeXp, "take-xp" USER INTEGER OPTIONAL(SPACE "level" OPTIONAL("s")), CP::Moderator, CALLBACK(takeXp));
+	registerCommand(Commands::Rank, "rank" GROUP(RANK_LIST_SIGNATURE "|" RANK_ADD_SIGNATURE "|" RANK_REMOVE_SIGNATURE "|" RANK_EDIT_SIGNATURE), CP::Moderator, CALLBACK(rank));
 }
 
 LevelModule::~LevelModule()
@@ -174,6 +179,11 @@ void LevelModule::giveXp(const Message& message, const Channel& channel)
 void LevelModule::takeXp(const Message& message, const Channel& channel)
 {
 	giveTakeXpImpl(message, channel, -1);
+}
+
+void LevelModule::rank(const Message& message, const Channel& channel)
+{
+	printf("Rank\n");
 }
 
 void LevelModule::giveTakeXpImpl(const Message& message, const Channel& channel, int multiplier)

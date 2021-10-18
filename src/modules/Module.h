@@ -7,7 +7,8 @@
 #include <QJsonObject>
 
 // For use when registering commands
-#define OPTIONAL(x) "(" x ")?"
+#define GROUP(x) "(" x ")"
+#define OPTIONAL(x) GROUP(x) "?"
 #define SPACE "\\s+"
 
 #define IDENTIFIER SPACE "\\S+"
@@ -56,6 +57,7 @@ CREATE_COMMANDS(
 	Top,
 	GiveXp,
 	TakeXp,
+	Rank,
 	
 	// Currency Module
 	Wallet,
