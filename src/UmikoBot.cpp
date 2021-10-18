@@ -11,6 +11,7 @@
 #include "modules/GlobalModule.h"
 #include "modules/LevelModule.h"
 #include "modules/UserModule.h"
+#include "modules/FunModule.h"
 #include "modules/CurrencyModule.h"
 
 using namespace Discord;
@@ -53,6 +54,7 @@ UmikoBot::UmikoBot(QObject* parent)
 	modules.push_back(new GlobalModule());
 	modules.push_back(new LevelModule());
 	modules.push_back(new UserModule());
+	modules.push_back(new FunModule());
 	modules.push_back(new CurrencyModule());
 }
 

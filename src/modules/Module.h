@@ -64,6 +64,9 @@ CREATE_COMMANDS(
 	
 	// User Module
 	SetTimezone,
+
+	// Fun Module
+	Roll,
 	
 	// Currency Module
 	Wallet,
