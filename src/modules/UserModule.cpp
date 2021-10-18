@@ -16,6 +16,29 @@ UserModule::~UserModule()
 {
 }
 
+void UserModule::onSave(QJsonObject& mainObject) const
+{
+	QJsonObject timeDataObject {};
+	for (UserId userId : userData.keys())
+	{
+		QJsonObject userJson {};
+		userJson["timezoneOffset"] = userData[userId];
+		timeDataObject[QString::number(userId)] = userJson;
+	}
+
+	mainObject["userData"] = timeDataObject;
+}
+
+void UserModule::onLoad(const QJsonObject& mainObject)
+{
+	QJsonObject timeDataObject = mainObject["userData"].toObject();
+	for (const QString& userIdString : timeDataObject.keys())
+	{
+		QJsonObject userJson = timeDataObject[userIdString].toObject();
+		userData[userIdString.toULongLong()] = userJson["timezoneOffset"].toInt();
+	}
+}
+
 void UserModule::onStatus(QString& output, GuildId guildId, UserId userId)
 {
 	(void) guildId;

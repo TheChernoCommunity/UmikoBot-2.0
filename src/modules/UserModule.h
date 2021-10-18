@@ -12,6 +12,9 @@ public:
 	void setTimezone(const Discord::Message&, const Discord::Channel&);
 
 protected:
+	void onSave(QJsonObject& mainObject) const override;
+	void onLoad(const QJsonObject& mainObject) override;
+
 	void onStatus(QString& output, GuildId guildId, UserId userId) override;
 
 private:
