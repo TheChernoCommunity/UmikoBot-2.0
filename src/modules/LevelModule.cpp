@@ -44,10 +44,45 @@ LevelModule::~LevelModule()
 
 void LevelModule::onSave(QJsonObject& mainObject) const
 {
+	QJsonObject userDataObject {};
+
+	for (GuildId guildId : levelData.keys())
+	{
+		QJsonObject guildJson {};
+		for (const UserLevelData& userLevelData : levelData[guildId])
+		{
+			QJsonObject userJson {};
+			userJson["currentXp"] = userLevelData.currentXp;
+
+			guildJson[QString::number(userLevelData.userId)] = userJson;
+		}
+
+		userDataObject[QString::number(guildId)] = guildJson;
+	}
+
+	mainObject["userData"] = userDataObject;
 }
 
 void LevelModule::onLoad(const QJsonObject& mainObject)
 {
+	QJsonObject userDataObject = mainObject["userData"].toObject();
+
+	for (const QString& guildIdString : userDataObject.keys())
+	{
+		QJsonObject guildJson = userDataObject[guildIdString].toObject();
+		GuildId guildId = guildIdString.toULongLong();
+
+		for (const QString& userIdString : guildJson.keys())
+		{
+			QJsonObject userJson = guildJson[userIdString].toObject();
+			UserId userId = userIdString.toULongLong();
+
+			levelData[guildId].append(UserLevelData {
+				userId,	
+				userJson["currentXp"].toInt(),
+			});
+		}
+	}
 }
 
 void LevelModule::onMessage(const Message& message, const Channel& channel)
