@@ -29,6 +29,39 @@
 		"additional": "",
 		"admin": true
 	},
+	"SetPrimaryChannel": {
+		"brief": "Sets the channel for unprompted bot messages.",
+		"usage": "set-primary-channel <channel>",
+		"additional": "",
+		"admin": true
+	},
+
+
+	"Top": {
+		"brief": "Displays a leaderboard of XP.",
+		"usage": "top [min] [max]",
+		"additional": "Providing a single argument iwll treat it as the max.",
+		"admin": false
+	},
+	
+	"GiveXp": {
+		"brief": "Gives a certain amount of XP to a specified user.",
+		"usage": "give-xp <@mention|name|id> <amount> [levels]",
+		"additional": "You can either give XP directly, or give a certain number of levels to the user.",
+		"admin": true
+	},
+	"TakeXp": {
+		"brief": "Takes a certain amount of XP from a specified user.",
+		"usage": "take-xp <@mention|name|id> <amount> [levels]",
+		"additional": "You can either take XP directly, or take a certain number of levels from the user.",
+		"admin": true
+	},
+	"Rank": {
+		"brief": "Used to control the ranking system.",
+		"usage": "rank (list | <add <name> <minimum level>> | <remove <name>> | <edit (name <new name> | level <new level>)>)",
+		"additional": "**Rank List**: Lists the ranks of the current server.\n**Rank Add**: Adds a new rank with specified name and minimum level.\n**Rank Remove**: Removes the rank with the specified name.\n**Rank Edit**: Edits the name or minimum level of the specified rank.",
+		"admin": true
+	},
 
 
 	"Wallet": {
@@ -79,17 +112,17 @@
 		"additional": "Careful! Your jail time might be extended...",
 		"admin": false
 	},
+	"Claim": {
+		"brief": "Claims the giveaway prize when it comes out.",
+		"usage": "claim",
+		"additional": "",
+		"admin": false
+	},
 	
 	"SetCurrencyName": {
 		"brief": "Sets the name and abbreviation for the currency unit.",
 		"usage": "set-currency-name [<name> <abbreviation>]",
 		"additional": "Giving no arguments returns the current currency name and abbreviation.",
-		"admin": true
-	},
-	"SetDailyReward": {
-		"brief": "Sets the reward for collecting a daily.",
-		"usage": "set-daily-reward [amount]",
-		"additional": "Giving no arguments returns the current daily reward.",
 		"admin": true
 	},
 	"SetMaxDebt": {
@@ -98,10 +131,40 @@
 		"additional": "A max debt of -100 means the user can go down to -100 coins.\nGiving no arugments returns the current maximum debt.",
 		"admin": true
 	},
+	"SetDailyReward": {
+		"brief": "Sets the reward for collecting a daily.",
+		"usage": "set-daily-reward [amount]",
+		"additional": "Giving no arguments returns the current daily reward.",
+		"admin": true
+	},
+	"SetDailyStreakBonus": {
+		"brief": "Sets the reward for maintaining a daily streak.",
+		"usage": "set-daily-streak-bonus [amount]",
+		"additional": "Giving no arguments returns the current daily streak bonus.",
+		"admin": true
+	},
+	"SetDailyStreakBonusPeriod": {
+		"brief": "Sets how often a daily streak bonus is achieved..",
+		"usage": "set-daily-streak-bonus-period [days]",
+		"additional": "Giving no arguments returns the current daily streak bonus period.",
+		"admin": true
+	},
 	"SetStealSuccessChance": {
 		"brief": "Sets the base chance for a steal to succeed.",
 		"usage": "set-steal-success-chance [chance]",
-		"additional": "Must be a value between 0 and 1.\nGiving no arugments returns the current success chance",
+		"additional": "Must be a value between 0 and 1.\nGiving no arugments returns the current success chance.",
+		"admin": true
+	},
+	"SetRandomGiveawayChance": {
+		"brief": "Sets the chance (per message) for a random giveaway to occur.",
+		"usage": "set-random-giveaway-chance [chance]",
+		"additional": "Must be a value between 0 and 1.\nGiving no arugments returns the current random giveaway chance.",
+		"admin": true
+	},
+	"SetRandomGiveawayReward": {
+		"brief": "Sets the reward for collecting a random giveaway.",
+		"usage": "set-random-giveaway-reward [amount]",
+		"additional": "Giving no arugments returns the current random giveaway reward.",
 		"admin": true
 	},
 	"SetStealFine": {
