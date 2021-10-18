@@ -28,9 +28,9 @@ LevelModule::LevelModule()
 	
 	namespace CP = CommandPermission;
 #define RANK_LIST_SIGNATURE GROUP(SPACE "list")
-#define RANK_ADD_SIGNATURE GROUP(SPACE "add" UNSIGNED_INTEGER IDENTIFIER)
-#define RANK_REMOVE_SIGNATURE GROUP(SPACE "remove" UNSIGNED_INTEGER)
-#define RANK_EDIT_SIGNATURE GROUP(SPACE "edit" UNSIGNED_INTEGER GROUP(SPACE "name" IDENTIFIER "|" SPACE "level" UNSIGNED_INTEGER))
+#define RANK_ADD_SIGNATURE GROUP(SPACE "add" IDENTIFIER UNSIGNED_INTEGER)
+#define RANK_REMOVE_SIGNATURE GROUP(SPACE "remove" IDENTIFIER)
+#define RANK_EDIT_SIGNATURE GROUP(SPACE "edit" IDENTIFIER GROUP(SPACE "name" IDENTIFIER "|" SPACE "level" UNSIGNED_INTEGER))
 
 	registerCommand(Commands::Top, "top" OPTIONAL(UNSIGNED_INTEGER) OPTIONAL(UNSIGNED_INTEGER), CP::User, CALLBACK(top));
 	registerCommand(Commands::GiveXp, "give-xp" USER INTEGER OPTIONAL(SPACE "level" OPTIONAL("s")), CP::Moderator, CALLBACK(giveXp));
@@ -183,7 +183,79 @@ void LevelModule::takeXp(const Message& message, const Channel& channel)
 
 void LevelModule::rank(const Message& message, const Channel& channel)
 {
-	printf("Rank\n");
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	QList<LevelRank>& guildRanks = levelRanks[channel.guildId()];
+	qSort(guildRanks.begin(), guildRanks.end(), [](const LevelRank& first, const LevelRank& second)
+	{
+		return first.minimumLevel < second.minimumLevel;
+	});
+	
+	if (args[1] == "list")
+	{
+		if (guildRanks.size() == 0)
+		{
+			SEND_MESSAGE("No ranks found in this server!");
+			return;
+		}
+
+		QString description = "";
+		for (int id = 0; id < guildRanks.size(); id++)
+		{
+			description += QString("`%1`) **%2** (requires level **%3**)\n").arg(QString::number(id), guildRanks[id].name,
+																				 QString::number(guildRanks[id].minimumLevel));
+		}
+
+		Embed embed;
+		embed.setTitle("Guild Ranks");
+		embed.setDescription(description);
+		embed.setColor(qrand() % 0xffffff);
+		SEND_MESSAGE(embed);
+	}
+	else if (args[1] == "add")
+	{
+		guildRanks.append(LevelRank { args[2], args[3].toUInt() });
+		SEND_MESSAGE(QString("Added rank **%1** with miniumum level **%2**!").arg(guildRanks.back().name,
+																				  QString::number(guildRanks.back().minimumLevel)));
+		return;
+	}
+	else if (args[1] == "remove")
+	{
+		for (int id = 0; id < guildRanks.size(); id++)
+		{
+			if (guildRanks[id].name == args[2])
+			{
+				SEND_MESSAGE(QString("Removed rank **%1**!").arg(guildRanks[id].name));
+				guildRanks.erase(guildRanks.begin() + id);
+				return;
+			}
+		}
+
+		SEND_MESSAGE("There is no rank with that name!");
+	}
+	else if (args[1] == "edit")
+	{
+		for (int id = 0; id < guildRanks.size(); id++)
+		{
+			if (guildRanks[id].name == args[2])
+			{
+				if (args[3] == "name")
+				{
+					SEND_MESSAGE(QString("Edited name of rank **%1** to be **%2**!").arg(guildRanks[id].name, args[4]));
+					guildRanks[id].name = args[4];
+				}
+				else if (args[3] == "level")
+				{
+					guildRanks[id].minimumLevel = args[4].toUInt();
+					SEND_MESSAGE(QString("Edited minimum level of rank **%1** to be **%2**!").arg(guildRanks[id].name,
+																								  QString::number(guildRanks[id].minimumLevel)));
+				}
+
+				return;
+			}
+		}
+
+		SEND_MESSAGE("There is no rank with that name!");
+	}
 }
 
 void LevelModule::giveTakeXpImpl(const Message& message, const Channel& channel, int multiplier)

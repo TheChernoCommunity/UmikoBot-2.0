@@ -15,6 +15,12 @@ struct UserLevelData
 	int messageCount = 0; // Resets every 30 seconds
 };
 
+struct LevelRank
+{
+	QString name = "";
+	unsigned int minimumLevel = 0;
+};
+
 class LevelModule : public Module
 {
 public:
@@ -40,7 +46,10 @@ private:
 	void giveTakeXpImpl(const Discord::Message&, const Discord::Channel&, int multiplier);
 
 private:
-	QTimer messageXpTimer;
 	QList<long long int> levels; // index is level number, value is individual XP requirement (not cumulative)
+	QMap<GuildId, QList<LevelRank>> levelRanks;
 	QMap<GuildId, QList<UserLevelData>> levelData;
+	
+	
+	QTimer messageXpTimer;
 };
