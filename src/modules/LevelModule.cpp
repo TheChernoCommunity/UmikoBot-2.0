@@ -44,8 +44,24 @@ LevelModule::~LevelModule()
 
 void LevelModule::onSave(QJsonObject& mainObject) const
 {
+	QJsonObject rankDataObject {};
 	QJsonObject userDataObject {};
 
+	for (GuildId guildId : levelRanks.keys())
+	{
+		QJsonObject guildJson {};
+		for (int id = 0; id < levelRanks[guildId].size(); id++)
+		{
+			QJsonObject rankJson {};
+			rankJson["name"] = levelRanks[guildId][id].name;
+			rankJson["minimumLevel"] = (int) levelRanks[guildId][id].minimumLevel;
+
+			guildJson[QString::number(id)] = rankJson;
+		}
+
+		rankDataObject[QString::number(guildId)] = guildJson;
+	}
+	
 	for (GuildId guildId : levelData.keys())
 	{
 		QJsonObject guildJson {};
@@ -60,13 +76,31 @@ void LevelModule::onSave(QJsonObject& mainObject) const
 		userDataObject[QString::number(guildId)] = guildJson;
 	}
 
+	mainObject["rankData"] = rankDataObject;
 	mainObject["userData"] = userDataObject;
 }
 
 void LevelModule::onLoad(const QJsonObject& mainObject)
 {
+	QJsonObject rankDataObject = mainObject["rankData"].toObject();
 	QJsonObject userDataObject = mainObject["userData"].toObject();
 
+	for (const QString& guildIdString : rankDataObject.keys())
+	{
+		QJsonObject guildJson = rankDataObject[guildIdString].toObject();
+		GuildId guildId = guildIdString.toULongLong();
+
+		for (const QString& rankIdString : guildJson.keys())
+		{
+			QJsonObject rankJson = guildJson[rankIdString].toObject();
+
+			levelRanks[guildId].append(LevelRank {
+				rankJson["name"].toString(),
+				(unsigned int) rankJson["minimumLevel"].toInt(),
+			});
+		}
+	}
+	
 	for (const QString& guildIdString : userDataObject.keys())
 	{
 		QJsonObject guildJson = userDataObject[guildIdString].toObject();
