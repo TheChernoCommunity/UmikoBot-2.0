@@ -93,6 +93,7 @@ protected:
 	void onLoad(const QJsonObject& mainObject) override;
 
 	void onMessage(const Discord::Message&, const Discord::Channel&) override;
+	void onStatus(QString& output, GuildId guildId, UserId userId) override;
 	
 private:
 	UserCurrencyData& getUserCurrencyData(GuildId guildId, UserId userId);

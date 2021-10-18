@@ -266,6 +266,13 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 	}
 }
 
+void CurrencyModule::onStatus(QString& output, GuildId guildId, UserId userId)
+{
+	output += QString("Wallet: %1 %2\n").arg(QString::number(getUserCurrencyData(guildId, userId).balanceInCents / 100.0f),
+											 currencyConfigs[guildId].currencyAbbreviation);
+	output += "\n";
+}
+
 UserCurrencyData& CurrencyModule::getUserCurrencyData(GuildId guildId, UserId userId)
 {
 	for (UserCurrencyData& userCurrencyData : currencyData[guildId])
