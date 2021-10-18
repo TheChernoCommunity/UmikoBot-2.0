@@ -310,10 +310,15 @@ void CurrencyModule::wallet(const Message& message, const Channel& channel)
 
 	UmikoBot::get().getAvatar(channel.guildId(), userId).then([this, message, channel, userId](const QString& icon)
 	{
+		const UserCurrencyData& userData = getUserCurrencyData(channel.guildId(), userId);
 		const GuildCurrencyConfig& guildConfig = currencyConfigs[channel.guildId()];
-		QString desc = QString("Current %1s: **%2 %3**").arg(guildConfig.currencyName,
-															QString::number(getUserCurrencyData(channel.guildId(), userId).balanceInCents / 100.0f),
-															guildConfig.currencyAbbreviation);
+		int streakDaysLeft = userData.dailyStreak % guildConfig.dailyStreakBonusPeriod;
+		
+		QString desc = QString("Current %1s: **%2 %3**\n").arg(guildConfig.currencyName, QString::number(userData.balanceInCents / 100.0f),
+															 guildConfig.currencyAbbreviation);
+		desc += QString("Daily Streak: **%1/%2**\n").arg(QString::number(userData.dailyStreak),
+													   QString::number(userData.dailyStreak + (guildConfig.dailyStreakBonusPeriod - streakDaysLeft)));
+		desc += QString("Today's Daily Claimed? **%1**\n").arg(userData.hasClaimedDaily ? "Yes" : "No");
 
 		Embed embed;
 		embed.setColor(qrand() % 0xffffff);
