@@ -62,6 +62,9 @@ CREATE_COMMANDS(
 	TakeXp,
 	Rank,
 	
+	// User Module
+	SetTimezone,
+	
 	// Currency Module
 	Wallet,
 	Daily,

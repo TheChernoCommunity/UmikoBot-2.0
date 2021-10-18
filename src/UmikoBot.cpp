@@ -7,8 +7,10 @@
 
 #include "UmikoBot.h"
 #include "core/Permissions.h"
+
 #include "modules/GlobalModule.h"
 #include "modules/LevelModule.h"
+#include "modules/UserModule.h"
 #include "modules/CurrencyModule.h"
 
 using namespace Discord;
@@ -50,6 +52,7 @@ UmikoBot::UmikoBot(QObject* parent)
 	// Modules
 	modules.push_back(new GlobalModule());
 	modules.push_back(new LevelModule());
+	modules.push_back(new UserModule());
 	modules.push_back(new CurrencyModule());
 }
 
