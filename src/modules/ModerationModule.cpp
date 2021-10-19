@@ -8,7 +8,7 @@ ModerationModule::ModerationModule()
 	: Module("Moderation")
 {
 	namespace CP = CommandPermission;
-	registerCommand(Commands::ModerateInvitations, "moderate-invitations (on|off)", CP::Moderator, CALLBACK(moderateInvitations));
+	registerCommand(Commands::ModerateInvitations, "moderate-invitations" OPTIONAL(SPACE "(on|off)"), CP::Moderator, CALLBACK(moderateInvitations));
 }
 
 void ModerationModule::onMessage(const Message& message, const Channel& channel)
@@ -41,6 +41,12 @@ void ModerationModule::moderateInvitations(const Message& message, const Channel
 {
 	(void) channel;
 	QStringList args = message.content().split(QRegularExpression(SPACE));
+	if (args.size() == 1)
+	{
+		SEND_MESSAGE(QString("Moderating invitations is turned %1!").arg(isModeratingInvitations ? "on" : "off"));
+		return;
+	}
+	
 	if (args[1] == "on")
 	{
 		isModeratingInvitations = true;
