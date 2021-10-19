@@ -67,6 +67,8 @@ CREATE_COMMANDS(
 
 	// Fun Module
 	Roll,
+	Meme,
+	Github,
 	
 	// Currency Module
 	Wallet,
