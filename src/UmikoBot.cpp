@@ -9,6 +9,7 @@
 #include "core/Permissions.h"
 
 #include "modules/GlobalModule.h"
+#include "modules/ModerationModule.h"
 #include "modules/LevelModule.h"
 #include "modules/UserModule.h"
 #include "modules/FunModule.h"
@@ -52,6 +53,7 @@ UmikoBot::UmikoBot(QObject* parent)
 
 	// Modules
 	modules.push_back(new GlobalModule());
+	modules.push_back(new ModerationModule());
 	modules.push_back(new LevelModule());
 	modules.push_back(new UserModule());
 	modules.push_back(new FunModule());

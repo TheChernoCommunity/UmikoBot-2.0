@@ -56,6 +56,9 @@ CREATE_COMMANDS(
 	Disable,
 	SetPrimaryChannel,
 
+	// Moderation Module
+	ModerateInvitations,
+	
 	// Level Module
 	Top,
 	GiveXp,
