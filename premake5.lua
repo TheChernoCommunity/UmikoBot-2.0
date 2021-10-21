@@ -15,6 +15,7 @@ workspace "UmikoBot"
 	platforms {
 		"x64",
 	}
+	startproject "UmikoBot"
 
 project "UmikoBot"
 	location "sln/prj/"

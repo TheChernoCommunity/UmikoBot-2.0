@@ -175,7 +175,7 @@ void UmikoBot::initialiseGuilds(GuildId afterId)
 {
 	constexpr snowflake_t LIMIT = 100;
 	
-	getCurrentUserGuilds(0, afterId, LIMIT).then([this](const QList<Guild>& guilds)
+	getCurrentUserGuilds(0, afterId, LIMIT).then([this, LIMIT](const QList<Guild>& guilds)
 	{
 		for (const Guild& guild : guilds)
 		{
@@ -208,7 +208,7 @@ void UmikoBot::initialiseGuildMembers(GuildId guildId, UserId afterId)
 {
 	constexpr snowflake_t LIMIT = 1000;
 	
-	listGuildMembers(guildId, LIMIT, afterId).then([this, guildId](const QList<GuildMember>& members)
+	listGuildMembers(guildId, LIMIT, afterId).then([this, guildId, LIMIT](const QList<GuildMember>& members)
 	{
 		for (const GuildMember& member : members)
 		{
