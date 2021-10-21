@@ -37,7 +37,7 @@ if ERRORLEVEL 1 (
 )
 
 rem Writes Qt directory to file for premake
-(echo | set /p=%qtDir%)>%projectRoot%\tmp\qtDir.txt
+(echo | set /p=%CD%)>%projectRoot%\tmp\qtDir.txt
 
 echo Copying Qt files to output directory...
 xcopy /y /q "plugins\platforms\qwindows.dll" "%projectRoot%\bin\" >nul
