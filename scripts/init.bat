@@ -40,18 +40,18 @@ rem Writes Qt directory to file for premake
 (echo | set /p=%qtDir%)>%projectRoot%\tmp\qtDir.txt
 
 echo Copying Qt files to output directory...
-xcopy /y /q "plugins\platforms\qwindows.dll" "%projectRoot%\bin\x64\" >nul
-xcopy /y /q "plugins\platforms\qwindowsd.dll" "%projectRoot%\bin\x64\" >nul
-xcopy /y /q "bin\Qt5Core.dll" "%projectRoot%\bin\x64\" >nul
-xcopy /y /q "bin\Qt5Cored.dll" "%projectRoot%\bin\x64\" >nul
-xcopy /y /q "bin\Qt5Gui.dll" "%projectRoot%\bin\x64\" >nul
-xcopy /y /q "bin\Qt5Guid.dll" "%projectRoot%\bin\x64\" >nul
-xcopy /y /q "bin\Qt5Network.dll" "%projectRoot%\bin\x64\" >nul
-xcopy /y /q "bin\Qt5Networkd.dll" "%projectRoot%\bin\x64\" >nul
-xcopy /y /q "bin\Qt5WebSockets.dll" "%projectRoot%\bin\x64\" >nul
-xcopy /y /q "bin\Qt5WebSocketsd.dll" "%projectRoot%\bin\x64\" >nul
-xcopy /y /q "bin\Qt5Widgets.dll" "%projectRoot%\bin\x64\" >nul
-xcopy /y /q "bin\Qt5Widgetsd.dll" "%projectRoot%\bin\x64\" >nul
+xcopy /y /q "plugins\platforms\qwindows.dll" "%projectRoot%\bin\" >nul
+xcopy /y /q "plugins\platforms\qwindowsd.dll" "%projectRoot%\bin\" >nul
+xcopy /y /q "bin\Qt5Core.dll" "%projectRoot%\bin\" >nul
+xcopy /y /q "bin\Qt5Cored.dll" "%projectRoot%\bin\" >nul
+xcopy /y /q "bin\Qt5Gui.dll" "%projectRoot%\bin\" >nul
+xcopy /y /q "bin\Qt5Guid.dll" "%projectRoot%\bin\" >nul
+xcopy /y /q "bin\Qt5Network.dll" "%projectRoot%\bin\" >nul
+xcopy /y /q "bin\Qt5Networkd.dll" "%projectRoot%\bin\" >nul
+xcopy /y /q "bin\Qt5WebSockets.dll" "%projectRoot%\bin\" >nul
+xcopy /y /q "bin\Qt5WebSocketsd.dll" "%projectRoot%\bin\" >nul
+xcopy /y /q "bin\Qt5Widgets.dll" "%projectRoot%\bin\" >nul
+xcopy /y /q "bin\Qt5Widgetsd.dll" "%projectRoot%\bin\" >nul
 
 cd %projectRoot%
 
