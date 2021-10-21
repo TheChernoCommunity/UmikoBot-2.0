@@ -4,40 +4,56 @@ set scriptDir=%~dp0
 set projectRoot=%scriptDir%\..
 set PREMAKE_VERSION=5.0.0-alpha16
 
-mkdir tmp bin bin\x64
+mkdir tmp bin bin\x64 >nul 2>nul
 
-rem Tries to locate premake
+echo Looking for premake...
 cd %projectRoot%\pmk
-where premake5
+where premake5 >nul 2>nul
 
-if %ERRORLEVEL% neq 0 (
-	rem Premake not found, download it
-	powershell -nologo -noprofile -command "Invoke-WebRequest https://github.com/premake/premake-core/releases/download/v%PREMAKE_VERSION%/premake-%PREMAKE_VERSION%-windows.zip -OutFile %projectRoot%\tmp\premake5.zip"
-	powershell -nologo -noprofile -command "& { $shell = New-Object -COM Shell.Application; $target = $shell.NameSpace('%projectRoot%\pmk'); $zip = $shell.NameSpace('%projectRoot%\tmp\premake5.zip'); $target.CopyHere($zip.Items(), 16); }"
-)
-
-rem Tries to locate Qt files
-for /r C:\Qt\5* %%a in (*) do if "%%~nxa"=="Qt5Core.dll" set qtDir=%%~dpa
-if defined qtDir (
-	echo Found Qt folder: %qtDir%
+if ERRORLEVEL 1 (
+	echo Premake not found, downloading it...
+	powershell -nologo -noprofile -command "(New-Object Net.WebClient).DownloadFile('https://github.com/premake/premake-core/releases/download/v%PREMAKE_VERSION%/premake-%PREMAKE_VERSION%-windows.zip', '%projectRoot%\tmp\premake5.zip')"
+	powershell Expand-Archive %projectRoot%\tmp\premake5.zip -DestinationPath %projectRoot%\pmk\
+	echo Downloaded and unzipped premake to pmk\premake5.exe!
 ) else (
-	rem Qt folder not found
-	set /p qtDir="Qt Directory: "
+	echo Found premake!
 )
 
-rem Copies Qt files to output directory
-xcopy "%qtDir%\..\plugins\platforms\qwindows.dll" "%projectRoot%\bin\x64\"
-xcopy "%qtDir%\..\plugins\platforms\qwindowsd.dll" "%projectRoot%\bin\x64\"
-xcopy "%qtDir%\bin\Qt5Core.dll" "bin\x64\"
-xcopy "%qtDir%\bin\Qt5Cored.dll" "bin\x64\"
-xcopy "%qtDir%\bin\Qt5Gui.dll" "bin\x64\"
-xcopy "%qtDir%\bin\Qt5Guid.dll" "bin\x64\"
-xcopy "%qtDir%\bin\Qt5Network.dll" "bin\x64\"
-xcopy "%qtDir%\bin\Qt5Networkd.dll" "bin\x64\"
-xcopy "%qtDir%\bin\Qt5WebSockets.dll" "bin\x64\"
-xcopy "%qtDir%\bin\Qt5WebSocketsd.dll" "bin\x64\"
-xcopy "%qtDir%\bin\Qt5Widgets.dll" "bin\x64\"
-xcopy "%qtDir%\bin\Qt5Widgetsd.dll" "bin\x64\"
+echo Looking for Qt directory...
+cd C:\Qt\5*\msvc*\ >nul 2>nul
+if ERRORLEVEL 1 (
+	echo Qt directory not found automatically, please input...
+	set /p qtDir="Qt Directory (e.g. C:\Qt\5.15.2\msvc2019_64\): "
+	
+	cd %qtDir%
+	if ERRORLEVEL 1 (
+		echo Qt directory not found!
+		goto :end
+	) else (
+		echo Found directory!
+	)
+) else (
+	echo Qt directory found automatically (%CD%\^)^!
+)
 
-rem Init or update submodules
+echo Copying Qt files to output directory...
+xcopy /y /q "plugins\platforms\qwindows.dll" "%projectRoot%\bin\x64\" >nul
+xcopy /y /q "plugins\platforms\qwindowsd.dll" "%projectRoot%\bin\x64\" >nul
+xcopy /y /q "bin\Qt5Core.dll" "%projectRoot%\bin\x64\" >nul
+xcopy /y /q "bin\Qt5Cored.dll" "%projectRoot%\bin\x64\" >nul
+xcopy /y /q "bin\Qt5Gui.dll" "%projectRoot%\bin\x64\" >nul
+xcopy /y /q "bin\Qt5Guid.dll" "%projectRoot%\bin\x64\" >nul
+xcopy /y /q "bin\Qt5Network.dll" "%projectRoot%\bin\x64\" >nul
+xcopy /y /q "bin\Qt5Networkd.dll" "%projectRoot%\bin\x64\" >nul
+xcopy /y /q "bin\Qt5WebSockets.dll" "%projectRoot%\bin\x64\" >nul
+xcopy /y /q "bin\Qt5WebSocketsd.dll" "%projectRoot%\bin\x64\" >nul
+xcopy /y /q "bin\Qt5Widgets.dll" "%projectRoot%\bin\x64\" >nul
+xcopy /y /q "bin\Qt5Widgetsd.dll" "%projectRoot%\bin\x64\" >nul
+
+cd %projectRoot%
+
+echo Initialising submodules
 git submodule update --init --recursive
+
+:end
+cd %projectRoot%
