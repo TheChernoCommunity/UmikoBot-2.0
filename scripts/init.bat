@@ -53,6 +53,10 @@ xcopy /y /q "bin\Qt5WebSocketsd.dll" "%projectRoot%\bin\" >nul
 xcopy /y /q "bin\Qt5Widgets.dll" "%projectRoot%\bin\" >nul
 xcopy /y /q "bin\Qt5Widgetsd.dll" "%projectRoot%\bin\" >nul
 
+echo Copying OpenSSL files to output directory...
+xcopy /y /q "..\..\Tools\OpenSSL\Win_x64\bin\libcrypto-1_1-x64.dll" "%projectRoot%\bin\" >nul
+xcopy /y /q "..\..\Tools\OpenSSL\Win_x64\bin\libssl-1_1-x64.dll" "%projectRoot%\bin\" >nul
+
 cd %projectRoot%
 
 echo Initialising submodules
