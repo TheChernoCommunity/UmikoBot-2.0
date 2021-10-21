@@ -5,7 +5,7 @@ set scriptDir=%~dp0
 set projectRoot=%scriptDir%\..
 
 rem Locates premake
-where premake5
+where premake5 >nul 2>nul
 
 if ERRORLEVEL 1 (
 	set premakeCommand=%projectRoot%\pmk\premake5

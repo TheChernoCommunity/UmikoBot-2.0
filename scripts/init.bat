@@ -36,6 +36,9 @@ if ERRORLEVEL 1 (
 	echo Qt directory found automatically (%CD%\^)^!
 )
 
+rem Writes Qt directory to file for premake
+(echo %qtDir%)>%projectRoot%\tmp\qtDir.txt
+
 echo Copying Qt files to output directory...
 xcopy /y /q "plugins\platforms\qwindows.dll" "%projectRoot%\bin\x64\" >nul
 xcopy /y /q "plugins\platforms\qwindowsd.dll" "%projectRoot%\bin\x64\" >nul

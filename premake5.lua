@@ -4,7 +4,7 @@ elseif _ACTION == "qmake" then
 	require "pmk/extensions/premake-qmake/qmake"
 end
 
-local qtdir_x64 = io.readfile("tmp/.qtdir_x64")
+local qtDir = io.readfile("tmp/qtDir.txt")
 
 workspace "UmikoBot"
 	location "sln/"
@@ -47,6 +47,7 @@ project "UmikoBot"
 	filter { "configurations:Release" }
 		optimize "Full"
 		defines {
+			"QT_NO_DEBUG",
 		}
 
 	filter { "platforms:x64" }
@@ -69,7 +70,7 @@ project "UmikoBot"
 			qtsuffix "d"
 
 		filter { "platforms:x64" }
-			qtpath (qtdir_x64)
+			qtpath (qtDir)
 	end
 
 group "QDiscord"
@@ -112,5 +113,5 @@ project "QDiscordCore"
 			qtsuffix "d"
 
 		filter { "platforms:x64" }
-			qtpath (qtdir_x64)
+			qtpath (qtDir)
 	end
