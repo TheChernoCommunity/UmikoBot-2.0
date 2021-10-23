@@ -10,7 +10,7 @@ Umiko can do everything that a Discord bot can technically do. Of course it does
 
 So you want to contribute? Awesome! Let's get you going. For starters, know that Umiko uses **[QDiscord](https://github.com/Gaztin/QDiscord)** to interface with the Discord API. This is already in the repo as a submodule, so you don't need to worry much.
 
-There are some prerequisites to the whole setup and build process after you're done forking and cloning (checkout Git 101 under **[Help and FAQ](#-help-and-faq)** if you're unfamiliar with the whole process), so let's start with those:
+There are some prerequisites to the whole setup and build process after you're done forking and cloning, so let's start with those:
 
 ### Prerequisites
 
@@ -63,7 +63,7 @@ You can provide an action of your choice for Premake, or allow the script to sel
 
 ### Building and Running
 
-WHen running, the authorisation token for the bot is provided as a command line argument.
+When running, the authorisation token for the bot is provided as a command line argument.
 
 #### Windows
 
@@ -89,157 +89,6 @@ If you weren't able to properly carry out the setup process, or if you just want
 <details>
 <summary>Is Umiko going to be open for invites anytime soon?</summary>
 This hasn't been thought about much, but all of Umiko is developed keeping multiple servers in mind, so we're ready for that already!
-</details>
-
-<details>
-<summary>Git 101
-</summary>
-
-This isn't an extensive guide by any means, but it'll bring you up to speed to start contributing.
-
-The first thing you will need to do is to *fork* this repo (repository). You need to do this because you don't have *direct push permissions* to this repository (meaning that you can't just publish your code here directly).
-
-*Forking* this repo essentially means creating your own *copy* of this repo on your GitHub account. It's not complicated either; just click on the Fork button on the upper-right corner of this repo's page, and voila!
-
-Your *forked repo* (or simply *fork*) stays on GitHub and is thus called a remote (this remote is usually referred to as `origin`). What you need to do next would be to get it locally on your own system. This process is called *cloning*. To *clone* a repository into some local directory, go to that directory, fire up a terminal and type this:
-
-```
-git clone <repo-link>
-```
-
-In our case, the link would be `https://github.com/<your-github-account>/UmikoBot.git` where `<your-github-account>` is, well, your GitHub account. We also have submodules to take care of. So we use
-
-```
-git clone --recurse-submodules -j8 https://github.com/<your-github-account>/UmikoBot.git
-```
-
-(`-j8` is an optional flag which enables fetching up to 8 submodules in parallel. We don't really need to use it, but it's always better to know about it.)
-
-> If that doesn't work, you might be using an old version of Git. Just do
->
-> ```
-> git clone https://github.com/> <MyGitHubAccount>/GameProject-1.git
-> ```
->
-> and make sure you run [`init.sh`](#initsh) right after; it will handle the submodule stuff (by using `git submodule update --init --recursive`).
-
-You have successfully forked and cloned the project. If you came from [Contributing](#️-contributing), you can continue with the [prerequisites](#prerequisites).
-
-The following material explains the basic commands and workflow to use for making contributions after you're done setting up and can build the project.
-
-Remember, you can always check the *status* of your repo using
-
-```
-git status
-```
-
-You can also learn more about a command by using
-
-```
-git help <command>
-```
-
-And of course, the **[documentation](https://git-scm.com/docs)** always helps.
-
-We talked about remotes just a bit earlier. We came across the `origin` which is another name for your fork. The remote from where you forked your fork is usually called `upstream`. To list the remotes you have, use
-
-```
-git remote -v
-```
-
-You'll notice that you don't actually have an upstream setup (unless you set it up yourself, and in that case why are you here?). To add the upstream repository (which would be this repository), do
-
-```
-git remote add upstream https://github.com/TheChernoCommunity/UmikoBot.git
-```
-
-You have covered all the basic prerequisites. From now on, when you intend to add a certain feature, follow these steps:
-
-1. Firstly, you need to create a new branch dedicated to that feature. You would usually branch out from the `master` branch of the main repo and then work on those changes.
-2. With each small change you bring, make sure you commit it. Each commit is essentially a package of changes to different files. It's up to you to decide when something doesn't belong to a particular commit.
-3. After the whole thing is properly done, you can then push it to your origin (you can push commits one by one while you work through them as well, but well it's up to you again).
-4. The only thing is that this code isn't part of the upstream. To make it part of that, you need to open a Pull Request (or a PR) which is basically a request to pull changes from your code. Pull Requests are a GitHub construct, and to open one, simply go to `Pull Requests` (on this repo's page) > `New Pull Request`.
-5. The code would then be reviewed and if it's all fine, it should be merged with the repo.
-6. The branch that you worked on would then become a stale branch. You can now delete it.
-7. While working on a feature if you find yourself in a scenario where upstream has had new commits that you would want to have in your version as well, just *rebase* your branch onto upstream's branch (this would usually be `master`).
-
-The commands that you'll find useful to go with the above process are listed here (stuff beginning with `#` are comments to guide you):
-
-```
-# Make a branch basing off of the current point you're at
-git branch <branch-name>
-
-# Checkout that branch (you aren't moved to  that branch by default)
-git checkout <branch-name>
-
-# To make a new branch and also check it out
-git checkout -b <branch-name>
-
-# Checkout the origin's master
-git checkout origin/master
-
-# Deleting a branch on origin
-git push -d origin <branch-name>
-
-# Deleting a local branch
-git branch -d <local-branch>
-
-# Use add followed by a list of files separated by space to add/stage files for a commit
-git add <file1> <file2> <file3> # and so on
-
-# Stage all changes
-git add -A
-
-# To commit after staging files
-git commit -m "A meaningful commit message"
-
-# Pushing your changes to your remote
-git push <remote-name> <branch-name>
-
-# Pulling changes
-git pull <remote-name> <branch-name>
-
-# Ensuring a local branch is up to date with a branch on upstream
-git fetch upstream <branch-name> 	# Fetch the meta-data
-git checkout <branch-name> 			# Ensure you're at the correct branch locally
-git merge upstream/<branch-name>
-
-# Rebasing a branch (branch1) onto another branch (branch2)
-git checkout branch1 	# First checkout the branch in concern
-git rebase branch2 		# Then rebase
-## This can also be done with a single command:
-git rebase branch2 branch1
-
-## Example: Rebasing your master to origin's master
-git checkout master 	# Of course make sure you're in the correct branch
-git fetch origin 		# Update origin
-git rebase origin/master
-## This also has the same effect as the last two commands:
-git pull --rebase origin master
-
-# Looking at the commits you made
-git log --oneline
-git log # More verbose
-## NOTE: You will find the commit hash with the commits
-
-# Checking out a commit temporarily
-git checkout <hash>
-## NOTE: This will detach your HEAD pointer. A detached state is when the HEAD points at a commit instead of a branch.
-## If you already know you want to make changes, make a new branch instead with the following set of commands.
-
-# Making a new branch basing off of a commit and checking it out
-git checkout -b <new-branch-name> <hash>
-
-# Reverting to an old commit
-git reset --hard <hash>
-
-## NOTE: ALL uncommitted work will be lost. If you have uncommitted changes you want to keep, stash them:
-git stash # Firstly, stash the changes
-git reset --hard <hash> # Revert to this commit
-git stash pop # Pop all the changes from the stash
-
-```
-
 </details>
 
 <details>
