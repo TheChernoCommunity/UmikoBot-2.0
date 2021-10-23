@@ -47,7 +47,7 @@
 	};
 
 CREATE_COMMANDS(
-	// Global Module
+	// General Module
 	Help,
 	Echo,
 	Status,

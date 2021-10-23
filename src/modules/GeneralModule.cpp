@@ -1,4 +1,4 @@
-#include "GlobalModule.h"
+#include "GeneralModule.h"
 #include "UmikoBot.h"
 #include "core/Permissions.h"
 
@@ -7,8 +7,8 @@
 
 using namespace Discord;
 
-GlobalModule::GlobalModule()
-	: Module("Global")
+GeneralModule::GeneralModule()
+	: Module("General")
 {
 	registerCommand(Commands::Help, "help" OPTIONAL(IDENTIFIER), CommandPermission::User, CALLBACK(help));
 	registerCommand(Commands::Echo, "echo" TEXT, CommandPermission::User, CALLBACK(echo));
@@ -19,7 +19,7 @@ GlobalModule::GlobalModule()
 	registerCommand(Commands::SetPrimaryChannel, "set-primary-channel" OPTIONAL(CHANNEL), CommandPermission::Moderator, CALLBACK(setPrimaryChannel));
 }
 
-void GlobalModule::onSave(QJsonObject& mainObject) const
+void GeneralModule::onSave(QJsonObject& mainObject) const
 {
 	QJsonObject commandsEnabledObject {};
 
@@ -35,7 +35,7 @@ void GlobalModule::onSave(QJsonObject& mainObject) const
 	mainObject["primaryChannel"] = QString::number(UmikoBot::get().primaryChannel);
 }
 
-void GlobalModule::onLoad(const QJsonObject& mainObject)
+void GeneralModule::onLoad(const QJsonObject& mainObject)
 {
 	QJsonObject commandsEnabledObject = mainObject["commandsEnabled"].toObject();
 
@@ -50,7 +50,7 @@ void GlobalModule::onLoad(const QJsonObject& mainObject)
 	UmikoBot::get().primaryChannel = mainObject["primaryChannel"].toString().toULongLong();
 }
 
-void GlobalModule::help(const Message& message, const Channel& channel)
+void GeneralModule::help(const Message& message, const Channel& channel)
 {
 	::Permissions::contains(channel.guildId(), message.author().id(), CommandPermission::Moderator, [this, message, channel](bool result)
 	{
@@ -110,14 +110,14 @@ void GlobalModule::help(const Message& message, const Channel& channel)
 	});
 }
 
-void GlobalModule::echo(const Message& message, const Channel& channel)
+void GeneralModule::echo(const Message& message, const Channel& channel)
 {
 	(void) channel;
 	QString restOfMessage = message.content().mid(message.content().indexOf(QRegularExpression("\\s")));
 	SEND_MESSAGE(restOfMessage);
 }
 
-void GlobalModule::status(const Message& message, const Channel& channel)
+void GeneralModule::status(const Message& message, const Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	UserId userId = message.author().id();
@@ -149,7 +149,7 @@ void GlobalModule::status(const Message& message, const Channel& channel)
 	});
 }
 
-void GlobalModule::setPrefix(const Message& message, const Channel& channel)
+void GeneralModule::setPrefix(const Message& message, const Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QString& prefix = UmikoBot::get().getGuildData()[channel.guildId()].prefix;
@@ -172,19 +172,19 @@ void GlobalModule::setPrefix(const Message& message, const Channel& channel)
 	}
 }
 
-void GlobalModule::enable(const Message& message, const Channel& channel)
+void GeneralModule::enable(const Message& message, const Channel& channel)
 {
 	(void) channel;
 	enableDisableImpl(message, true);
 }
 
-void GlobalModule::disable(const Message& message, const Channel& channel)
+void GeneralModule::disable(const Message& message, const Channel& channel)
 {
 	(void) channel;
 	enableDisableImpl(message, false);
 }
 
-void GlobalModule::setPrimaryChannel(const Message& message, const Channel& channel)
+void GeneralModule::setPrimaryChannel(const Message& message, const Channel& channel)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	
@@ -213,7 +213,7 @@ void GlobalModule::setPrimaryChannel(const Message& message, const Channel& chan
 	}
 }
 
-QString GlobalModule::commandHelp(const QString& request, const QString& prefix)
+QString GeneralModule::commandHelp(const QString& request, const QString& prefix)
 {
 	for (Module* module : UmikoBot::get().getModules())
 	{
@@ -247,7 +247,7 @@ bool canBeDisabled(const Command& command)
 	return command.name != "help" && command.name != "enable" && command.name != "disable";
 }
 
-void GlobalModule::enableDisableImpl(const Message& message, bool enable)
+void GeneralModule::enableDisableImpl(const Message& message, bool enable)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	QString output = "";

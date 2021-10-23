@@ -8,7 +8,7 @@
 #include "UmikoBot.h"
 #include "core/Permissions.h"
 
-#include "modules/GlobalModule.h"
+#include "modules/GeneralModule.h"
 #include "modules/ModerationModule.h"
 #include "modules/LevelModule.h"
 #include "modules/UserModule.h"
@@ -52,7 +52,7 @@ UmikoBot::UmikoBot(QObject* parent)
 	connect(this, &Client::onMessageCreate, this, &UmikoBot::umikoOnMessageCreate);
 
 	// Modules
-	modules.push_back(new GlobalModule());
+	modules.push_back(new GeneralModule());
 	modules.push_back(new ModerationModule());
 	modules.push_back(new LevelModule());
 	modules.push_back(new UserModule());
@@ -509,12 +509,12 @@ void UmikoBot::umikoOnMessageCreate(const Message& message)
 							}
 							else
 							{
-								// Looks for global module and outputs help text
-								for (Module* globalModule : modules)
+								// Looks for general module and outputs help text
+								for (Module* generalModule : modules)
 								{
-									if (globalModule->getName() == "Global")
+									if (generalModule->getName() == "General")
 									{
-										QString helpText = ((GlobalModule*) globalModule)->commandHelp(command.name, prefix);
+										QString helpText = ((GeneralModule*) generalModule)->commandHelp(command.name, prefix);
 										
 										Embed embed {};
 										embed.setColor(qrand() % 0xffffff);

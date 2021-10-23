@@ -2,10 +2,10 @@
 
 #include "modules/Module.h"
 
-class GlobalModule : public Module
+class GeneralModule : public Module
 {
 public:
-	GlobalModule();
+	GeneralModule();
 
 	void help(const Discord::Message&, const Discord::Channel&);
 	void echo(const Discord::Message&, const Discord::Channel&);
