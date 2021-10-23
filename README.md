@@ -14,6 +14,14 @@ There are some prerequisites to the whole setup and build process after you're d
 
 ### Prerequisites
 
+#### Windows
+
+- Windows 10
+- **[Qt](https://www.qt.io/) (version 5)**
+- Visual Studio (recommended)
+
+![Qt Required Components](images/Qt-Required-Components.png)
+
 #### Linux (or WSL on Windows)
 
 To build on linux, you first need to make sure you have `g++` and `make` ready to go. Then all you need to do to install Qt is
@@ -24,7 +32,16 @@ sudo apt install qt5-default libqt5websockets5-dev
 
 ### Setting up the project
 
-All you need to do to set up the project is to run
+All you need to do to set up the project is to run:
+
+#### Windows
+
+```bat
+scripts\init.bat
+scripts\generate_project_files.bat
+```
+
+#### Linux
 
 ```bash
 scripts/init.sh
@@ -48,7 +65,13 @@ You can provide an action of your choice for Premake, or allow the script to sel
 
 WHen running, the authorisation token for the bot is provided as a command line argument.
 
-### Linux
+#### Windows
+
+Open the solution (found in the `sln\` directory) in Visual Studio. To add the bot token as a command line argument, go to Project Properties -> Debugging.
+
+![Visual Studio Command Args](images/Bot-Token-VS.png)
+
+#### Linux
 
 ```bash
 cd sln/
