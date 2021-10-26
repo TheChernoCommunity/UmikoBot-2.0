@@ -18,6 +18,7 @@
 #define CHANNEL SPACE "\\S+"
 
 #define TEXT SPACE ".+"
+#define MULTI_LINE_TEXT SPACE "(.|\\n|\\r)+"
 #define INTEGER SPACE "[+-]?[0-9]+"
 #define UNSIGNED_INTEGER SPACE "[+]?[0-9]+"
 #define DECIMAL SPACE "[+-]?[0-9]+(\\.[0-9]+)?"
@@ -58,6 +59,8 @@ CREATE_COMMANDS(
 
 	// Moderation Module
 	ModerateInvitations,
+	Warn,
+	Warnings,
 	
 	// Level Module
 	Top,

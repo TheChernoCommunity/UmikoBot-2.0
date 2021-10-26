@@ -9,6 +9,8 @@ ModerationModule::ModerationModule()
 {
 	namespace CP = CommandPermission;
 	registerCommand(Commands::ModerateInvitations, "moderate-invitations" OPTIONAL(SPACE "(on|off)"), CP::Moderator, CALLBACK(moderateInvitations));
+	registerCommand(Commands::Warn, "warn" USER MULTI_LINE_TEXT, CP::Moderator, CALLBACK(warn));
+	registerCommand(Commands::Warnings, "warnings" SPACE "(list" USER "|list-all" USER "|remove" USER UNSIGNED_INTEGER ")", CP::Moderator, CALLBACK(warnings));
 }
 
 void ModerationModule::onMessage(const Message& message, const Channel& channel)
@@ -57,4 +59,62 @@ void ModerationModule::moderateInvitations(const Message& message, const Channel
 	}
 
 	SEND_MESSAGE(QString("Moderating invitations has been turned %1!").arg(args[1]));
+}
+
+void ModerationModule::warn(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	
+	UserId userId = UmikoBot::get().getUserIdFromArgument(channel.guildId(), args[1]);
+	if (!userId)
+	{
+		SEND_MESSAGE("Could not find user!");
+		return;
+	}
+
+	// Removes everything but the message argument
+	QString msg = message.content();
+	msg.remove(0, args[0].size());
+	msg.remove(0, msg.indexOf(QRegularExpression("\\S")));
+	msg.remove(0, args[1].size());
+	msg.remove(0, msg.indexOf(QRegularExpression("\\S")));
+
+	userWarnings[userId].append(UserWarning { message.author().id(), msg });
+	unsigned int numberOfWarnings = countWarningsForUser(userId);
+	QString numberOfWarningsString = "";
+
+	switch (numberOfWarnings)
+	{
+	case 1: numberOfWarningsString = "First"; break;
+	case 2: numberOfWarningsString = "Second"; break;
+	case 3: numberOfWarningsString = "Third"; break;
+
+	// Good enough, shouldn't be seen
+	default: numberOfWarningsString = QString("%1th").arg(QString::number(numberOfWarnings));
+	}
+
+	SEND_MESSAGE(QString("%1 warning for <@%2>").arg(numberOfWarningsString, QString::number(userId)));
+}
+
+void ModerationModule::warnings(const Message& message, const Channel& channel)
+{
+}
+
+unsigned int ModerationModule::countWarningsForUser(UserId userId, bool activeWarningsOnly)
+{
+	if (!activeWarningsOnly)
+	{
+		return userWarnings[userId].size();
+	}
+
+	unsigned int total = 0;
+	for (const UserWarning& warning : userWarnings[userId])
+	{
+		if (warning.isActive)
+		{
+			total += 1;
+		}
+	}
+
+	return total;
 }
