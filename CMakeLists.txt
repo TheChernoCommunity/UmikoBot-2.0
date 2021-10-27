@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
+if (CMAKE_VERSION VERSION_LESS "3.7.0")
+	set(CMAKE_INCLUDE_CURRENT_DIR ON)
+endif()
 
 project(UmikoBot VERSION 2.0.0 LANGUAGES CXX)
 
@@ -10,17 +13,24 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-if (CMAKE_VERSION VERSION_LESS "3.7.0")
-	set(CMAKE_INCLUDE_CURRENT_DIR ON)
-endif()
+# Output directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
+# Dependencies
 find_package(Qt5 COMPONENTS Core Gui Network WebSockets Widgets)
+add_subdirectory(dep/QDiscord/)
 
+# Files
 set(SOURCES
 	main.cpp UmikoBot.cpp
 	core/Data.cpp core/InterruptHandler.cpp core/Permissions.cpp
 	modules/CurrencyModule.cpp modules/FunModule.cpp modules/GeneralModule.cpp modules/LevelModule.cpp modules/ModerationModule.cpp modules/Module.cpp modules/UserModule.cpp)
 list(TRANSFORM SOURCES PREPEND src/)
 
+# The executable
 add_executable(UmikoBot ${SOURCES})
 target_link_libraries(UmikoBot Qt5::Core Qt5::Gui Qt5::Network Qt5::WebSockets Qt5::Widgets)
+target_link_libraries(UmikoBot QDiscord)
+target_include_directories(UmikoBot PUBLIC src/)
