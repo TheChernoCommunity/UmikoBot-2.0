@@ -13,12 +13,12 @@ struct UserWarning
 	bool isActive;
 
 	UserWarning(UserId warnedBy, QString message)
-		: UserWarning(warnedBy, QDateTime::currentDateTime(), message)
+		: UserWarning(warnedBy, QDateTime::currentDateTime(), message, true)
 	{
 	}
 
-	UserWarning(UserId warnedBy, QDateTime when, QString message)
-		: warnedBy(warnedBy), when(when), message(message), isActive(true)
+	UserWarning(UserId warnedBy, QDateTime when, QString message, bool isActive)
+		: warnedBy(warnedBy), when(when), message(message), isActive(isActive)
 	{
 	}
 };
@@ -33,6 +33,9 @@ public:
 	void warnings(const Discord::Message&, const Discord::Channel&);
 
 protected:
+	void onSave(QJsonObject& mainObject) const override;
+	void onLoad(const QJsonObject& mainObject) override;
+
 	void onMessage(const Discord::Message&, const Discord::Channel&) override;
 
 private:

@@ -2,6 +2,8 @@
 #include "UmikoBot.h"
 #include "core/Permissions.h"
 
+#include <QJsonArray>
+
 using namespace Discord;
 
 ModerationModule::ModerationModule()
@@ -11,6 +13,48 @@ ModerationModule::ModerationModule()
 	registerCommand(Commands::ModerateInvitations, "moderate-invitations" OPTIONAL(SPACE "(on|off)"), CP::Moderator, CALLBACK(moderateInvitations));
 	registerCommand(Commands::Warn, "warn" USER MULTI_LINE_TEXT, CP::Moderator, CALLBACK(warn));
 	registerCommand(Commands::Warnings, "warnings" SPACE "(list" USER "|list-all" USER "|remove" USER UNSIGNED_INTEGER ")", CP::Moderator, CALLBACK(warnings));
+}
+
+void ModerationModule::onSave(QJsonObject& mainObject) const
+{
+	QJsonObject userWarningsObject {};
+	for (UserId userId : userWarnings.keys())
+	{
+		QJsonArray userWarningsArray;
+		for (const UserWarning& warning : userWarnings[userId])
+		{
+			QJsonObject warningJson {};
+			warningJson["warnedBy"] = QString::number(warning.warnedBy);
+			warningJson["when"] = warning.when.toString();
+			warningJson["message"] = warning.message;
+			warningJson["isActive"] = warning.isActive;
+
+			userWarningsArray.append(warningJson);
+		}
+
+		userWarningsObject[QString::number(userId)] = userWarningsArray;
+	}
+
+	mainObject["userWarnings"] = userWarningsObject;
+}
+
+void ModerationModule::onLoad(const QJsonObject& mainObject)
+{
+	QJsonObject userWarningsObject = mainObject["userWarnings"].toObject();
+	for (const QString& userIdString : userWarningsObject.keys())
+	{
+		QJsonArray userWarningsArray = userWarningsObject[userIdString].toArray();
+		for (const QJsonValue& warningJson : userWarningsArray)
+		{
+			QJsonObject warningObject = warningJson.toObject();
+			userWarnings[userIdString.toULongLong()].append(UserWarning {
+				warningJson["warnedBy"].toString().toULongLong(),
+				QDateTime::fromString(warningJson["when"].toString()),
+				warningJson["message"].toString(),
+				warningJson["isActive"].toBool(),
+			});
+		}
+	}
 }
 
 void ModerationModule::onMessage(const Message& message, const Channel& channel)
