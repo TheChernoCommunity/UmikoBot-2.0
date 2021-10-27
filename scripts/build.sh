@@ -8,14 +8,21 @@ projectRoot=$scriptDir/..
 echo Cleaning...
 rm -r $projectRoot/bin/ 2> /dev/null
 
+# Ensures submodules are present
+echo
+echo Checking submodules...
+cd $projectRoot
+git submodule update --init --recursive
+
 echo
 echo Generating project files...
-$scriptDir/generate_project_files.sh
+mkdir $projectRoot/sln/ 2> /dev/null
+cd $projectRoot/sln/
+# Generates the project files
+cmake ..
 
 echo
 echo Building...
-cd $projectRoot/sln/
-
 # nproc returns the number of CPU cores/threads available
 make -j $(nproc) || exit 1
 
