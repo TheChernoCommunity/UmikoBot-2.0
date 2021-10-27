@@ -132,8 +132,9 @@ void ModerationModule::warnings(const Message& message, const Channel& channel)
 			QString description = "";
 			bool hasOutputInactiveMessage = false;
 			
-			for (const UserWarning& warning : userWarnings[userId])
+			for (int id = 0; id < userWarnings[userId].size(); id++)
 			{
+				const UserWarning& warning = userWarnings[userId][id];
 				if (!warning.isActive)
 				{
 					if (activeWarningsOnly)
@@ -148,9 +149,10 @@ void ModerationModule::warnings(const Message& message, const Channel& channel)
 					}
 				}
 
-				description += QString("%1 - warned by %2\n**%3**\n\n").arg(warning.when.toString("yyyy-MM-dd hh:mm:ss"),
-																			UmikoBot::get().getName(channel.guildId(), warning.warnedBy),
-																			warning.message);
+				description += QString("%1 - %2 warned on %3\n**%4**\n\n").arg(QString::number(userWarnings[userId].size() - id - 1),
+																			   UmikoBot::get().getName(channel.guildId(), warning.warnedBy),
+																			   warning.when.toString("yyyy-MM-dd hh:mm:ss"),
+																			   warning.message);
 			}
 
 			Embed embed;
