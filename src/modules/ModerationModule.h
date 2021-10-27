@@ -40,6 +40,7 @@ protected:
 
 private:
 	unsigned int countWarningsForUser(UserId userId, bool activeWarningsOnly = true);
+	void checkWarningsExpiry();
 	
 private:
 	bool isModeratingInvitations = false;

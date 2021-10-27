@@ -55,6 +55,8 @@ void ModerationModule::onLoad(const QJsonObject& mainObject)
 			});
 		}
 	}
+
+	checkWarningsExpiry();
 }
 
 void ModerationModule::onMessage(const Message& message, const Channel& channel)
@@ -142,6 +144,7 @@ void ModerationModule::warn(const Message& message, const Channel& channel)
 
 void ModerationModule::warnings(const Message& message, const Channel& channel)
 {
+	checkWarningsExpiry();
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 
 	UserId userId = UmikoBot::get().getUserIdFromArgument(channel.guildId(), args[2]);
@@ -196,7 +199,7 @@ void ModerationModule::warnings(const Message& message, const Channel& channel)
 
 					if (!hasOutputInactiveMessage)
 					{
-						description += "\n===== Expired ======\n\n";
+						description += "**===== Expired ======**\n\n";
 						hasOutputInactiveMessage = true;
 					}
 				}
@@ -233,4 +236,21 @@ unsigned int ModerationModule::countWarningsForUser(UserId userId, bool activeWa
 	}
 
 	return total;
+}
+
+void ModerationModule::checkWarningsExpiry()
+{
+	QDateTime now = QDateTime::currentDateTime();
+
+	for (UserId userId : userWarnings.keys())
+	{
+		for (UserWarning& warning : userWarnings[userId])
+		{
+			// Warnings expire after 3 months
+			if (warning.isActive && (warning.when.addMonths(3) <= now))
+			{
+				warning.isActive = false;
+			}
+		}
+	}
 }
