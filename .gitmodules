@@ -6,4 +6,4 @@
 	url = https://github.com/dcourtois/premake-qt.git
 [submodule "dep/QDiscord"]
 	path = dep/QDiscord
-	url = https://github.com/Gaztin/QDiscord.git
+	url = https://github.com/FancyKillerPanda/QDiscord.git
