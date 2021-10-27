@@ -98,6 +98,68 @@ void ModerationModule::warn(const Message& message, const Channel& channel)
 
 void ModerationModule::warnings(const Message& message, const Channel& channel)
 {
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+
+	UserId userId = UmikoBot::get().getUserIdFromArgument(channel.guildId(), args[2]);
+	if (!userId)
+	{
+		SEND_MESSAGE("Could not find user!");
+		return;
+	}
+	
+	if (args[1] == "remove")
+	{
+		
+	}
+	else if (args[1] == "list" || args[1] == "list-all")
+	{
+		bool activeWarningsOnly = args[1] == "list-all" ? false : true;
+		unsigned int numberOfWarnings = countWarningsForUser(userId, activeWarningsOnly);
+		if (numberOfWarnings == 0)
+		{
+			SEND_MESSAGE("Nothing to see here...");
+			return;
+		}
+
+		UmikoBot::get().getAvatar(channel.guildId(), userId).then(
+			[this, message, channel, args, userId, activeWarningsOnly, numberOfWarnings](const QString& icon)
+		{
+			qSort(userWarnings[userId].begin(), userWarnings[userId].end(), [](const UserWarning& first, const UserWarning& second)
+			{
+				return first.when > second.when;
+			});
+
+			QString description = "";
+			bool hasOutputInactiveMessage = false;
+			
+			for (const UserWarning& warning : userWarnings[userId])
+			{
+				if (!warning.isActive)
+				{
+					if (activeWarningsOnly)
+					{
+						continue;
+					}
+
+					if (!hasOutputInactiveMessage)
+					{
+						description += "\n===== Expired ======\n\n";
+						hasOutputInactiveMessage = true;
+					}
+				}
+
+				description += QString("%1 - warned by %2\n**%3**\n\n").arg(warning.when.toString("yyyy-MM-dd hh:mm:ss"),
+																			UmikoBot::get().getName(channel.guildId(), warning.warnedBy),
+																			warning.message);
+			}
+
+			Embed embed;
+			embed.setColor(qrand() % 0xffffff);
+			embed.setAuthor(EmbedAuthor { QString("Warnings for %1").arg(UmikoBot::get().getName(channel.guildId(), userId)), "", icon });
+			embed.setDescription(description);
+			SEND_MESSAGE(embed);
+		});
+	}
 }
 
 unsigned int ModerationModule::countWarningsForUser(UserId userId, bool activeWarningsOnly)
