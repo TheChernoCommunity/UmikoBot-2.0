@@ -109,7 +109,15 @@ void ModerationModule::warnings(const Message& message, const Channel& channel)
 	
 	if (args[1] == "remove")
 	{
-		
+		int id = userWarnings[userId].size() - args[3].toInt() - 1;
+		if (id < 0 || id >= userWarnings[userId].size())
+		{
+			SEND_MESSAGE(QString("That is an invalid ID! Use `%1warnings list` to see IDs!").arg(UmikoBot::get().getGuildData()[channel.guildId()].prefix));
+			return;
+		}
+
+		UserWarning warning = userWarnings[userId].takeAt(id);
+		SEND_MESSAGE(QString("Removed warning by %1:\n**%2**").arg(UmikoBot::get().getName(channel.guildId(), warning.warnedBy), warning.message));
 	}
 	else if (args[1] == "list" || args[1] == "list-all")
 	{
