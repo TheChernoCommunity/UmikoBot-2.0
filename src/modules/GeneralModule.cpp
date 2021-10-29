@@ -22,6 +22,7 @@ GeneralModule::GeneralModule()
 void GeneralModule::onSave(QJsonObject& mainObject) const
 {
 	QJsonObject commandsEnabledObject {};
+	QJsonObject primaryChannelsObject {};
 
 	for (Module* module : UmikoBot::get().getModules())
 	{
@@ -31,8 +32,13 @@ void GeneralModule::onSave(QJsonObject& mainObject) const
 		}
 	}
 
+	for (GuildId guildId : UmikoBot::get().primaryChannels.keys())
+	{
+		primaryChannelsObject[QString::number(guildId)] = QString::number(UmikoBot::get().primaryChannels[guildId]);
+	}
+
 	mainObject["commandsEnabled"] = commandsEnabledObject;
-	mainObject["primaryChannel"] = QString::number(UmikoBot::get().primaryChannel);
+	mainObject["primaryChannels"] = primaryChannelsObject;
 }
 
 void GeneralModule::onLoad(const QJsonObject& mainObject)
@@ -47,7 +53,11 @@ void GeneralModule::onLoad(const QJsonObject& mainObject)
 		}
 	}
 
-	UmikoBot::get().primaryChannel = mainObject["primaryChannel"].toString().toULongLong();
+	QJsonObject primaryChannelsObject = mainObject["primaryChannels"].toObject();
+	for (const QString& guildIdString : primaryChannelsObject.keys())
+	{
+		UmikoBot::get().primaryChannels[guildIdString.toULongLong()] = primaryChannelsObject[guildIdString].toString().toULongLong();
+	}
 }
 
 void GeneralModule::help(const Message& message, const Channel& channel)
@@ -190,10 +200,10 @@ void GeneralModule::setPrimaryChannel(const Message& message, const Channel& cha
 	
 	if (args.size() > 1)
 	{
-		UmikoBot::get().getChannelFromArgument(channel.guildId(), args[1]).then([this, message](const Channel& mentionedChannel)
+		UmikoBot::get().getChannelFromArgument(channel.guildId(), args[1]).then([this, message, channel](const Channel& mentionedChannel)
 		{
-			UmikoBot::get().primaryChannel = mentionedChannel.id();
-			SEND_MESSAGE(QString("Primary channel is <#%1>").arg(QString::number(UmikoBot::get().primaryChannel)));
+			UmikoBot::get().primaryChannels[channel.guildId()] = mentionedChannel.id();
+			SEND_MESSAGE(QString("Primary channel is <#%1>").arg(QString::number(UmikoBot::get().primaryChannels[channel.guildId()])));
 		})
 		.otherwise([this, message]()
 		{
@@ -202,9 +212,9 @@ void GeneralModule::setPrimaryChannel(const Message& message, const Channel& cha
 	}
 	else
 	{
-		if (UmikoBot::get().primaryChannel)
+		if (UmikoBot::get().primaryChannels[channel.guildId()])
 		{
-			SEND_MESSAGE(QString("Primary channel is <#%1>").arg(QString::number(UmikoBot::get().primaryChannel)));
+			SEND_MESSAGE(QString("Primary channel is <#%1>").arg(QString::number(UmikoBot::get().primaryChannels[channel.guildId()])));
 		}
 		else
 		{

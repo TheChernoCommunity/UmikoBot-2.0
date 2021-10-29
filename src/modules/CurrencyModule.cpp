@@ -35,7 +35,7 @@ CurrencyModule::CurrencyModule()
 			if (!guildConfig.randomGiveawayDone)
 			{
 				guildConfig.randomGiveawayInProgress = true;
-				UmikoBot::get().createMessage(UmikoBot::get().primaryChannel,
+				UmikoBot::get().createMessage(UmikoBot::get().primaryChannels[guildId],
 											  QString("Hey everyone! Today's freebie expires in **60 seconds**! Go `%1claim` it now!")
 											  .arg(UmikoBot::get().getGuildData()[guildId].prefix));
 			}

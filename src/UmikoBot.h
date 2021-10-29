@@ -60,7 +60,7 @@ private slots:
 	void umikoOnMessageCreate(const Discord::Message& message);
 	
 public:
-	ChannelId primaryChannel;
+	QMap<GuildId, ChannelId> primaryChannels;
 
 private:
 	QTimer saveTimer;
