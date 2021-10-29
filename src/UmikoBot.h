@@ -30,6 +30,7 @@ public:
 	UserId getUserIdFromArgument(GuildId guildId, const QString& argument);
 	UserId getUserIdFromMention(GuildId guildId, const QString& mention);
 	Discord::Promise<Discord::Channel>& getChannelFromArgument(GuildId guildId, const QString& argument);
+	ChannelId getChannelIdFromArgument(const QList<Discord::Channel>& channels, const QString& argument);
 
 private:
 	UmikoBot(QObject* parent = nullptr);

@@ -354,37 +354,51 @@ Promise<Channel>& UmikoBot::getChannelFromArgument(GuildId guildId, const QStrin
 	Promise<Channel>* promise = new Promise<Channel>();
 	getGuildChannels(guildId).then([this, argument, promise](const QList<Channel>& channels)
 	{
-		static const QRegularExpression channelMentionRegex { "^<#!?([0-9]+)>$" };
-		QRegularExpressionMatch match = channelMentionRegex.match(argument);
-
-		if (match.hasMatch())
+		ChannelId channelId = getChannelIdFromArgument(channels, argument);
+		if (channelId)
 		{
-			ChannelId channelId = match.captured(1).toULongLong();
-			for (const Channel& channel : channels)
+			UmikoBot::get().getChannel(channelId).then([promise](const Channel& channel)
 			{
-				if (channel.id() == channelId)
-				{
-					promise->resolve(channel);
-					return;
-				}
-			}
+				promise->resolve(channel);
+			});
 		}
 		else
 		{
-			for (const Channel& channel : channels)
-			{
-				if (channel.name() == argument)
-				{
-					promise->resolve(channel);
-					return;
-				}
-			}
+			promise->reject();
 		}
-		
-		promise->reject();
 	});
 
 	return *promise;
+}
+
+ChannelId UmikoBot::getChannelIdFromArgument(const QList<Channel>& channels, const QString& argument)
+{
+	static const QRegularExpression channelMentionRegex { "^<#!?([0-9]+)>$" };
+	QRegularExpressionMatch match = channelMentionRegex.match(argument);
+
+	if (match.hasMatch())
+	{
+		ChannelId channelId = match.captured(1).toULongLong();
+		for (const Channel& channel : channels)
+		{
+			if (channel.id() == channelId)
+			{
+				return channelId;
+			}
+		}
+	}
+	else
+	{
+		for (const Channel& channel : channels)
+		{
+			if (channel.name() == argument)
+			{
+				return channel.id();
+			}
+		}
+	}
+
+	return 0;
 }
 
 void UmikoBot::umikoOnReady()
