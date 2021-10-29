@@ -67,6 +67,8 @@ CREATE_COMMANDS(
 	GiveXp,
 	TakeXp,
 	Rank,
+	EnableXp,
+	DisableXp,
 	
 	// User Module
 	SetTimezone,

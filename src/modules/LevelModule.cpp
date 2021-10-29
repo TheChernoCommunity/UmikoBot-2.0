@@ -36,6 +36,8 @@ LevelModule::LevelModule()
 	registerCommand(Commands::GiveXp, "give-xp" USER INTEGER OPTIONAL(SPACE "level" OPTIONAL("s")), CP::Moderator, CALLBACK(giveXp));
 	registerCommand(Commands::TakeXp, "take-xp" USER INTEGER OPTIONAL(SPACE "level" OPTIONAL("s")), CP::Moderator, CALLBACK(takeXp));
 	registerCommand(Commands::Rank, "rank" GROUP(RANK_LIST_SIGNATURE "|" RANK_ADD_SIGNATURE "|" RANK_REMOVE_SIGNATURE "|" RANK_EDIT_SIGNATURE), CP::Moderator, CALLBACK(rank));
+	registerCommand(Commands::EnableXp, "enable-xp" GROUP(CHANNEL) "+", CP::Moderator, CALLBACK(enableXp));
+	registerCommand(Commands::DisableXp, "disable-xp" GROUP(CHANNEL) "+", CP::Moderator, CALLBACK(disableXp));
 }
 
 void LevelModule::onSave(QJsonObject& mainObject) const
@@ -119,7 +121,10 @@ void LevelModule::onLoad(const QJsonObject& mainObject)
 
 void LevelModule::onMessage(const Message& message, const Channel& channel)
 {
-	getUserLevelData(channel.guildId(), message.author().id()).messageCount += 1;
+	if (!channelsWithXpDisabled[channel.id()])
+	{
+		getUserLevelData(channel.guildId(), message.author().id()).messageCount += 1;
+	}
 }
 
 void LevelModule::onStatus(QString& output, GuildId guildId, UserId userId)
@@ -376,6 +381,16 @@ void LevelModule::rank(const Message& message, const Channel& channel)
 	}
 }
 
+void LevelModule::enableXp(const Message& message, const Channel& channel)
+{
+	enableDisableXpImpl(message, channel, true);
+}
+
+void LevelModule::disableXp(const Message& message, const Channel& channel)
+{
+	enableDisableXpImpl(message, channel, false);
+}
+
 void LevelModule::giveTakeXpImpl(const Message& message, const Channel& channel, int multiplier)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
@@ -437,6 +452,31 @@ void LevelModule::giveTakeXpImpl(const Message& message, const Channel& channel,
 	SEND_MESSAGE(format.arg(QString::number(abs(userLevelData.currentXp - initialXp)),
 							QString::number(abs(getCurrentLevel(channel.guildId(), userId) - initialLevel)),
 							UmikoBot::get().getName(channel.guildId(), userId)));
+}
+
+void LevelModule::enableDisableXpImpl(const Message& message, const Channel& channel, bool enable)
+{
+	UmikoBot::get().getGuildChannels(channel.guildId()).then([this, message, channel, enable](const QList<Channel>& channels)
+	{
+		QStringList args = message.content().split(QRegularExpression(SPACE));
+		QString output = "";
+		
+		for (int i = 1; i < args.size(); i++)
+		{
+			ChannelId channelId = UmikoBot::get().getChannelIdFromArgument(channels, args[i]);
+			if (channelId)
+			{
+				channelsWithXpDisabled[channelId] = !enable;
+				output += QString("%1 XP in channel <#%2>").arg(enable ? "Enabled" : "Disabled", QString::number(channelId));
+			}
+			else
+			{
+				output += QString("Could not find channel '%1'!").arg(args[i]);
+			}
+		}
+
+		SEND_MESSAGE(output);
+	});
 }
 
 void LevelModule::sortRanks(GuildId guildId)

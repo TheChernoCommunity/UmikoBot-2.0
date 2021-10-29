@@ -30,6 +30,8 @@ public:
 	void giveXp(const Discord::Message&, const Discord::Channel&);
 	void takeXp(const Discord::Message&, const Discord::Channel&);
 	void rank(const Discord::Message&, const Discord::Channel&);
+	void enableXp(const Discord::Message&, const Discord::Channel&);
+	void disableXp(const Discord::Message&, const Discord::Channel&);
 	
 protected:
 	void onSave(QJsonObject& mainObject) const override;
@@ -45,11 +47,16 @@ private:
 	QString getCurrentRank(GuildId guildId, UserId userId);
 
 	void giveTakeXpImpl(const Discord::Message&, const Discord::Channel&, int multiplier);
+	void enableDisableXpImpl(const Discord::Message&, const Discord::Channel&, bool enable);
 	
 	void sortRanks(GuildId guildId);
 	void sortLeaderboard(GuildId guildId);
 
 private:
+	// We need to have enabled being the default, so:
+	// true = disabled, false = enabled
+	QMap<ChannelId, bool> channelsWithXpDisabled;
+	
 	QList<long long int> levels; // index is level number, value is individual XP requirement (not cumulative)
 	QMap<GuildId, QList<LevelRank>> levelRanks;
 	QMap<GuildId, QList<UserLevelData>> levelData;
