@@ -817,8 +817,8 @@ void CurrencyModule::setCurrencyName(const Message& message, const Channel& chan
 		currencyConfigs[channel.guildId()].currencyAbbreviation = args[2];
 	}
 
-	SEND_MESSAGE(QString("Currency name is **%1** and abbreviation is **%2**").arg(currencyConfigs[channel.guildId()].currencyName,
-																				   currencyConfigs[channel.guildId()].currencyAbbreviation));
+	SEND_MESSAGE(QString("Currency name set to **%1** and abbreviation set to **%2**").arg(currencyConfigs[channel.guildId()].currencyName,
+																						   currencyConfigs[channel.guildId()].currencyAbbreviation));
 }
 
 void CurrencyModule::setMaxDebt(const Message& message, const Channel& channel)
@@ -829,8 +829,8 @@ void CurrencyModule::setMaxDebt(const Message& message, const Channel& channel)
 		currencyConfigs[channel.guildId()].maxDebt = args[1].toDouble() * 100;
 	}
 	
-	SEND_MESSAGE(QString("Maximum debt is **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].maxDebt / 100.0f),
-														  currencyConfigs[channel.guildId()].currencyAbbreviation));
+	SEND_MESSAGE(QString("Maximum debt set to **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].maxDebt / 100.0f),
+															  currencyConfigs[channel.guildId()].currencyAbbreviation));
 }
 
 void CurrencyModule::setDailyReward(const Message& message, const Channel& channel)
@@ -841,8 +841,8 @@ void CurrencyModule::setDailyReward(const Message& message, const Channel& chann
 		currencyConfigs[channel.guildId()].rewardForDaily = args[1].toDouble() * 100;
 	}
 	
-	SEND_MESSAGE(QString("Reward for daily is **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].rewardForDaily / 100.0f),
-															  currencyConfigs[channel.guildId()].currencyAbbreviation));
+	SEND_MESSAGE(QString("Reward for daily set to **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].rewardForDaily / 100.0f),
+																  currencyConfigs[channel.guildId()].currencyAbbreviation));
 }
 
 void CurrencyModule::setDailyStreakBonus(const Message& message, const Channel& channel)
@@ -853,8 +853,8 @@ void CurrencyModule::setDailyStreakBonus(const Message& message, const Channel& 
 		currencyConfigs[channel.guildId()].dailyStreakBonus = args[1].toDouble() * 100;
 	}
 
-	SEND_MESSAGE(QString("Bonus for daily streak is **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].dailyStreakBonus / 100.0f),
-																	currencyConfigs[channel.guildId()].currencyAbbreviation));
+	SEND_MESSAGE(QString("Bonus for daily streak set to **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].dailyStreakBonus / 100.0f),
+																		currencyConfigs[channel.guildId()].currencyAbbreviation));
 }
 
 void CurrencyModule::setDailyStreakBonusPeriod(const Message& message, const Channel& channel)
@@ -865,7 +865,7 @@ void CurrencyModule::setDailyStreakBonusPeriod(const Message& message, const Cha
 		currencyConfigs[channel.guildId()].dailyStreakBonusPeriod = args[1].toInt();
 	}
 
-	SEND_MESSAGE(QString("Period for daily streak bonus is **%1 days**")
+	SEND_MESSAGE(QString("Period for daily streak bonus set to **%1 days**")
 				 .arg(QString::number(currencyConfigs[channel.guildId()].dailyStreakBonusPeriod)));
 }
 
@@ -877,7 +877,7 @@ void CurrencyModule::setRandomGiveawayChance(const Message& message, const Chann
 		currencyConfigs[channel.guildId()].randomGiveawayChance = args[1].toDouble();
 	}
 
-	SEND_MESSAGE(QString("Random giveaway chance is **%1**").arg(QString::number(currencyConfigs[channel.guildId()].randomGiveawayChance)));
+	SEND_MESSAGE(QString("Random giveaway chance set to **%1**").arg(QString::number(currencyConfigs[channel.guildId()].randomGiveawayChance)));
 }
 
 void CurrencyModule::setRandomGiveawayReward(const Message& message, const Channel& channel)
@@ -888,8 +888,8 @@ void CurrencyModule::setRandomGiveawayReward(const Message& message, const Chann
 		currencyConfigs[channel.guildId()].randomGiveawayReward = args[1].toDouble() * 100;
 	}
 
-	SEND_MESSAGE(QString("Random giveaway reward is **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].randomGiveawayReward / 100.0f),
-																	currencyConfigs[channel.guildId()].currencyAbbreviation));
+	SEND_MESSAGE(QString("Random giveaway reward set to **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].randomGiveawayReward / 100.0f),
+																		currencyConfigs[channel.guildId()].currencyAbbreviation));
 }
 
 void CurrencyModule::setStealSuccessChance(const Message& message, const Channel& channel)
@@ -908,7 +908,7 @@ void CurrencyModule::setStealSuccessChance(const Message& message, const Channel
 		currencyConfigs[channel.guildId()].stealSuccessBaseChance = newChance;
 	}
 	
-	SEND_MESSAGE(QString("Steal success chance is **%1**").arg(QString::number(newChance)));
+	SEND_MESSAGE(QString("Steal success chance set to **%1**").arg(QString::number(newChance)));
 }
 
 void CurrencyModule::setStealFine(const Message& message, const Channel& channel)
@@ -919,7 +919,7 @@ void CurrencyModule::setStealFine(const Message& message, const Channel& channel
 		currencyConfigs[channel.guildId()].stealFineAmount = args[1].toDouble();
 	}
 	
-	SEND_MESSAGE(QString("Steal fine portion is **%1**").arg(QString::number(currencyConfigs[channel.guildId()].stealFineAmount)));
+	SEND_MESSAGE(QString("Steal fine portion set to **%1**").arg(QString::number(currencyConfigs[channel.guildId()].stealFineAmount)));
 }
 
 void CurrencyModule::setStealVictimBonus(const Message& message, const Channel& channel)
@@ -930,7 +930,7 @@ void CurrencyModule::setStealVictimBonus(const Message& message, const Channel& 
 		currencyConfigs[channel.guildId()].stealVictimBonus = args[1].toDouble();
 	}
 	
-	SEND_MESSAGE(QString("Steal victim bonus portion is **%1**").arg(QString::number(currencyConfigs[channel.guildId()].stealVictimBonus)));;
+	SEND_MESSAGE(QString("Steal victim bonus portion set to **%1**").arg(QString::number(currencyConfigs[channel.guildId()].stealVictimBonus)));;
 }
 
 void CurrencyModule::setStealJailTime(const Message& message, const Channel& channel)
@@ -941,7 +941,7 @@ void CurrencyModule::setStealJailTime(const Message& message, const Channel& cha
 		currencyConfigs[channel.guildId()].stealJailTimeMinutes = args[1].toUInt();
 	}
 	
-	SEND_MESSAGE(QString("Jail time for a failed steal is **%1 minutes**")
+	SEND_MESSAGE(QString("Jail time for a failed steal set to **%1 minutes**")
 				 .arg(QString::number(currencyConfigs[channel.guildId()].stealJailTimeMinutes)));
 }
 
@@ -999,7 +999,7 @@ void CurrencyModule::setBribeExtraJailTime(const Message& message, const Channel
 		currencyConfigs[channel.guildId()].bribeExtraJailTimeMinutes = args[1].toUInt();
 	}
 	
-	SEND_MESSAGE(QString("Extra jail time from failed bribe is **%1 minutes**")
+	SEND_MESSAGE(QString("Extra jail time from failed bribe set to **%1 minutes**")
 				 .arg(QString::number(currencyConfigs[channel.guildId()].bribeExtraJailTimeMinutes)));
 }
 
@@ -1011,8 +1011,8 @@ void CurrencyModule::setGambleDefaultBet(const Message& message, const Channel& 
 		currencyConfigs[channel.guildId()].gambleDefaultAmountBet = args[1].toDouble() * 100;
 	}
 	
-	SEND_MESSAGE(QString("Default bet for gamble is **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].gambleDefaultAmountBet / 100.0f),
-																	currencyConfigs[channel.guildId()].currencyAbbreviation));
+	SEND_MESSAGE(QString("Default bet for gamble set to **%1 %2**").arg(QString::number(currencyConfigs[channel.guildId()].gambleDefaultAmountBet / 100.0f),
+																		currencyConfigs[channel.guildId()].currencyAbbreviation));
 }
 
 void CurrencyModule::setGambleTimeout(const Message& message, const Channel& channel)
@@ -1023,5 +1023,5 @@ void CurrencyModule::setGambleTimeout(const Message& message, const Channel& cha
 		currencyConfigs[channel.guildId()].gambleTimeoutSeconds = args[1].toUInt();
 	}
 	
-	SEND_MESSAGE(QString("Gamble timeout is **%1 seconds**").arg(currencyConfigs[channel.guildId()].gambleTimeoutSeconds));
+	SEND_MESSAGE(QString("Gamble timeout set to **%1 seconds**").arg(currencyConfigs[channel.guildId()].gambleTimeoutSeconds));
 }

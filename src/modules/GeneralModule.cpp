@@ -203,7 +203,7 @@ void GeneralModule::setPrimaryChannel(const Message& message, const Channel& cha
 		UmikoBot::get().getChannelFromArgument(channel.guildId(), args[1]).then([this, message, channel](const Channel& mentionedChannel)
 		{
 			UmikoBot::get().primaryChannels[channel.guildId()] = mentionedChannel.id();
-			SEND_MESSAGE(QString("Primary channel is <#%1>").arg(QString::number(UmikoBot::get().primaryChannels[channel.guildId()])));
+			SEND_MESSAGE(QString("Primary channel set to <#%1>").arg(QString::number(UmikoBot::get().primaryChannels[channel.guildId()])));
 		})
 		.otherwise([this, message]()
 		{
