@@ -44,6 +44,7 @@ void LevelModule::onSave(QJsonObject& mainObject) const
 {
 	QJsonObject rankDataObject {};
 	QJsonObject userDataObject {};
+	QJsonObject disabledChannelsObject {};
 
 	for (GuildId guildId : levelRanks.keys())
 	{
@@ -74,14 +75,21 @@ void LevelModule::onSave(QJsonObject& mainObject) const
 		userDataObject[QString::number(guildId)] = guildJson;
 	}
 
+	for (ChannelId channelId : channelsWithXpDisabled.keys())
+	{
+		disabledChannelsObject[QString::number(channelId)] = channelsWithXpDisabled[channelId];
+	}
+
 	mainObject["rankData"] = rankDataObject;
 	mainObject["userData"] = userDataObject;
+	mainObject["disabledChannels"] = userDataObject;
 }
 
 void LevelModule::onLoad(const QJsonObject& mainObject)
 {
 	QJsonObject rankDataObject = mainObject["rankData"].toObject();
 	QJsonObject userDataObject = mainObject["userData"].toObject();
+	QJsonObject disabledChannelsObject = mainObject["disabledChannels"].toObject();
 
 	for (const QString& guildIdString : rankDataObject.keys())
 	{
@@ -116,6 +124,11 @@ void LevelModule::onLoad(const QJsonObject& mainObject)
 				userJson["currentXp"].toInt(),
 			});
 		}
+	}
+
+	for (const QString& channelIdString : disabledChannelsObject.keys())
+	{
+		channelsWithXpDisabled[channelIdString.toULongLong()] = disabledChannelsObject[channelIdString].toBool();
 	}
 }
 
