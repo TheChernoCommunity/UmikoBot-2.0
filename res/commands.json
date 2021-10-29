@@ -11,6 +11,13 @@
 		"additional": "",
 		"admin": false
 	},
+	"Status": {
+		"brief": "Retrieves the status of a user.",
+		"usage": "status [@mention|name|id]",
+		"additional": "",
+		"admin": false
+	},
+
 	"SetPrefix": {
 		"brief": "Sets/gets the prefix of the bot.",
 		"usage": "setprefix [newprefix]",
@@ -37,10 +44,30 @@
 	},
 
 
+	"ModerateInvitations": {
+		"brief": "Sets whether to remove discord server invite links.",
+		"usage": "moderate-invitations [on|off]",
+		"additional": "Giving no arguments returns whether the bot is currently moderating invitations.",
+		"admin": true
+	},
+	"Warn": {
+		"brief": "Warns a user with a message.",
+		"usage": "warn <@mention|name|id> <message>",
+		"additional": "",
+		"admin": true
+	},
+	"Warnings": {
+		"brief": "Lists the warnings for a user and lets a moderator remove them.",
+		"usage": "warnings (list[-all] <@mention|name|id>)|(remove <@mention|name|id> <warningId>)",
+		"additional": "The command `list-all` will list all the warnings, including expired ones.\nThe warning ID can be obtained from the list commands.",
+		"admin": true
+	},
+
+
 	"Top": {
 		"brief": "Displays a leaderboard of XP.",
 		"usage": "top [min] [max]",
-		"additional": "Providing a single argument iwll treat it as the max.",
+		"additional": "Providing a single argument will treat it as the max.",
 		"admin": false
 	},
 	
@@ -62,7 +89,47 @@
 		"additional": "**Rank List**: Lists the ranks of the current server.\n**Rank Add**: Adds a new rank with specified name and minimum level.\n**Rank Remove**: Removes the rank with the specified name.\n**Rank Edit**: Edits the name or minimum level of the specified rank.",
 		"admin": true
 	},
+	"EnableXp": {
+		"brief": "Enables the collection of XP in the specified channels.",
+		"usage": "enable-xp <channel>...",
+		"additional": "Channels have XP collection enabled by default.",
+		"admin": true
+	},
+	"DisableXp": {
+		"brief": "Disables the collection of XP in the specified channels.",
+		"usage": "disable-xp <channel>...",
+		"additional": "Channels have XP collection enabled by default.",
+		"admin": true
+	},
 
+
+	"SetTimezone": {
+		"brief": "Sets the timezone offset of the user.",
+		"usage": "set-timezone <offset>",
+		"additional": "The offset is the time difference from UTC, for example a timezone of UTC-3 will have offset -3.",
+		"admin": false
+	},
+	
+
+	"Roll": {
+		"brief": "Returns a random number in the bounds provided.",
+		"usage": "roll [min] <max>",
+		"additional": "The bounds are inclusive.",
+		"admin": false
+	},
+	"Meme": {
+		"brief": "Shows a random meme from reddit.",
+		"usage": "meme",
+		"additional": "",
+		"admin": false
+	},
+	"Github": {
+		"brief": "Shows popular projects from GitHub.",
+		"usage": "github",
+		"additional": "",
+		"admin": false
+	},
+	
 
 	"Wallet": {
 		"brief": "Shows info relating to the user's currency data.",
@@ -144,7 +211,7 @@
 		"admin": true
 	},
 	"SetDailyStreakBonusPeriod": {
-		"brief": "Sets how often a daily streak bonus is achieved..",
+		"brief": "Sets how often a daily streak bonus is achieved.",
 		"usage": "set-daily-streak-bonus-period [days]",
 		"additional": "Giving no arguments returns the current daily streak bonus period.",
 		"admin": true
