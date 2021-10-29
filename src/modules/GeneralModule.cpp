@@ -72,9 +72,9 @@ void GeneralModule::help(const Message& message, const Channel& channel)
 		{
 			for (Module* module : UmikoBot::get().getModules())
 			{
+				QString userCommandsOutput = "";
 				QString adminCommandsOutput = "";
-				output += "**" + module->getName() + "**\n";
-			
+
 				for (const Command& command : module->getCommands())
 				{
 					bool adminRequired = CommandInfo::adminRequired[(unsigned int) command.id];
@@ -90,15 +90,25 @@ void GeneralModule::help(const Message& message, const Channel& channel)
 					}
 
 					// Admin commands are displayed at the end
-					QString& outputToUse = adminRequired ? adminCommandsOutput : output;
+					QString& outputToUse = adminRequired ? adminCommandsOutput : userCommandsOutput;
 					outputToUse += QString("`%1%2` - %3\n").arg(prefix, command.name, description);
 				}
 
+				if (userCommandsOutput == "" && adminCommandsOutput == "")
+				{
+					continue;
+				}
+
+				output += "**" + module->getName() + "**\n";					
+
+				if (userCommandsOutput != "")
+				{
+					output += userCommandsOutput + "\n";
+				}
 				if (adminCommandsOutput != "")
 				{
-					output += "\n" + adminCommandsOutput;
+					output += adminCommandsOutput + "\n";
 				}
-				output += "\n";
 			}
 		}
 		else
