@@ -457,7 +457,6 @@ void UmikoBot::umikoOnGuildMemberAdd(const GuildMember& member, GuildId guildId)
 
 void UmikoBot::umikoOnGuildMemberUpdate(GuildId guildId, const QList<RoleId>& roles, const User& user, const QString& nickname)
 {
-	(void) roles;
 	guildData[guildId].userData[user.id()].username = user.username();
 	guildData[guildId].userData[user.id()].nickname = nickname;
 }

@@ -88,7 +88,6 @@ void FunModule::onGithubFinished(QNetworkReply* reply)
 
 void FunModule::roll(const Message& message, const Channel& channel)
 {
-	(void) channel;
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	int min = 0;
 	int max = 0;
@@ -124,14 +123,12 @@ void FunModule::roll(const Message& message, const Channel& channel)
 
 void FunModule::meme(const Message& message, const Channel& channel)
 {
-	(void) message;
 	memeChannel = channel.id();
 	memeManager.get(QNetworkRequest(QUrl("https://meme-api.herokuapp.com/gimme")));
 }
 
 void FunModule::github(const Message& message, const Channel& channel)
 {
-	(void) message;
 	std::random_device randomDevice;
 	std::mt19937 prng { randomDevice() };
 	std::uniform_int_distribution<> distribution('A', 'Z');

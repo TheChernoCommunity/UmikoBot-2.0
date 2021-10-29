@@ -20,7 +20,6 @@ static BOOL WINAPI HandlerRoutine(DWORD sig)
 #elif defined(Q_OS_UNIX)
 static void HandlerRoutine(int sig)
 {
-	(void) sig;
 	QApplication::quit();
 }
 #endif

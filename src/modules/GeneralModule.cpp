@@ -122,7 +122,6 @@ void GeneralModule::help(const Message& message, const Channel& channel)
 
 void GeneralModule::echo(const Message& message, const Channel& channel)
 {
-	(void) channel;
 	QString restOfMessage = message.content().mid(message.content().indexOf(QRegularExpression("\\s")));
 	SEND_MESSAGE(restOfMessage);
 }
@@ -184,13 +183,11 @@ void GeneralModule::setPrefix(const Message& message, const Channel& channel)
 
 void GeneralModule::enable(const Message& message, const Channel& channel)
 {
-	(void) channel;
 	enableDisableImpl(message, true);
 }
 
 void GeneralModule::disable(const Message& message, const Channel& channel)
 {
-	(void) channel;
 	enableDisableImpl(message, false);
 }
 

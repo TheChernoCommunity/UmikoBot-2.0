@@ -87,7 +87,6 @@ void ModerationModule::onMessage(const Message& message, const Channel& channel)
 
 void ModerationModule::moderateInvitations(const Message& message, const Channel& channel)
 {
-	(void) channel;
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	if (args.size() == 1)
 	{

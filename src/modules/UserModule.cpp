@@ -34,7 +34,6 @@ void UserModule::onLoad(const QJsonObject& mainObject)
 
 void UserModule::onStatus(QString& output, GuildId guildId, UserId userId)
 {
-	(void) guildId;
 	int userSecondsOffset = userData[userId];
 	
 	output += QString("Time offset: %1\n").arg(getUserTimezoneString(userId));
@@ -54,8 +53,6 @@ QString UserModule::getUserTimezoneString(UserId userId)
 
 void UserModule::setTimezone(const Message& message, const Channel& channel)
 {
-	(void) channel;
-	
 	// Removes UTC prefix if it exists
 	QString offset = message.content().split(QRegularExpression(SPACE))[1];
 	if (offset.startsWith("UTC"))
