@@ -17,6 +17,8 @@ if exist %projectRoot%\tmp\qtDir.txt (
 		set /p qtDir="Qt Directory (e.g. C:\Qt\5.15.2\msvc2019_64\): "
 
 		rem Writes Qt directory to file for future
+		mkdir %projectRoot%\tmp\ >nul 2>nul
+		break>%projectRoot%\tmp\qtDir.txt
 		(echo | set /p=!qtDir!)>%projectRoot%\tmp\qtDir.txt
 	) else (
 		set qtDir=!cd!
