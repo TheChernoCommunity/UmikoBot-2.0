@@ -34,3 +34,16 @@ add_executable(UmikoBot ${SOURCES})
 target_link_libraries(UmikoBot Qt5::Core Qt5::Gui Qt5::Network Qt5::WebSockets Qt5::Widgets)
 target_link_libraries(UmikoBot QDiscord)
 target_include_directories(UmikoBot PUBLIC src/)
+
+# Copies DLLs on Windows
+if (WIN32)
+	add_custom_command(TARGET UmikoBot POST_BUILD COMMAND
+		${CMAKE_COMMAND} -E copy_if_different
+		$<TARGET_FILE:Qt5::Core>
+		$<TARGET_FILE:Qt5::Gui>
+		$<TARGET_FILE:Qt5::Network>
+		$<TARGET_FILE:Qt5::WebSockets>
+		$<TARGET_FILE:Qt5::Widgets>
+		$<TARGET_FILE_DIR:UmikoBot>
+	)
+endif()
