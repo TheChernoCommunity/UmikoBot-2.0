@@ -37,6 +37,8 @@ target_include_directories(UmikoBot PUBLIC src/)
 
 # Copies DLLs on Windows
 if (WIN32)
+	set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT UmikoBot)
+	
 	add_custom_command(TARGET UmikoBot POST_BUILD COMMAND
 		${CMAKE_COMMAND} -E copy_if_different
 		$<TARGET_FILE:Qt5::Core>
@@ -44,6 +46,9 @@ if (WIN32)
 		$<TARGET_FILE:Qt5::Network>
 		$<TARGET_FILE:Qt5::WebSockets>
 		$<TARGET_FILE:Qt5::Widgets>
+		$<TARGET_FILE_DIR:Qt5::Core>/../plugins/platforms/qwindows.dll
+		$<TARGET_FILE_DIR:Qt5::Core>/../plugins/platforms/qwindowsd.dll
+
 		$<TARGET_FILE_DIR:UmikoBot>
 	)
 endif()
