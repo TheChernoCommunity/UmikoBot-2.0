@@ -35,11 +35,13 @@ target_link_libraries(UmikoBot Qt5::Core Qt5::Gui Qt5::Network Qt5::WebSockets Q
 target_link_libraries(UmikoBot QDiscord)
 target_include_directories(UmikoBot PUBLIC src/)
 
-# Copies DLLs on Windows
+# Windows specific configuration
 if (WIN32)
 	set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT UmikoBot)
+	set_target_properties(UmikoBot PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/res")
 	
 	add_custom_command(TARGET UmikoBot POST_BUILD COMMAND
+		# Files
 		${CMAKE_COMMAND} -E copy_if_different
 		$<TARGET_FILE:Qt5::Core>
 		$<TARGET_FILE:Qt5::Gui>
@@ -52,6 +54,7 @@ if (WIN32)
 		${CMAKE_PREFIX_PATH}/../../Tools/OpenSSL/Win_x64/bin/libcrypto-1_1-x64.dll
 		${CMAKE_PREFIX_PATH}/../../Tools/OpenSSL/Win_x64/bin/libssl-1_1-x64.dll
 
+		# Destination
 		$<TARGET_FILE_DIR:UmikoBot>
 	)
 endif()
