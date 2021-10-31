@@ -46,8 +46,11 @@ if (WIN32)
 		$<TARGET_FILE:Qt5::Network>
 		$<TARGET_FILE:Qt5::WebSockets>
 		$<TARGET_FILE:Qt5::Widgets>
-		$<TARGET_FILE_DIR:Qt5::Core>/../plugins/platforms/qwindows.dll
-		$<TARGET_FILE_DIR:Qt5::Core>/../plugins/platforms/qwindowsd.dll
+
+		${CMAKE_PREFIX_PATH}/plugins/platforms/qwindows.dll
+		${CMAKE_PREFIX_PATH}/plugins/platforms/qwindowsd.dll
+		${CMAKE_PREFIX_PATH}/../../Tools/OpenSSL/Win_x64/bin/libcrypto-1_1-x64.dll
+		${CMAKE_PREFIX_PATH}/../../Tools/OpenSSL/Win_x64/bin/libssl-1_1-x64.dll
 
 		$<TARGET_FILE_DIR:UmikoBot>
 	)
