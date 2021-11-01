@@ -9,6 +9,7 @@ public:
 	UserModule();
 
 	void setTimezone(const Discord::Message&, const Discord::Channel&);
+	void achievements(const Discord::Message&, const Discord::Channel&);
 
 protected:
 	void onSave(QJsonObject& mainObject) const override;

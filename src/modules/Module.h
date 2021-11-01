@@ -72,6 +72,7 @@ CREATE_COMMANDS(
 	
 	// User Module
 	SetTimezone,
+	Achievements,
 
 	// Fun Module
 	Roll,

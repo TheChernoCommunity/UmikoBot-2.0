@@ -10,6 +10,7 @@ UserModule::UserModule()
 	namespace CP = CommandPermission;
 
 	registerCommand(Commands::SetTimezone, "set-timezone" SPACE OPTIONAL("UTC") OPTIONAL("[+-]") "[0-9]{1,2}" OPTIONAL(":[0-9]{1,2}"), CP::User, CALLBACK(setTimezone));
+	registerCommand(Commands::Achievements, "achievements" OPTIONAL(USER), CP::User, CALLBACK(achievements));
 }
 
 void UserModule::onSave(QJsonObject& mainObject) const
@@ -88,4 +89,42 @@ void UserModule::setTimezone(const Message& message, const Channel& channel)
 
 	userData[message.author().id()] = multiplier * ((hours * 3600) + (minutes * 60));
 	SEND_MESSAGE(QString("Set timezone to **%1**!").arg(getUserTimezoneString(message.author().id())));
+}
+
+void UserModule::achievements(const Message& message, const Channel& channel)
+{
+	QStringList args = message.content().split(QRegularExpression(SPACE));
+	UserId userId = 0;
+
+	if (args.size() == 1)
+	{
+		userId = message.author().id();
+	}
+	else
+	{
+		userId = UmikoBot::get().getUserIdFromArgument(channel.guildId(), args[1]);
+	}
+
+	if (!userId)
+	{
+		SEND_MESSAGE("Could not find user!");
+		return;
+	}
+
+	UmikoBot::get().getGuildMember(channel.guildId(), userId).then([this, message, channel, userId](const GuildMember& member)
+	{
+		UmikoBot::get().getAvatar(channel.guildId(), userId).then([this, message, channel, userId, member](const QString& icon)
+		{
+			QString description = "";
+
+			description += "**General**\n";
+			description += QString("Date Joined: **%1**\n").arg(member.joinedAt().date().toString());
+
+			Embed embed;
+			embed.setAuthor(EmbedAuthor { QString("%1's Statistics").arg(UmikoBot::get().getName(channel.guildId(), userId)), "", icon });
+			embed.setColor(qrand() % 0xffffff);
+			embed.setDescription(description);
+			SEND_MESSAGE(embed);
+		});
+	});
 }
