@@ -18,6 +18,11 @@ struct UserCurrencyData
 	int numberOfDailysClaimed = 0;
 	int longestDailyStreak = 0;
 	int numberOfGiveawaysClaimed = 0;
+	int amountDonatedInCents = 0;
+	int amountReceivedFromDonationsInCents = 0;
+	int amountStolenInCents = 0;
+	int netAmountFromGamblingInCents = 0;
+	int amountSpentOnBribingInCents = 0;
 };
 
 struct GuildCurrencyConfig
@@ -93,6 +98,7 @@ public:
 	void setGambleTimeout(const Discord::Message&, const Discord::Channel&);
 	
 	UserCurrencyData& getUserCurrencyData(GuildId guildId, UserId userId);
+	GuildCurrencyConfig& getGuildCurrencyConfig(GuildId guildId);
 
 protected:
 	void onSave(QJsonObject& mainObject) const override;

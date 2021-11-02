@@ -126,12 +126,23 @@ void UserModule::achievements(const Message& message, const Channel& channel)
 				if (module->getName() == "Currency")
 				{
 					CurrencyModule* currencyModule = (CurrencyModule*) module;
-					const UserCurrencyData& userCurrencyData = currencyModule->getUserCurrencyData(channel.guildId(), userId);
+					const UserCurrencyData& userData = currencyModule->getUserCurrencyData(channel.guildId(), userId);
+					const QString& currencyAbbreviation = currencyModule->getGuildCurrencyConfig(channel.guildId()).currencyAbbreviation;
 					
 					description += "\n**Currency**\n";
-					description += QString("`daily`s claimed: **%1**\n").arg(userCurrencyData.numberOfDailysClaimed);
-					description += QString("Longest streak of `daily`s: **%1**\n").arg(userCurrencyData.longestDailyStreak);
-					description += QString("\nFreebies claimed: **%1**\n").arg(userCurrencyData.numberOfGiveawaysClaimed);
+					description += QString("`daily`s claimed: **%1**\n").arg(userData.numberOfDailysClaimed);
+					description += QString("Longest streak of `daily`s: **%1**\n").arg(userData.longestDailyStreak);
+					description += QString("Freebies claimed: **%1**\n").arg(userData.numberOfGiveawaysClaimed);
+
+					description += QString("\nAmount donated: **%1 %2**\n").arg(QString::number(userData.amountDonatedInCents / 100.0f),
+																				currencyAbbreviation);
+					description += QString("Donations received: **%1 %2**\n").arg(QString::number(userData.amountReceivedFromDonationsInCents / 100.0f),
+																				  currencyAbbreviation);
+					description += QString("Amount stolen: **%1 %2**\n").arg(QString::number(userData.amountStolenInCents / 100.0f), currencyAbbreviation);
+					description += QString("Amount spent on bribes: **%1 %2**\n").arg(QString::number(userData.amountSpentOnBribingInCents / 100.0f),
+																					  currencyAbbreviation);
+					description += QString("Net result from gambling: **%1 %2**\n").arg(QString::number(userData.netAmountFromGamblingInCents / 100.0f),
+																						currencyAbbreviation);
 				}
 			}
 			

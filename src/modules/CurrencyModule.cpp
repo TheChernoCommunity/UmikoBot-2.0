@@ -136,6 +136,11 @@ void CurrencyModule::onSave(QJsonObject& mainObject) const
 			userJson["numberOfDailysClaimed"] = userCurrencyData.numberOfDailysClaimed;
 			userJson["longestDailyStreak"] = userCurrencyData.longestDailyStreak;
 			userJson["numberOfGiveawaysClaimed"] = userCurrencyData.numberOfGiveawaysClaimed;
+			userJson["amountDonatedInCents"] = userCurrencyData.amountDonatedInCents;
+			userJson["amountReceivedFromDonationsInCents"] = userCurrencyData.amountReceivedFromDonationsInCents;
+			userJson["amountStolenInCents"] = userCurrencyData.amountStolenInCents;
+			userJson["netAmountFromGamblingInCents"] = userCurrencyData.netAmountFromGamblingInCents;
+			userJson["amountSpentOnBribingInCents"] = userCurrencyData.amountSpentOnBribingInCents;
 
 			guildJson[QString::number(userCurrencyData.userId)] = userJson;
 		}
@@ -205,6 +210,11 @@ void CurrencyModule::onLoad(const QJsonObject& mainObject)
 				userJson["numberOfDailysClaimed"].toInt(),
 				userJson["longestDailyStreak"].toInt(),
 				userJson["numberOfGiveawaysClaimed"].toInt(),
+				userJson["amountDonatedInCents"].toInt(),
+				userJson["amountReceivedFromDonationsInCents"].toInt(),
+				userJson["amountStolenInCents"].toInt(),
+				userJson["netAmountFromGamblingInCents"].toInt(),
+				userJson["amountSpentOnBribingInCents"].toInt(),
 			});
 		}
 	}
@@ -247,6 +257,7 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 		{
 			int amountWon = gambleData[channel.guildId()].amountBetInCents * 4;
 			getUserCurrencyData(channel.guildId(), gambleData[channel.guildId()].currentUserId).balanceInCents += amountWon;
+			getUserCurrencyData(channel.guildId(), gambleData[channel.guildId()].currentUserId).netAmountFromGamblingInCents += amountWon;
 			
 			embed.setColor(0x00ff00);
 			embed.setTitle("You Won!!!");
@@ -257,6 +268,7 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 		{
 			int amountLost = gambleData[channel.guildId()].amountBetInCents;
 			getUserCurrencyData(channel.guildId(), gambleData[channel.guildId()].currentUserId).balanceInCents -= amountLost;
+			getUserCurrencyData(channel.guildId(), gambleData[channel.guildId()].currentUserId).netAmountFromGamblingInCents -= amountLost;
 			
 			embed.setColor(0xff0000);
 			embed.setTitle("You Lost!");
@@ -292,6 +304,11 @@ UserCurrencyData& CurrencyModule::getUserCurrencyData(GuildId guildId, UserId us
 	// The user does not exist yet, make a new one
 	currencyData[guildId].append(UserCurrencyData { userId });
 	return currencyData[guildId].back();
+}
+
+GuildCurrencyConfig& CurrencyModule::getGuildCurrencyConfig(GuildId guildId)
+{
+	return currencyConfigs[guildId];
 }
 
 void CurrencyModule::wallet(const Message& message, const Channel& channel)
@@ -413,7 +430,9 @@ void CurrencyModule::donate(const Message& message, const Channel& channel)
 	}
 	
 	getUserCurrencyData(channel.guildId(), senderId).balanceInCents -= amountInCents;
+	getUserCurrencyData(channel.guildId(), senderId).amountDonatedInCents += amountInCents;
 	getUserCurrencyData(channel.guildId(), receiverId).balanceInCents += amountInCents;
+	getUserCurrencyData(channel.guildId(), receiverId).amountReceivedFromDonationsInCents += amountInCents;
 
 	Embed embed {};
 	embed.setTitle("Donation by " + UmikoBot::get().getName(channel.guildId(), senderId));
@@ -490,6 +509,7 @@ void CurrencyModule::steal(const Message& message, const Channel& channel)
 		// Steal success
 		victimData.balanceInCents -= amountInCents;
 		thiefData.balanceInCents += amountInCents;
+		thiefData.amountStolenInCents += amountInCents;
 
 		Embed embed;
 		embed.setTitle(":man_detective: Steal Success! :man_detective:");
@@ -760,6 +780,7 @@ void CurrencyModule::bribe(const Message& message, const Channel& channel)
 	if (distribution(prng))
 	{
 		userCurrencyData.balanceInCents -= amountToBribeInCents;
+		userCurrencyData.amountSpentOnBribingInCents += amountToBribeInCents;
 		delete userCurrencyData.jailTimer;
 		userCurrencyData.jailTimer = nullptr;
 
