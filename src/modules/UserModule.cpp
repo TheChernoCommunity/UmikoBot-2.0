@@ -1,4 +1,5 @@
 #include "modules/UserModule.h"
+#include "modules/CurrencyModule.h"
 #include "core/Permissions.h"
 #include "UmikoBot.h"
 
@@ -120,6 +121,20 @@ void UserModule::achievements(const Message& message, const Channel& channel)
 			description += "**General**\n";
 			description += QString("Date Joined: **%1**\n").arg(member.joinedAt().date().toString());
 
+			for (Module* module : UmikoBot::get().getModules())
+			{
+				if (module->getName() == "Currency")
+				{
+					CurrencyModule* currencyModule = (CurrencyModule*) module;
+					const UserCurrencyData& userCurrencyData = currencyModule->getUserCurrencyData(channel.guildId(), userId);
+					
+					description += "\n**Currency**\n";
+					description += QString("`daily`s claimed: **%1**\n").arg(userCurrencyData.numberOfDailysClaimed);
+					description += QString("Longest streak of `daily`s: **%1**\n").arg(userCurrencyData.longestDailyStreak);
+					description += QString("\nFreebies claimed: **%1**\n").arg(userCurrencyData.numberOfGiveawaysClaimed);
+				}
+			}
+			
 			Embed embed;
 			embed.setAuthor(EmbedAuthor { QString("%1's Statistics").arg(UmikoBot::get().getName(channel.guildId(), userId)), "", icon });
 			embed.setColor(qrand() % 0xffffff);

@@ -13,6 +13,11 @@ struct UserCurrencyData
 	
 	QTimer* jailTimer = nullptr;
 	bool hasUsedBribe = false;
+
+	// Achievements
+	int numberOfDailysClaimed = 0;
+	int longestDailyStreak = 0;
+	int numberOfGiveawaysClaimed = 0;
 };
 
 struct GuildCurrencyConfig
@@ -87,6 +92,8 @@ public:
 	void setGambleDefaultBet(const Discord::Message&, const Discord::Channel&);
 	void setGambleTimeout(const Discord::Message&, const Discord::Channel&);
 	
+	UserCurrencyData& getUserCurrencyData(GuildId guildId, UserId userId);
+
 protected:
 	void onSave(QJsonObject& mainObject) const override;
 	void onLoad(const QJsonObject& mainObject) override;
@@ -94,9 +101,6 @@ protected:
 	void onMessage(const Discord::Message&, const Discord::Channel&) override;
 	void onStatus(QString& output, GuildId guildId, UserId userId) override;
 	
-private:
-	UserCurrencyData& getUserCurrencyData(GuildId guildId, UserId userId);
-
 private:
 	QMap<GuildId, GuildCurrencyConfig> currencyConfigs;
 	QMap<GuildId, QList<UserCurrencyData>> currencyData;

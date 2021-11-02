@@ -133,6 +133,10 @@ void CurrencyModule::onSave(QJsonObject& mainObject) const
 			userJson["hasClaimedDaily"] = userCurrencyData.hasClaimedDaily;
 			userJson["dailyStreak"] = userCurrencyData.dailyStreak;
 
+			userJson["numberOfDailysClaimed"] = userCurrencyData.numberOfDailysClaimed;
+			userJson["longestDailyStreak"] = userCurrencyData.longestDailyStreak;
+			userJson["numberOfGiveawaysClaimed"] = userCurrencyData.numberOfGiveawaysClaimed;
+
 			guildJson[QString::number(userCurrencyData.userId)] = userJson;
 		}
 
@@ -195,6 +199,12 @@ void CurrencyModule::onLoad(const QJsonObject& mainObject)
 				userJson["balanceInCents"].toInt(),
 				userJson["hasClaimedDaily"].toBool(),
 				userJson["dailyStreak"].toInt(),
+				nullptr,
+				false,
+
+				userJson["numberOfDailysClaimed"].toInt(),
+				userJson["longestDailyStreak"].toInt(),
+				userJson["numberOfGiveawaysClaimed"].toInt(),
 			});
 		}
 	}
@@ -344,8 +354,11 @@ void CurrencyModule::daily(const Message& message, const Channel& channel)
 	}
 
 	userCurrencyData.balanceInCents += guildConfig.rewardForDaily;
-	userCurrencyData.dailyStreak += 1;
 	userCurrencyData.hasClaimedDaily = true;
+	userCurrencyData.dailyStreak += 1;
+	userCurrencyData.longestDailyStreak = qMax(userCurrencyData.longestDailyStreak, userCurrencyData.dailyStreak);
+	userCurrencyData.numberOfDailysClaimed += 1;
+	
 	QString output;
 	int streakDaysLeft = userCurrencyData.dailyStreak % guildConfig.dailyStreakBonusPeriod;
 
@@ -788,6 +801,7 @@ void CurrencyModule::claim(const Message& message, const Channel& channel)
 		}
 		
 		userCurrencyData.balanceInCents += guildConfig.randomGiveawayReward;
+		userCurrencyData.numberOfGiveawaysClaimed += 1;
 		guildConfig.randomGiveawayDone = true;
 		guildConfig.randomGiveawayInProgress = false;
 		guildConfig.randomGiveawayClaimer = message.author().id();
