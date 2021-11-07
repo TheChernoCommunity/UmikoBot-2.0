@@ -2,6 +2,8 @@ bin/
 obj/
 sln/
 tmp/
+configs/
+build/
 
 pmk/premake*
 
@@ -9,3 +11,5 @@ res/
 !res/commands.json
 
 scripts/run.sh
+
+umiko.service
