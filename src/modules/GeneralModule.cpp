@@ -11,7 +11,7 @@ GeneralModule::GeneralModule()
 	: Module("General")
 {
 	registerCommand(Commands::Help, "help" OPTIONAL(IDENTIFIER), CommandPermission::User, CALLBACK(help));
-	registerCommand(Commands::Echo, "echo" TEXT, CommandPermission::User, CALLBACK(echo));
+	registerCommand(Commands::Echo, "echo" TEXT, CommandPermission::Moderator, CALLBACK(echo));
 	registerCommand(Commands::Status, "status" OPTIONAL(IDENTIFIER), CommandPermission::User, CALLBACK(status));
 	registerCommand(Commands::SetPrefix, "set-prefix" OPTIONAL(IDENTIFIER), CommandPermission::Moderator, CALLBACK(setPrefix));
 	registerCommand(Commands::Enable, "enable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(enable));

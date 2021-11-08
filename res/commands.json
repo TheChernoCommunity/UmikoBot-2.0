@@ -9,7 +9,7 @@
 		"brief": "The bot says what you want it to.",
 		"usage": "echo <text>",
 		"additional": "",
-		"admin": false
+		"admin": true
 	},
 	"Status": {
 		"brief": "Retrieves the status of a user.",
@@ -107,6 +107,12 @@
 		"brief": "Sets the timezone offset of the user.",
 		"usage": "set-timezone <offset>",
 		"additional": "The offset is the time difference from UTC, for example a timezone of UTC-3 will have offset -3.",
+		"admin": false
+	},
+	"Achievements": {
+		"brief": "Shows the achievements of a user.",
+		"usage": "achievements [@mention|name|id]",
+		"additional": "",
 		"admin": false
 	},
 	
