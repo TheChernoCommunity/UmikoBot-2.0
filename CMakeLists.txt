@@ -25,8 +25,9 @@ add_subdirectory(dep/QDiscord/)
 # Files
 set(SOURCES
 	main.cpp UmikoBot.cpp
-	core/Data.cpp core/InterruptHandler.cpp core/Permissions.cpp
-	modules/CurrencyModule.cpp modules/FunModule.cpp modules/GeneralModule.cpp modules/LevelModule.cpp modules/ModerationModule.cpp modules/Module.cpp modules/UserModule.cpp)
+	core/Core.cpp core/Data.cpp core/InterruptHandler.cpp core/Permissions.cpp
+	modules/CurrencyModule.cpp modules/FunModule.cpp modules/GeneralModule.cpp modules/LevelModule.cpp
+	modules/ModerationModule.cpp modules/Module.cpp modules/UserModule.cpp)
 list(TRANSFORM SOURCES PREPEND src/)
 
 # The executable
