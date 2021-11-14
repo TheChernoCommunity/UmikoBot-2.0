@@ -498,8 +498,8 @@ void UmikoBot::umikoOnMessageCreate(const Message& message)
 					{
 						isCommand = true;
 						
-						::Permissions::contains(channel.guildId(), message.author().id(), command.requiredPermissions,
-												[this, message, channel, command, fullCommand, module, prefix](bool result)
+						containsPermission(channel.guildId(), message.author().id(), command.requiredPermissions,
+										   [this, message, channel, command, fullCommand, module, prefix](bool result)
 						{
 							if (!result)
 							{

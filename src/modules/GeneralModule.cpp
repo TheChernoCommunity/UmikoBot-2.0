@@ -62,7 +62,7 @@ void GeneralModule::onLoad(const QJsonObject& mainObject)
 
 void GeneralModule::help(const Message& message, const Channel& channel)
 {
-	::Permissions::contains(channel.guildId(), message.author().id(), CommandPermission::Moderator, [this, message, channel](bool result)
+	containsPermission(channel.guildId(), message.author().id(), CommandPermission::Moderator, [this, message, channel](bool result)
 	{
 		QString output = "";
 		QStringList args = message.content().split(QRegularExpression(SPACE));

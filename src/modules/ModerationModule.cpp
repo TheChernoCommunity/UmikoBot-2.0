@@ -65,7 +65,7 @@ void ModerationModule::onMessage(const Message& message, const Channel& channel)
 	{
 		if (message.content().contains("discord.gg/", Qt::CaseInsensitive))
 		{
-			::Permissions::contains(channel.guildId(), message.author().id(), CommandPermission::Moderator, [this, message](bool result)
+			containsPermission(channel.guildId(), message.author().id(), CommandPermission::Moderator, [this, message](bool result)
 			{
 				if (result)
 				{
