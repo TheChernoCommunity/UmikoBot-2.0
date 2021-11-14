@@ -4,6 +4,7 @@
 
 #include <Discord/Objects/Embed.h>
 #include <QFile>
+#include <QJsonArray>
 
 using namespace Discord;
 
@@ -14,8 +15,8 @@ GeneralModule::GeneralModule()
 	registerCommand(Commands::Echo, "echo" TEXT, CommandPermission::Moderator, CALLBACK(echo));
 	registerCommand(Commands::Status, "status" OPTIONAL(IDENTIFIER), CommandPermission::User, CALLBACK(status));
 	registerCommand(Commands::SetPrefix, "set-prefix" OPTIONAL(IDENTIFIER), CommandPermission::Moderator, CALLBACK(setPrefix));
-	registerCommand(Commands::Enable, "enable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(enable));
-	registerCommand(Commands::Disable, "disable" SPACE "(module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(disable));
+	registerCommand(Commands::Enable, "enable" SPACE "(channel|module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(enable));
+	registerCommand(Commands::Disable, "disable" SPACE "(channel|module|command)" IDENTIFIER, CommandPermission::Moderator, CALLBACK(disable));
 	registerCommand(Commands::SetPrimaryChannel, "set-primary-channel" OPTIONAL(CHANNEL), CommandPermission::Moderator, CALLBACK(setPrimaryChannel));
 }
 
@@ -23,6 +24,7 @@ void GeneralModule::onSave(QJsonObject& mainObject) const
 {
 	QJsonObject commandsEnabledObject {};
 	QJsonObject primaryChannelsObject {};
+	QJsonObject channelsEnabledObject {};
 
 	for (Module* module : UmikoBot::get().getModules())
 	{
@@ -37,14 +39,25 @@ void GeneralModule::onSave(QJsonObject& mainObject) const
 		primaryChannelsObject[QString::number(guildId)] = QString::number(UmikoBot::get().primaryChannels[guildId]);
 	}
 
+	for (GuildId guildId : UmikoBot::get().channelsEnabled.keys())
+	{
+		QJsonArray channelsEnabledArray;
+		for (ChannelId channelId : UmikoBot::get().channelsEnabled[guildId])
+		{
+			channelsEnabledArray.append(QString::number(channelId));
+		}
+
+		channelsEnabledObject[QString::number(guildId)] = channelsEnabledArray;
+	}
+	
 	mainObject["commandsEnabled"] = commandsEnabledObject;
 	mainObject["primaryChannels"] = primaryChannelsObject;
+	mainObject["channelsEnabled"] = channelsEnabledObject;
 }
 
 void GeneralModule::onLoad(const QJsonObject& mainObject)
 {
 	QJsonObject commandsEnabledObject = mainObject["commandsEnabled"].toObject();
-
 	for (Module* module : UmikoBot::get().getModules())
 	{
 		for (Command& command : module->getCommands())
@@ -57,6 +70,19 @@ void GeneralModule::onLoad(const QJsonObject& mainObject)
 	for (const QString& guildIdString : primaryChannelsObject.keys())
 	{
 		UmikoBot::get().primaryChannels[guildIdString.toULongLong()] = primaryChannelsObject[guildIdString].toString().toULongLong();
+	}
+
+	QJsonObject channelsEnabledObject = mainObject["channelsEnabled"].toObject();
+	for (const QString& guildIdString : channelsEnabledObject.keys())
+	{
+		QJsonArray channelsEnabledArray = channelsEnabledObject[guildIdString].toArray();
+		QSet<ChannelId> channelsEnabledSet;
+		for (const QJsonValue& channelId : channelsEnabledArray)
+		{
+			channelsEnabledSet.insert(channelId.toString().toULongLong());
+		}
+
+		UmikoBot::get().channelsEnabled[guildIdString.toULongLong()] = channelsEnabledSet;
 	}
 }
 
@@ -193,12 +219,12 @@ void GeneralModule::setPrefix(const Message& message, const Channel& channel)
 
 void GeneralModule::enable(const Message& message, const Channel& channel)
 {
-	enableDisableImpl(message, true);
+	enableDisableImpl(message, channel, true);
 }
 
 void GeneralModule::disable(const Message& message, const Channel& channel)
 {
-	enableDisableImpl(message, false);
+	enableDisableImpl(message, channel, false);
 }
 
 void GeneralModule::setPrimaryChannel(const Message& message, const Channel& channel)
@@ -264,40 +290,68 @@ bool canBeDisabled(const Command& command)
 	return command.name != "help" && command.name != "enable" && command.name != "disable";
 }
 
-void GeneralModule::enableDisableImpl(const Message& message, bool enable)
+void GeneralModule::enableDisableImpl(const Message& message, const Channel& channel, bool enable)
 {
 	QStringList args = message.content().split(QRegularExpression(SPACE));
-	QString output = "";
 
-	for (Module* module : UmikoBot::get().getModules())
+	if (args[1] == "channel")
 	{
-		if (args[1] == "module" && module->getName() != args[2])
+		UmikoBot::get().getGuildChannels(channel.guildId()).then([message, channel, enable, args](const QList<Channel>& channels)
 		{
-			continue;
-		}
+			ChannelId channelId = UmikoBot::get().getChannelIdFromArgument(channels, args[2]);
+			if (!channelId)
+			{
+				SEND_MESSAGE("Could not find that channel!");
+				return;
+			}
 
-		for (Command& command : module->getCommands())
+			QSet<ChannelId>& guildEnabledChannels = UmikoBot::get().channelsEnabled[channel.guildId()];
+			if (enable)
+			{
+				guildEnabledChannels.insert(channelId);
+			}
+			else
+			{
+				guildEnabledChannels.remove(channelId);
+			}
+
+			SEND_MESSAGE(QString("%1 output in <#%2>").arg(enable ? "Enabled" : "Disabled", QString::number(channelId)));
+		});
+	}
+	else if (args[1] == "module" || args[1] == "command")
+	{
+		QString output = "";
+
+		for (Module* module : UmikoBot::get().getModules())
 		{
-			if (args[1] == "command" && command.name != args[2])
+			if (args[1] == "module" && module->getName() != args[2])
 			{
 				continue;
 			}
 
-			if (!enable && !canBeDisabled(command))
+			for (Command& command : module->getCommands())
 			{
-				output += "You can't disable command `" + command.name + "`\n";
-				continue;
-			}
+				if (args[1] == "command" && command.name != args[2])
+				{
+					continue;
+				}
+
+				if (!enable && !canBeDisabled(command))
+				{
+					output += "You can't disable command `" + command.name + "`\n";
+					continue;
+				}
 		
-			command.enabled = enable;
-			output += QString("%1 command `%2`\n").arg(enable ? "Enabled" : "Disabled", command.name);		
+				command.enabled = enable;
+				output += QString("%1 command `%2`\n").arg(enable ? "Enabled" : "Disabled", command.name);
+			}
 		}
-	}
 
-	if (output == "")
-	{
-		output = "Could not find that " + args[1] + "!";
-	}
+		if (output == "")
+		{
+			output = "Could not find that " + args[1] + "!";
+		}
 
-	SEND_MESSAGE(output);
+		SEND_MESSAGE(output);
+	}
 }
