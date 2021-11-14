@@ -190,6 +190,7 @@ void UmikoBot::initialiseGuilds(GuildId afterId)
 			});
 
 			initialiseGuildMembers(guild.id());
+			QThread::msleep(1000);
 		}
 
 		if (guilds.size() == LIMIT)
@@ -197,10 +198,8 @@ void UmikoBot::initialiseGuilds(GuildId afterId)
 			// More to come
 			initialiseGuilds(guilds.back().id());
 		}
-		else
-		{
-			printf("Guild count: %d\n", guilds.size());
-		}
+
+		printf("Guild count: %d\n", guilds.size());
 	});
 }
 
@@ -219,6 +218,7 @@ void UmikoBot::initialiseGuildMembers(GuildId guildId, UserId afterId)
 		if (members.size() == LIMIT)
 		{
 			// More to come
+			QThread::msleep(1000);
 			initialiseGuildMembers(guildId, members.back().user().id());
 		}
 		
@@ -404,9 +404,7 @@ ChannelId UmikoBot::getChannelIdFromArgument(const QList<Channel>& channels, con
 void UmikoBot::umikoOnReady()
 {
 	printf("Ready!\n");
-
 	load();
-	initialiseGuilds();
 }
 
 void UmikoBot::umikoOnDisconnect()
