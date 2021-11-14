@@ -19,7 +19,7 @@ echo Generating project files...
 mkdir $projectRoot/sln/ 2> /dev/null
 cd $projectRoot/sln/
 # Generates the project files
-cmake ..
+cmake .. "${@:2}"
 
 echo
 echo Building...
@@ -30,7 +30,7 @@ echo
 echo Running...
 cd $projectRoot/res/
 
-$projectRoot/bin/UmikoBot -platform offscreen "$@"
+$projectRoot/bin/UmikoBot -platform offscreen "$1"
 
 cd $originalDir
 exit 0

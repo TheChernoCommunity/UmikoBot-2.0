@@ -28,8 +28,6 @@ CurrencyModule::CurrencyModule()
 				}
 				
 				userCurrencyData.hasClaimedDaily = false;
-
-				// TODO(fkp): Each module should be able to react to guild member remove
 			}
 
 			if (!guildConfig.randomGiveawayDone)

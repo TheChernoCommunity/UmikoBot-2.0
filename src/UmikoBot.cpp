@@ -477,82 +477,83 @@ void UmikoBot::umikoOnMessageCreate(const Message& message)
 {
 	getChannel(message.channelId()).then([this, message](const Channel& channel)
 	{
-		// messageString -> !status Name
-		// prefix        -> !
-		// fullCommand   ->  status Name
-		// commandName   ->  status
-		QString messageString = message.content();
-		const QString& prefix = getGuildData()[channel.guildId()].prefix;
-		QString fullCommand = messageString.mid(prefix.length());
-		QString commandName = messageString.mid(prefix.length(), messageString.indexOf(QRegularExpression(SPACE)) - prefix.length());
-
-		bool isCommand = false;
-
-		if (messageString.startsWith(prefix))
+		containsPermission(channel.guildId(), message.author().id(), CommandPermission::Moderator, [this, message, channel](bool isModerator)
 		{
-			for (Module* module : modules)
+			// messageString -> !status Name
+			// prefix        -> !
+			// fullCommand   ->  status Name
+			// commandName   ->  status
+			QString messageString = message.content();
+			const QString& prefix = getGuildData()[channel.guildId()].prefix;
+			QString fullCommand = messageString.mid(prefix.length());
+			QString commandName = messageString.mid(prefix.length(), messageString.indexOf(QRegularExpression(SPACE)) - prefix.length());
+
+			bool isCommand = false;
+
+			if (messageString.startsWith(prefix) && (UmikoBot::get().channelsEnabled[channel.guildId()].contains(channel.id()) || isModerator))
 			{
-				for (const Command& command : module->getCommands())
+				for (Module* module : modules)
 				{
-					if (command.name == commandName)
+					for (const Command& command : module->getCommands())
 					{
-						isCommand = true;
-						
-						::Permissions::contains(channel.guildId(), message.author().id(), command.requiredPermissions,
-												[this, message, channel, command, fullCommand, module, prefix](bool result)
+						if (command.name == commandName)
 						{
-							if (!result)
+							isCommand = true;
+						
+							containsPermission(channel.guildId(), message.author().id(), command.requiredPermissions,
+											   [this, message, channel, command, fullCommand, module, prefix](bool result)
 							{
-								SEND_MESSAGE("You do not have permission to use this command!");
-								return;
-							}
-
-							if (command.regex.match(fullCommand).hasMatch())
-							{
-								if (command.enabled)
+								if (!result)
 								{
+									SEND_MESSAGE("You do not have permission to use this command!");
+									return;
+								}
 
-									command.callback(message, channel);
-
+								if (command.regex.match(fullCommand).hasMatch())
+								{
+									if (command.enabled)
+									{
+										command.callback(message, channel);
+									}
+									else
+									{
+										SEND_MESSAGE("This command has been disabled!");
+									}
 								}
 								else
 								{
-									SEND_MESSAGE("This command has been disabled!");
-								}
-							}
-							else
-							{
-								// Looks for general module and outputs help text
-								for (Module* generalModule : modules)
-								{
-									if (generalModule->getName() == "General")
+									// Looks for general module and outputs help text
+									for (Module* generalModule : modules)
 									{
-										QString helpText = ((GeneralModule*) generalModule)->commandHelp(command.name, prefix);
+										if (generalModule->getName() == "General")
+										{
+											QString helpText = ((GeneralModule*) generalModule)->commandHelp(command.name, prefix);
 										
-										Embed embed {};
-										embed.setColor(qrand() % 0xffffff);
-										embed.setTitle("Incorrect Usage of Command");
-										embed.setDescription(helpText);
-										SEND_MESSAGE(embed);
+											Embed embed {};
+											embed.setColor(qrand() % 0xffffff);
+											embed.setTitle("Incorrect Usage of Command");
+											embed.setDescription(helpText);
+											SEND_MESSAGE(embed);
 
-										break;
+											break;
+										}
 									}
 								}
-							}
-						});
+							});
 
-						break;
+							break;
+						}
 					}
 				}
 			}
-		}
 
-		if (!isCommand)
-		{
-			for (Module* module : modules)
+			if (!isCommand)
 			{
-				module->onMessage(message, channel);
+				for (Module* module : modules)
+				{
+					module->onMessage(message, channel);
+				}
 			}
-		}
+		});
 	});
 }

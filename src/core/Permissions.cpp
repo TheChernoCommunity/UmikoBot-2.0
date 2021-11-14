@@ -3,7 +3,7 @@
 
 using namespace Discord;
 
-void ::Permissions::contains(GuildId guildId, UserId userId, unsigned int permissions, PermissionCallback callback)
+void containsPermission(GuildId guildId, UserId userId, unsigned int permissions, PermissionCallback callback)
 {
 	UmikoBot::get().getGuildMember(guildId, userId).then([guildId, userId, permissions, callback](const GuildMember& user)
 	{
@@ -12,59 +12,25 @@ void ::Permissions::contains(GuildId guildId, UserId userId, unsigned int permis
 			return callback(true);
 		}
 
-		unsigned int totalPermissions = 0;
-		for (const Role& role : UmikoBot::get().getRoles(guildId))
+		if (permissions == 0)
 		{
-			for (RoleId roleId : user.roles())
+			return callback(true);
+		}
+
+		for (RoleId roleId : user.roles())
+		{
+			for (const Role& role : UmikoBot::get().getRoles(guildId))
 			{
-				if (roleId == role.id())
+				if (role.id() == roleId)
 				{
-					totalPermissions |= role.permissions();
+					if ((permissions & role.permissions()) != 0)
+					{
+						return callback(true);
+					}
+
 					break;
 				}
 			}
-		}
-
-		unsigned int x = 1;
-		while (x <= permissions)
-		{
-			unsigned int current = permissions & x;
-			if ((totalPermissions & current) != 0)
-			{
-				return callback(true);
-			}
-
-			x <<= 1;
-		}
-
-		return callback(false);
-	});
-}
-
-void ::Permissions::matches(GuildId guildId, UserId userId, unsigned int permissions, PermissionCallback callback)
-{
-	UmikoBot::get().getGuildMember(guildId, userId).then([guildId, userId, permissions, callback](const GuildMember& user)
-	{
-		if (UmikoBot::get().isOwner(guildId, userId))
-		{
-			return callback(true);
-		}
-
-		unsigned int totalPermissions = 0;
-		for (const Role& role : UmikoBot::get().getRoles(guildId))
-		{
-			for (RoleId roleId : user.roles())
-			{
-				if (roleId == role.id())
-				{
-					totalPermissions |= role.permissions();
-				}
-			}
-		}
-
-		if ((totalPermissions & permissions) == permissions)
-		{
-			return callback(true);
 		}
 
 		return callback(false);

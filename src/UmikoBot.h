@@ -61,6 +61,7 @@ private slots:
 	
 public:
 	QMap<GuildId, ChannelId> primaryChannels;
+	QMap<GuildId, QSet<ChannelId>> channelsEnabled;
 
 private:
 	QTimer saveTimer;

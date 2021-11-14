@@ -9,3 +9,5 @@ res/
 !res/commands.json
 
 scripts/run.sh
+
+umiko.service

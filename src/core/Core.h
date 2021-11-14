@@ -6,3 +6,5 @@ using UserId = snowflake_t;
 using RoleId = snowflake_t;
 using ChannelId = snowflake_t;
 using GuildId = snowflake_t;
+
+QString stringifyMilliseconds(unsigned long long milliseconds);

@@ -115,7 +115,7 @@ struct Command
 	using Callback = std::function<void(const Discord::Message&, const Discord::Channel&)>;
 
 	Commands id;
-	bool enabled; 	// TODO(fkp): Enabled state per guild
+	bool enabled;
 	unsigned int requiredPermissions;
 
 	QString name;
