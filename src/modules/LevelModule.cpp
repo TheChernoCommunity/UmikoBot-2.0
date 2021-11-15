@@ -134,7 +134,7 @@ void LevelModule::onLoad(const QJsonObject& mainObject)
 
 void LevelModule::onMessage(const Message& message, const Channel& channel)
 {
-	if (!channelsWithXpDisabled[channel.id()])
+	if (!channelsWithXpDisabled[channel.id()] && !message.author().bot())
 	{
 		getUserLevelData(channel.guildId(), message.author().id()).messageCount += 1;
 	}
