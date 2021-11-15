@@ -426,21 +426,30 @@ void CurrencyModule::donate(const Message& message, const Channel& channel)
 		SEND_MESSAGE("You're too poor to be donating!");
 		return;
 	}
-	
-	getUserCurrencyData(channel.guildId(), senderId).balanceInCents -= amountInCents;
-	getUserCurrencyData(channel.guildId(), senderId).amountDonatedInCents += amountInCents;
-	getUserCurrencyData(channel.guildId(), receiverId).balanceInCents += amountInCents;
-	getUserCurrencyData(channel.guildId(), receiverId).amountReceivedFromDonationsInCents += amountInCents;
 
-	Embed embed {};
-	embed.setTitle("Donation by " + UmikoBot::get().getName(channel.guildId(), senderId));
-	embed.setDescription(QString("Transferred **%1 %2** from the account of %3 to %4's balance!")
-						 .arg(QString::number(amountInCents / 100.0f),
-							  currencyConfigs[channel.guildId()].currencyAbbreviation,
-							  UmikoBot::get().getName(channel.guildId(), senderId),
-							  UmikoBot::get().getName(channel.guildId(), receiverId)));
-	embed.setColor(qrand() % 0xffffff);
-	SEND_MESSAGE(embed);
+	UmikoBot::get().getUser(receiverId).then([this, message, channel, senderId, receiverId, amountInCents](const User& user)
+	{
+		if (user.bot())
+		{
+			SEND_MESSAGE("Bots have no need for your worthless currency!");
+			return;
+		}
+
+		getUserCurrencyData(channel.guildId(), senderId).balanceInCents -= amountInCents;
+		getUserCurrencyData(channel.guildId(), senderId).amountDonatedInCents += amountInCents;
+		getUserCurrencyData(channel.guildId(), receiverId).balanceInCents += amountInCents;
+		getUserCurrencyData(channel.guildId(), receiverId).amountReceivedFromDonationsInCents += amountInCents;
+
+		Embed embed {};
+		embed.setTitle("Donation by " + UmikoBot::get().getName(channel.guildId(), senderId));
+		embed.setDescription(QString("Transferred **%1 %2** from the account of %3 to %4's balance!")
+							 .arg(QString::number(amountInCents / 100.0f),
+								  currencyConfigs[channel.guildId()].currencyAbbreviation,
+								  UmikoBot::get().getName(channel.guildId(), senderId),
+								  UmikoBot::get().getName(channel.guildId(), receiverId)));
+		embed.setColor(qrand() % 0xffffff);
+		SEND_MESSAGE(embed);
+	});
 }
 
 void CurrencyModule::steal(const Message& message, const Channel& channel)
@@ -481,71 +490,83 @@ void CurrencyModule::steal(const Message& message, const Channel& channel)
 		return;
 	}
 
-	// TODO(fkp): Check if victim is a bot
-
-	if (victimData.balanceInCents - amountInCents < guildConfig.maxDebt)
+	UmikoBot::get().getUser(victimId).then([this, message, channel, victimId, thiefId, amountInCents](const User& user)
 	{
-		SEND_MESSAGE("I can't let your victim go into serious debt!");
-		return;
-	}
-
-	if (thiefData.balanceInCents - (amountInCents * guildConfig.stealFineAmount) < guildConfig.maxDebt)
-	{
-		SEND_MESSAGE("I can't let you go into serious debt!");
-		return;
-	}
-
-	// https://www.desmos.com/calculator/lp80egcojn
-	// This success chance is in the range of 0 to 1
-	double successChance = guildConfig.stealSuccessBaseChance * qExp(-0.0001 * qPow(amountInCents / 100.0f, 1.5));
-	std::random_device randomDevice;
-	std::mt19937 prng { randomDevice() };
-	std::uniform_real_distribution<> distribution { 0, 1 };
-
-	if (distribution(prng) <= successChance)
-	{
-		// Steal success
-		victimData.balanceInCents -= amountInCents;
-		thiefData.balanceInCents += amountInCents;
-		thiefData.amountStolenInCents += amountInCents;
-
-		Embed embed;
-		embed.setTitle(":man_detective: Steal Success! :man_detective:");
-		embed.setColor(0x00ff00);
-		embed.setDescription(QString("%1 has discreetly stolen **%2 %3** from right under %4's nose!")
-							 .arg(UmikoBot::get().getName(channel.guildId(), thiefId),
-								  QString::number(amountInCents / 100.0f), guildConfig.currencyAbbreviation,
-								  UmikoBot::get().getName(channel.guildId(), victimId)));
-		SEND_MESSAGE(embed);
-	}
-	else
-	{
-		// Steal failure
-		victimData.balanceInCents += amountInCents * guildConfig.stealVictimBonus;
-		thiefData.balanceInCents -= amountInCents * guildConfig.stealFineAmount;
-
-		if (thiefData.jailTimer) delete thiefData.jailTimer;
-		thiefData.jailTimer = new QTimer();
-		thiefData.jailTimer->setSingleShot(true);
-		thiefData.jailTimer->start(guildConfig.stealJailTimeMinutes * 60 * 1000);
-		QObject::connect(thiefData.jailTimer, &QTimer::timeout, [this, channel, thiefId]()
+		// Just for ease of use
+		UserCurrencyData& victimData = getUserCurrencyData(channel.guildId(), victimId);
+		UserCurrencyData& thiefData = getUserCurrencyData(channel.guildId(), thiefId);
+		const GuildCurrencyConfig& guildConfig = currencyConfigs[channel.guildId()];
+	
+		if (user.bot())
 		{
-			delete getUserCurrencyData(channel.guildId(), thiefId).jailTimer;
-			getUserCurrencyData(channel.guildId(), thiefId).jailTimer = nullptr;
-		});
+			SEND_MESSAGE("You cannot steal from us mighty bots!");
+			return;
+		}
 
-		Embed embed;
-		embed.setTitle(":rotating_light: You Got Caught! :rotating_light:");
-		embed.setColor(0xff0000);
-		embed.setDescription(QString("%1 has been fined **%2 %3** and placed in jail.\n"
-									 "%4 has been granted **%5 %3** as compensation.")
-							 .arg(UmikoBot::get().getName(channel.guildId(), thiefId),
-								  QString::number((amountInCents * guildConfig.stealFineAmount) / 100.0f),
-								  guildConfig.currencyAbbreviation,
-								  UmikoBot::get().getName(channel.guildId(), victimId),
-								  QString::number((amountInCents * guildConfig.stealVictimBonus) / 100.0f)));
-		SEND_MESSAGE(embed);
-	}
+		if (victimData.balanceInCents - amountInCents < guildConfig.maxDebt)
+		{
+			SEND_MESSAGE("I can't let your victim go into serious debt!");
+			return;
+		}
+
+		if (thiefData.balanceInCents - (amountInCents * guildConfig.stealFineAmount) < guildConfig.maxDebt)
+		{
+			SEND_MESSAGE("I can't let you go into serious debt!");
+			return;
+		}
+
+		// https://www.desmos.com/calculator/lp80egcojn
+		// This success chance is in the range of 0 to 1
+		double successChance = guildConfig.stealSuccessBaseChance * qExp(-0.0001 * qPow(amountInCents / 100.0f, 1.5));
+		std::random_device randomDevice;
+		std::mt19937 prng { randomDevice() };
+		std::uniform_real_distribution<> distribution { 0, 1 };
+
+		if (distribution(prng) <= successChance)
+		{
+			// Steal success
+			victimData.balanceInCents -= amountInCents;
+			thiefData.balanceInCents += amountInCents;
+			thiefData.amountStolenInCents += amountInCents;
+
+			Embed embed;
+			embed.setTitle(":man_detective: Steal Success! :man_detective:");
+			embed.setColor(0x00ff00);
+			embed.setDescription(QString("%1 has discreetly stolen **%2 %3** from right under %4's nose!")
+								 .arg(UmikoBot::get().getName(channel.guildId(), thiefId),
+									  QString::number(amountInCents / 100.0f), guildConfig.currencyAbbreviation,
+									  UmikoBot::get().getName(channel.guildId(), victimId)));
+			SEND_MESSAGE(embed);
+		}
+		else
+		{
+			// Steal failure
+			victimData.balanceInCents += amountInCents * guildConfig.stealVictimBonus;
+			thiefData.balanceInCents -= amountInCents * guildConfig.stealFineAmount;
+
+			if (thiefData.jailTimer) delete thiefData.jailTimer;
+			thiefData.jailTimer = new QTimer();
+			thiefData.jailTimer->setSingleShot(true);
+			thiefData.jailTimer->start(guildConfig.stealJailTimeMinutes * 60 * 1000);
+			QObject::connect(thiefData.jailTimer, &QTimer::timeout, [this, channel, thiefId]()
+			{
+				delete getUserCurrencyData(channel.guildId(), thiefId).jailTimer;
+				getUserCurrencyData(channel.guildId(), thiefId).jailTimer = nullptr;
+			});
+
+			Embed embed;
+			embed.setTitle(":rotating_light: You Got Caught! :rotating_light:");
+			embed.setColor(0xff0000);
+			embed.setDescription(QString("%1 has been fined **%2 %3** and placed in jail.\n"
+										 "%4 has been granted **%5 %3** as compensation.")
+								 .arg(UmikoBot::get().getName(channel.guildId(), thiefId),
+									  QString::number((amountInCents * guildConfig.stealFineAmount) / 100.0f),
+									  guildConfig.currencyAbbreviation,
+									  UmikoBot::get().getName(channel.guildId(), victimId),
+									  QString::number((amountInCents * guildConfig.stealVictimBonus) / 100.0f)));
+			SEND_MESSAGE(embed);
+		}
+	});
 }
 
 void CurrencyModule::compensate(const Message& message, const Channel& channel)
