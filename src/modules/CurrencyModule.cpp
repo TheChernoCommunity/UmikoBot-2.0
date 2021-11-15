@@ -356,15 +356,14 @@ void CurrencyModule::daily(const Message& message, const Channel& channel)
 
 	if (userCurrencyData.hasClaimedDaily)
 	{
-		// TODO(fkp): Time left
-		SEND_MESSAGE("You have already claimed your credits for today!");
+		SEND_MESSAGE(QString("You have already claimed your credits for today!\nCome back in **%1** to collect more!")
+					 .arg(stringifyMilliseconds(dayTimer.remainingTime())));
 		return;
 	}
 
 	if (userCurrencyData.jailTimer)
 	{
-		// TODO(fkp): Time left
-		SEND_MESSAGE("You are in jail!");
+		SEND_MESSAGE(QString("You are in jail!\nYou will be released in **%1**!").arg(stringifyMilliseconds(userCurrencyData.jailTimer->remainingTime())));
 		return;
 	}
 
@@ -467,8 +466,7 @@ void CurrencyModule::steal(const Message& message, const Channel& channel)
 	
 	if (thiefData.jailTimer)
 	{
-		// TODO(fkp): Time left
-		SEND_MESSAGE("You are in jail!");
+		SEND_MESSAGE(QString("You are in jail!\nYou will be released in **%1**!").arg(stringifyMilliseconds(thiefData.jailTimer->remainingTime())));
 		return;
 	}
 
@@ -677,11 +675,11 @@ void CurrencyModule::gamble(const Message& message, const Channel& channel)
 	QStringList args = message.content().split(QRegularExpression(SPACE));
 	GuildGambleData& guildGambleData = gambleData[channel.guildId()];
 	GuildCurrencyConfig& guildConfig = currencyConfigs[channel.guildId()];
+	const UserCurrencyData& userCurrencyData = getUserCurrencyData(channel.guildId(), message.author().id());
 
-	if (getUserCurrencyData(channel.guildId(), message.author().id()).jailTimer)
+	if (userCurrencyData.jailTimer)
 	{
-		// TODO(fkp): Time left
-		SEND_MESSAGE("You are in jail!");
+		SEND_MESSAGE(QString("You are in jail!\nYou will be released in **%1**!").arg(stringifyMilliseconds(userCurrencyData.jailTimer->remainingTime())));
 		return;
 	}
 
@@ -706,7 +704,7 @@ void CurrencyModule::gamble(const Message& message, const Channel& channel)
 		}
 	}
 
-	if (getUserCurrencyData(channel.guildId(), message.author().id()).balanceInCents - guildGambleData.amountBetInCents < guildConfig.maxDebt)
+	if (userCurrencyData.balanceInCents - guildGambleData.amountBetInCents < guildConfig.maxDebt)
 	{
 		SEND_MESSAGE("You're too poor to be gambling that much!");
 		return;
@@ -812,9 +810,10 @@ void CurrencyModule::bribe(const Message& message, const Channel& channel)
 		int newRemainingTime = userCurrencyData.jailTimer->remainingTime() + (guildConfig.bribeExtraJailTimeMinutes * 60 * 1000);
 		userCurrencyData.jailTimer->start(newRemainingTime);
 
-		// TODO(fkp): Time left
 		SEND_MESSAGE(QString(":police_officer: Your bribes don't affect my loyalty! :police_officer:\n"
-							 "Enjoy rotting in jail for another **%1 minutes**!\n").arg(guildConfig.bribeExtraJailTimeMinutes));
+							 "Enjoy rotting in jail for another **%1 minutes**!\n"
+							 "You will be released in **%2**!")
+					 .arg(QString::number(guildConfig.bribeExtraJailTimeMinutes), stringifyMilliseconds(userCurrencyData.jailTimer->remainingTime())));
 	}
 }
 
