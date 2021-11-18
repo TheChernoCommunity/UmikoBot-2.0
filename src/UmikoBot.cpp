@@ -31,6 +31,7 @@ UmikoBot::UmikoBot(QObject* parent)
 	qsrand(QTime::currentTime().msec());
 
 	saveTimer.setInterval(60 * 1000);
+	saveTimer.start();
 	QObject::connect(&saveTimer, &QTimer::timeout, [this]()
 	{
 		save();
