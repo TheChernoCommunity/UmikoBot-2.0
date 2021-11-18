@@ -197,7 +197,7 @@ void CurrencyModule::onLoad(const QJsonObject& mainObject)
 			QJsonObject userJson = guildJson[userIdString].toObject();
 			UserId userId = userIdString.toULongLong();
 			
-			currencyData[guildId].append(UserCurrencyData {
+			currencyData[guildId][userId] = UserCurrencyData {
 				userId,
 				userJson["balanceInCents"].toInt(),
 				userJson["hasClaimedDaily"].toBool(),
@@ -213,7 +213,7 @@ void CurrencyModule::onLoad(const QJsonObject& mainObject)
 				userJson["amountStolenInCents"].toInt(),
 				userJson["netAmountFromGamblingInCents"].toInt(),
 				userJson["amountSpentOnBribingInCents"].toInt(),
-			});
+			};
 		}
 	}
 }
@@ -291,17 +291,8 @@ void CurrencyModule::onStatus(QString& output, GuildId guildId, UserId userId)
 
 UserCurrencyData& CurrencyModule::getUserCurrencyData(GuildId guildId, UserId userId)
 {
-	for (UserCurrencyData& userCurrencyData : currencyData[guildId])
-	{
-		if (userCurrencyData.userId == userId)
-		{
-			return userCurrencyData;
-		}
-	}
-
-	// The user does not exist yet, make a new one
-	currencyData[guildId].append(UserCurrencyData { userId });
-	return currencyData[guildId].back();
+	currencyData[guildId][userId].userId = userId; // Just in case this is first initialisation
+	return currencyData[guildId][userId];
 }
 
 GuildCurrencyConfig& CurrencyModule::getGuildCurrencyConfig(GuildId guildId)
@@ -619,7 +610,7 @@ void CurrencyModule::richlist(const Message& message, const Channel& channel)
 		return;
 	}
 
-	QList<UserCurrencyData>& leaderboard = currencyData[channel.guildId()];
+	QList<UserCurrencyData> leaderboard = currencyData[channel.guildId()].values();
 	if (min > (unsigned int) leaderboard.size())
 	{
 		SEND_MESSAGE("Not enough members to create the list!");

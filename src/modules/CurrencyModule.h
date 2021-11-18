@@ -109,7 +109,7 @@ protected:
 	
 private:
 	QMap<GuildId, GuildCurrencyConfig> currencyConfigs;
-	QMap<GuildId, QList<UserCurrencyData>> currencyData;
+	QMap<GuildId, QMap<UserId, UserCurrencyData>> currencyData;
 	QMap<GuildId, GuildGambleData> gambleData;
 
 	QTimer dayTimer;

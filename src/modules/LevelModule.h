@@ -50,7 +50,7 @@ private:
 	void enableDisableXpImpl(const Discord::Message&, const Discord::Channel&, bool enable);
 	
 	void sortRanks(GuildId guildId);
-	void sortLeaderboard(GuildId guildId);
+	QList<UserLevelData> getLeaderboard(GuildId guildId);
 
 private:
 	// We need to have enabled being the default, so:
@@ -59,7 +59,7 @@ private:
 	
 	QList<long long int> levels; // index is level number, value is individual XP requirement (not cumulative)
 	QMap<GuildId, QList<LevelRank>> levelRanks;
-	QMap<GuildId, QList<UserLevelData>> levelData;
+	QMap<GuildId, QMap<UserId, UserLevelData>> levelData;
 	
 	QTimer messageXpTimer;
 };

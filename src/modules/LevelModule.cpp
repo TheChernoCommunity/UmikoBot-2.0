@@ -11,9 +11,9 @@ LevelModule::LevelModule()
 	messageXpTimer.start();
 	QObject::connect(&messageXpTimer, &QTimer::timeout, [this]()
 	{
-		for (QList<UserLevelData>& guildLevelData : levelData)
+		for (GuildId guildId : levelData.keys())
 		{
-			for (UserLevelData& userLevelData : guildLevelData)
+			for (UserLevelData& userLevelData : levelData[guildId])
 			{
 				if (userLevelData.messageCount > 0)
 				{
@@ -119,10 +119,10 @@ void LevelModule::onLoad(const QJsonObject& mainObject)
 			QJsonObject userJson = guildJson[userIdString].toObject();
 			UserId userId = userIdString.toULongLong();
 
-			levelData[guildId].append(UserLevelData {
+			levelData[guildId][userId] = UserLevelData {
 				userId,	
 				userJson["currentXp"].toInt(),
-			});
+			};
 		}
 	}
 
@@ -142,8 +142,7 @@ void LevelModule::onMessage(const Message& message, const Channel& channel)
 
 void LevelModule::onStatus(QString& output, GuildId guildId, UserId userId)
 {
-	QList<UserLevelData>& leaderboard = levelData[guildId];
-	sortLeaderboard(guildId);
+	QList<UserLevelData> leaderboard = getLeaderboard(guildId);
 
 	int leaderboardPosition = 0;
 	for (int i = 0; i < leaderboard.size(); i++)
@@ -175,17 +174,8 @@ void LevelModule::onStatus(QString& output, GuildId guildId, UserId userId)
 
 UserLevelData& LevelModule::getUserLevelData(GuildId guildId, UserId userId)
 {
-	for (UserLevelData& userLevelData : levelData[guildId])
-	{
-		if (userLevelData.userId == userId)
-		{
-			return userLevelData;
-		}
-	}
-
-	// The user does not exist yet, make a new one
-	levelData[guildId].append(UserLevelData { userId });
-	return levelData[guildId].back();
+	levelData[guildId][userId].userId = userId; // Just in case this is first initialisation
+	return levelData[guildId][userId];
 }
 
 void LevelModule::generateLevels()
@@ -264,7 +254,7 @@ void LevelModule::top(const Message& message, const Channel& channel)
 		return;
 	}
 
-	QList<UserLevelData>& leaderboard = levelData[channel.guildId()];
+	QList<UserLevelData> leaderboard = getLeaderboard(channel.guildId());
 	if (min > (unsigned int) leaderboard.size())
 	{
 		SEND_MESSAGE("Not enough members to create the list!");
@@ -280,7 +270,6 @@ void LevelModule::top(const Message& message, const Channel& channel)
 		return;
 	}
 
-	sortLeaderboard(channel.guildId());
 	QString description = "";
 	unsigned int numberOfDigits = QString::number(max).size();
 	unsigned int rank = min;
@@ -501,11 +490,13 @@ void LevelModule::sortRanks(GuildId guildId)
 	});
 }
 
-void LevelModule::sortLeaderboard(GuildId guildId)
+QList<UserLevelData> LevelModule::getLeaderboard(GuildId guildId)
 {
-	QList<UserLevelData>& leaderboard = levelData[guildId];
+	QList<UserLevelData> leaderboard = levelData[guildId].values();
 	qSort(leaderboard.begin(), leaderboard.end(), [](const UserLevelData& first, const UserLevelData& second)
 	{
 		return first.currentXp > second.currentXp;
 	});
+
+	return leaderboard;
 }
