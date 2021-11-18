@@ -23,15 +23,21 @@ find_package(Qt5 COMPONENTS Core Gui Network WebSockets Widgets)
 add_subdirectory(dep/QDiscord/)
 
 # Files
+set(HEADERS
+	UmikoBot.h
+	core/Core.h core/Data.h core/InterruptHandler.h core/Permissions.h
+	modules/CurrencyModule.h modules/FunModule.h modules/GeneralModule.h modules/LevelModule.h
+	modules/ModerationModule.h modules/Module.h modules/UserModule.h)
 set(SOURCES
 	main.cpp UmikoBot.cpp
 	core/Core.cpp core/Data.cpp core/InterruptHandler.cpp core/Permissions.cpp
 	modules/CurrencyModule.cpp modules/FunModule.cpp modules/GeneralModule.cpp modules/LevelModule.cpp
 	modules/ModerationModule.cpp modules/Module.cpp modules/UserModule.cpp)
 list(TRANSFORM SOURCES PREPEND src/)
+list(TRANSFORM HEADERS PREPEND src/)
 
 # The executable
-add_executable(UmikoBot ${SOURCES})
+add_executable(UmikoBot ${HEADERS} ${SOURCES})
 target_link_libraries(UmikoBot Qt5::Core Qt5::Gui Qt5::Network Qt5::WebSockets Qt5::Widgets)
 target_link_libraries(UmikoBot QDiscord)
 target_include_directories(UmikoBot PUBLIC src/)
