@@ -40,7 +40,7 @@ private:
 	void load();
 	void loadGuildData();
 	
-	void initialiseGuilds(GuildId afterId = 0);
+	void initialiseGuild(GuildId guildId);
 	void initialiseGuildMembers(GuildId guildId, UserId afterId = 0);
 
 private slots:
