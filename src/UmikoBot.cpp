@@ -394,6 +394,8 @@ void UmikoBot::umikoOnReady()
 
 void UmikoBot::umikoOnDisconnect()
 {
+	printf("Disconnected! Reconnecting...\n");
+	getGatewaySocket().reconnectToGateway();
 }
 
 void UmikoBot::umikoOnGuildCreate(const Guild& guild)
