@@ -171,36 +171,19 @@ void UmikoBot::loadGuildData()
 	file.close();
 }
 
-void UmikoBot::initialiseGuilds(GuildId afterId)
+void UmikoBot::initialiseGuild(GuildId guildId)
 {
-	constexpr snowflake_t LIMIT = 100;
-	
-	getCurrentUserGuilds(0, afterId, LIMIT).then([this, LIMIT](const QList<Guild>& guilds)
+	getGuild(guildId).then([this](const Guild& guild)
 	{
-		for (const Guild& guild : guilds)
-		{
-			getGuild(guild.id()).then([this](const Guild& guild)
-			{
-				guildData[guild.id()].ownerId = guild.ownerId();
-			});
-
-			getGuildRoles(guild.id()).then([this, guild](const QList<Role>& roles)
-			{
-				guildData[guild.id()].roles = roles;
-			});
-
-			initialiseGuildMembers(guild.id());
-			QThread::msleep(1000);
-		}
-
-		if (guilds.size() == LIMIT)
-		{
-			// More to come
-			initialiseGuilds(guilds.back().id());
-		}
-
-		printf("Guild count: %d\n", guilds.size());
+		guildData[guild.id()].ownerId = guild.ownerId();
 	});
+
+	getGuildRoles(guildId).then([this, guildId](const QList<Role>& roles)
+	{
+		guildData[guildId].roles = roles;
+	});
+
+	initialiseGuildMembers(guildId);
 }
 
 void UmikoBot::initialiseGuildMembers(GuildId guildId, UserId afterId)
@@ -221,8 +204,10 @@ void UmikoBot::initialiseGuildMembers(GuildId guildId, UserId afterId)
 			QThread::msleep(1000);
 			initialiseGuildMembers(guildId, members.back().user().id());
 		}
-		
-		printf("Guild %llu: %d members\n", guildId, members.size());
+		else
+		{
+			printf("Guild %llu: %d members\n", guildId, guildData[guildId].userData.size());
+		}
 	});
 }
 
@@ -409,12 +394,14 @@ void UmikoBot::umikoOnReady()
 
 void UmikoBot::umikoOnDisconnect()
 {
+	printf("Disconnected! Reconnecting...\n");
+	getGatewaySocket().reconnectToGateway();
 }
 
 void UmikoBot::umikoOnGuildCreate(const Guild& guild)
 {
 	guildData[guild.id()] = GuildData { guild.id() };
-	initialiseGuilds(); // TODO(fkp): Only initialise a single guild?
+	initialiseGuild(guild.id());
 }
 
 void UmikoBot::umikoOnGuildUpdate(const Guild& guild)
