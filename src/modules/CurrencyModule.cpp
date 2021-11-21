@@ -19,9 +19,8 @@ CurrencyModule::CurrencyModule()
 		{
 			GuildCurrencyConfig& guildConfig = currencyConfigs[guildId];
 			
-			for (int userIndex = 0; userIndex < currencyData[guildId].size(); userIndex++)
+			for (UserCurrencyData& userCurrencyData : currencyData[guildId])
 			{
-				UserCurrencyData& userCurrencyData = currencyData[guildId][userIndex];
 				if (!userCurrencyData.hasClaimedDaily)
 				{
 					userCurrencyData.dailyStreak = 0;
@@ -29,7 +28,7 @@ CurrencyModule::CurrencyModule()
 				
 				userCurrencyData.hasClaimedDaily = false;
 			}
-
+			
 			if (!guildConfig.randomGiveawayDone)
 			{
 				guildConfig.randomGiveawayInProgress = true;
