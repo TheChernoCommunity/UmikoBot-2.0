@@ -195,8 +195,8 @@ void UmikoBot::initialiseGuildMembers(GuildId guildId, UserId afterId)
 	{
 		for (const GuildMember& member : members)
 		{
-			guildData[guildId].userData[member.user().id()].username = member.user().username();
-			guildData[guildId].userData[member.user().id()].nickname = member.nick();
+			guildData[guildId].userData[member.user().id()].username = User::sanitiseName(member.user().username());
+			guildData[guildId].userData[member.user().id()].nickname = User::sanitiseName(member.nick());
 		}
 
 		if (members.size() == LIMIT)
@@ -445,13 +445,13 @@ void UmikoBot::umikoOnGuildRoleDelete(GuildId guildId, RoleId roleId)
 
 void UmikoBot::umikoOnGuildMemberAdd(const GuildMember& member, GuildId guildId)
 {
-	guildData[guildId].userData[member.user().id()].username = member.user().username();
+	guildData[guildId].userData[member.user().id()].username = User::sanitiseName(member.user().username());
 }
 
 void UmikoBot::umikoOnGuildMemberUpdate(GuildId guildId, const QList<RoleId>& roles, const User& user, const QString& nickname)
 {
-	guildData[guildId].userData[user.id()].username = user.username();
-	guildData[guildId].userData[user.id()].nickname = nickname;
+	guildData[guildId].userData[user.id()].username = User::sanitiseName(user.username());
+	guildData[guildId].userData[user.id()].nickname = User::sanitiseName(nickname);
 }
 
 void UmikoBot::umikoOnGuildMemberRemove(GuildId guildId, const User& user)
