@@ -395,8 +395,15 @@ void UmikoBot::umikoOnReady()
 
 void UmikoBot::umikoOnDisconnect()
 {
-	printf("Disconnected! Reconnecting...\n");
-	getGatewaySocket().reconnectToGateway();
+	printf("Disconnected (close code: %d)!\n", getGatewaySocket().closeCode());
+
+	// TODO(fkp): Test if the occaisional disconnection has this close code.
+	// NOTE(fkp): This is the close code of when the bot is shut down.
+	if (getGatewaySocket().closeCode() != QWebSocketProtocol::CloseCodeGoingAway)
+	{
+		printf("Reconnecting...\n");
+		getGatewaySocket().reconnectToGateway();
+	}
 }
 
 void UmikoBot::umikoOnGuildCreate(const Guild& guild)
