@@ -230,8 +230,9 @@ void CurrencyModule::onMessage(const Message& message, const Channel& channel)
 		if (distribution(prng) <= guildConfig.randomGiveawayChance)
 		{
 			guildConfig.randomGiveawayInProgress = true;
-			SEND_MESSAGE(QString("Hey everyone! **FREEBIE** available now! Go `%1claim` some juicy coins!")
-						 .arg(UmikoBot::get().getGuildData()[channel.guildId()].prefix));
+			UmikoBot::get().createMessage(UmikoBot::get().primaryChannels[channel.guildId()],
+										  QString("Hey everyone! **FREEBIE** available now! Go `%1claim` some juicy coins!")
+										  .arg(UmikoBot::get().getGuildData()[channel.guildId()].prefix));
 		}
 	}
 	
